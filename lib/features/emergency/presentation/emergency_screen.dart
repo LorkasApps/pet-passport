@@ -47,22 +47,7 @@ class EmergencyScreen extends ConsumerWidget {
               _IdentitySection(pet: pet, l: l),
               if (pet.allergies != null && pet.allergies!.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  color: scheme.errorContainer,
-                  child: ListTile(
-                    leading: Icon(Icons.warning_amber_outlined,
-                        color: scheme.onErrorContainer),
-                    title: Text(
-                      l.petFieldAllergies,
-                      style: TextStyle(color: scheme.onErrorContainer),
-                    ),
-                    subtitle: Text(
-                      pet.allergies!,
-                      style: TextStyle(color: scheme.onErrorContainer),
-                    ),
-                  ),
-                ),
+                _AllergiesCard(raw: pet.allergies!, l: l, scheme: scheme),
               ],
               if (weight != null) ...[
                 const SizedBox(height: 12),
@@ -242,5 +227,66 @@ class _VetRow extends StatelessWidget {
         SnackBar(content: Text(l.launchFailed)),
       );
     }
+  }
+}
+
+class _AllergiesCard extends StatelessWidget {
+  const _AllergiesCard({
+    required this.raw,
+    required this.l,
+    required this.scheme,
+  });
+
+  final String raw;
+  final AppL10n l;
+  final ColorScheme scheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = raw
+        .split(RegExp(r'[,;\n]'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList(growable: false);
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      color: scheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(Icons.warning_amber_outlined,
+                  color: scheme.onErrorContainer),
+              const SizedBox(width: 12),
+              Text(
+                l.petFieldAllergies,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: scheme.onErrorContainer,
+                    ),
+              ),
+            ]),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final a in items)
+                  Chip(
+                    label: Text(a),
+                    labelStyle: TextStyle(color: scheme.onErrorContainer),
+                    backgroundColor: scheme.error.withValues(alpha: 0.15),
+                    side: BorderSide(
+                      color: scheme.onErrorContainer.withValues(alpha: 0.3),
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

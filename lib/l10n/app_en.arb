@@ -464,6 +464,10 @@
   "foodRemindersEnabledHint": "Daily notifications at each feeding time.",
   "foodRemindersOnChip": "Reminders on",
 
+  "petAllergyAddTitle": "Add allergy",
+  "petAllergyAddAction": "Add",
+  "petAllergyHint": "e.g. chicken, pollen",
+
   "weightChartTitle": "Weight chart",
   "weightChartEmptyTitle": "No curve yet",
   "weightChartEmptyMessage": "The chart shows up once at least two weight events exist."

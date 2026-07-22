@@ -1154,6 +1154,15 @@ class AppL10nDe extends AppL10n {
   String get foodRemindersOnChip => 'Erinnerung an';
 
   @override
+  String get petAllergyAddTitle => 'Allergie hinzufügen';
+
+  @override
+  String get petAllergyAddAction => 'Hinzufügen';
+
+  @override
+  String get petAllergyHint => 'z. B. Hühnerfleisch, Pollen';
+
+  @override
   String get weightChartTitle => 'Gewichtsverlauf';
 
   @override

@@ -1150,6 +1150,15 @@ class AppL10nEn extends AppL10n {
   String get foodRemindersOnChip => 'Reminders on';
 
   @override
+  String get petAllergyAddTitle => 'Add allergy';
+
+  @override
+  String get petAllergyAddAction => 'Add';
+
+  @override
+  String get petAllergyHint => 'e.g. chicken, pollen';
+
+  @override
   String get weightChartTitle => 'Weight chart';
 
   @override

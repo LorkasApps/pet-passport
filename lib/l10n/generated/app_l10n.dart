@@ -2065,6 +2065,24 @@ abstract class AppL10n {
   /// **'Reminders on'**
   String get foodRemindersOnChip;
 
+  /// No description provided for @petAllergyAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add allergy'**
+  String get petAllergyAddTitle;
+
+  /// No description provided for @petAllergyAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get petAllergyAddAction;
+
+  /// No description provided for @petAllergyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. chicken, pollen'**
+  String get petAllergyHint;
+
   /// No description provided for @weightChartTitle.
   ///
   /// In en, this message translates to:

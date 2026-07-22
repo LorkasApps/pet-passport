@@ -30,8 +30,8 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
   final _colorCtrl = TextEditingController();
   final _chipCtrl = TextEditingController();
   final _tassoCtrl = TextEditingController();
-  final _allergiesCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  List<String> _allergies = const [];
 
   Species _species = Species.dog;
   Sex _sex = Sex.male;
@@ -49,7 +49,6 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
     _colorCtrl.dispose();
     _chipCtrl.dispose();
     _tassoCtrl.dispose();
-    _allergiesCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -62,7 +61,7 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
     _colorCtrl.text = pet.color ?? '';
     _chipCtrl.text = pet.chipNumber ?? '';
     _tassoCtrl.text = pet.tassoNumber ?? '';
-    _allergiesCtrl.text = pet.allergies ?? '';
+    _allergies = _splitAllergies(pet.allergies);
     _notesCtrl.text = pet.notes ?? '';
     _species = pet.species;
     _sex = pet.sex;
@@ -128,7 +127,7 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
       final color = _emptyToNull(_colorCtrl.text);
       final chip = _emptyToNull(_chipCtrl.text);
       final tasso = _emptyToNull(_tassoCtrl.text);
-      final allergies = _emptyToNull(_allergiesCtrl.text);
+      final allergies = _allergies.isEmpty ? null : _allergies.join(', ');
       final notes = _emptyToNull(_notesCtrl.text);
 
       String uuid;
@@ -207,6 +206,46 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
   String? _emptyToNull(String v) {
     final t = v.trim();
     return t.isEmpty ? null : t;
+  }
+
+  static List<String> _splitAllergies(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return const [];
+    return raw
+        .split(RegExp(r'[,;\n]'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  Future<void> _addAllergy() async {
+    final l = AppL10n.of(context);
+    final ctrl = TextEditingController();
+    final value = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.petAllergyAddTitle),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(hintText: l.petAllergyHint),
+          onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+            child: Text(l.actionAdd),
+          ),
+        ],
+      ),
+    );
+    if (value == null || value.isEmpty) return;
+    if (_allergies.contains(value)) return;
+    setState(() => _allergies = [..._allergies, value]);
   }
 
   Future<void> _confirmDelete(BuildContext context, AppL10n l) async {
@@ -363,13 +402,30 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
                   InputDecoration(labelText: l.petFieldTassoNumber),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _allergiesCtrl,
-              decoration: InputDecoration(
-                labelText: l.petFieldAllergies,
-                helperText: l.petFieldAllergiesHelp,
-              ),
-              maxLines: 2,
+            Text(l.petFieldAllergies,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(l.petFieldAllergiesHelp,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    )),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final a in _allergies)
+                  InputChip(
+                    label: Text(a),
+                    onDeleted: () => setState(
+                        () => _allergies = List.of(_allergies)..remove(a)),
+                  ),
+                ActionChip(
+                  avatar: const Icon(Icons.add, size: 18),
+                  label: Text(l.petAllergyAddAction),
+                  onPressed: _addAllergy,
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             TextFormField(
