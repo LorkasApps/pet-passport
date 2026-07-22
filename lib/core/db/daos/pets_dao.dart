@@ -1,12 +1,13 @@
 import 'package:drift/drift.dart';
 
 import '../database.dart';
+import '../tables/pet_passport_documents_table.dart';
 import '../tables/pet_weights_table.dart';
 import '../tables/pets_table.dart';
 
 part 'pets_dao.g.dart';
 
-@DriftAccessor(tables: [Pets, PetWeights])
+@DriftAccessor(tables: [Pets, PetWeights, PetPassportDocuments])
 class PetsDao extends DatabaseAccessor<AppDatabase> with _$PetsDaoMixin {
   PetsDao(super.db);
 
@@ -61,5 +62,28 @@ class PetsDao extends DatabaseAccessor<AppDatabase> with _$PetsDaoMixin {
 
   Future<int> insertWeight(PetWeightsCompanion companion) {
     return into(petWeights).insert(companion);
+  }
+
+  // ── Passport documents ────────────────────────────────────────────────
+
+  Stream<List<PetPassportDocumentRow>> watchPassportDocsForPet(int petId) {
+    return (select(petPassportDocuments)
+          ..where((d) => d.petId.equals(petId))
+          ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
+        .watch();
+  }
+
+  Future<PetPassportDocumentRow?> getPassportDocByUuid(String uuid) {
+    return (select(petPassportDocuments)..where((d) => d.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
+  Future<int> insertPassportDoc(PetPassportDocumentsCompanion companion) {
+    return into(petPassportDocuments).insert(companion);
+  }
+
+  Future<int> deletePassportDocByUuid(String uuid) {
+    return (delete(petPassportDocuments)..where((d) => d.uuid.equals(uuid)))
+        .go();
   }
 }

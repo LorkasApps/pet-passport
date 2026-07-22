@@ -132,6 +132,11 @@ class _IdentitySection extends StatelessWidget {
       rows.add(_copyTile(context, Icons.confirmation_number_outlined,
           l.petFieldTassoNumber, pet.tassoNumber!, l));
     }
+    if (pet.vaccinationPassportNumber != null &&
+        pet.vaccinationPassportNumber!.isNotEmpty) {
+      rows.add(_copyTile(context, Icons.badge_outlined,
+          l.passportNumberLabel, pet.vaccinationPassportNumber!, l));
+    }
     if (rows.isEmpty) return const SizedBox.shrink();
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12),

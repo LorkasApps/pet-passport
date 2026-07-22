@@ -98,6 +98,10 @@ class EmergencyQrCard extends StatelessWidget {
     if (pet.tassoNumber != null && pet.tassoNumber!.isNotEmpty) {
       b.writeln('${l.petFieldTassoNumber}: ${pet.tassoNumber}');
     }
+    if (pet.vaccinationPassportNumber != null &&
+        pet.vaccinationPassportNumber!.isNotEmpty) {
+      b.writeln('${l.passportNumberLabel}: ${pet.vaccinationPassportNumber}');
+    }
     if (pet.allergies != null && pet.allergies!.isNotEmpty) {
       b.writeln('${l.petFieldAllergies}: ${pet.allergies}');
     }

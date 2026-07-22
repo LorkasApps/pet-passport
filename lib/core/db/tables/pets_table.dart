@@ -17,6 +17,7 @@ class Pets extends Table {
   TextColumn get chipNumber => text().nullable()();
   TextColumn get tassoNumber => text().nullable()();
   DateTimeColumn get tassoRegisteredAt => dateTime().nullable()();
+  TextColumn get vaccinationPassportNumber => text().nullable()();
   TextColumn get profilePhotoPath => text().nullable()();
   TextColumn get allergies => text().nullable()();
   TextColumn get notes => text().nullable()();

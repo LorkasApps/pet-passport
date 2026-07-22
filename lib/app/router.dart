@@ -24,6 +24,7 @@ import '../features/more/presentation/more_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../features/pdf/presentation/pdf_menu_screen.dart';
 import '../features/pets/application/current_pet_provider.dart';
+import '../features/pets/presentation/passport_screen.dart';
 import '../features/pets/presentation/pet_edit_screen.dart';
 import '../features/pets/presentation/pet_management_screen.dart';
 import '../features/pets/presentation/pet_switcher_sheet.dart';
@@ -293,6 +294,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pdf',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const PdfMenuScreen(),
+      ),
+      GoRoute(
+        path: '/passport',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const PassportScreen(),
       ),
       GoRoute(
         path: '/pets/:petId/events/new',

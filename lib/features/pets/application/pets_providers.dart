@@ -4,6 +4,7 @@ import '../../../core/media/media_service.dart';
 import '../../settings/application/settings_providers.dart';
 import '../data/pets_repository.dart';
 import '../domain/pet.dart';
+import '../domain/pet_passport_document.dart';
 
 final mediaServiceProvider = Provider<MediaService>((ref) {
   return MediaService();
@@ -11,7 +12,8 @@ final mediaServiceProvider = Provider<MediaService>((ref) {
 
 final petsRepositoryProvider = Provider<PetsRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return PetsRepository(db.petsDao);
+  final media = ref.watch(mediaServiceProvider);
+  return PetsRepository(db.petsDao, media: media);
 });
 
 final activePetsProvider = StreamProvider<List<Pet>>((ref) {
@@ -26,4 +28,9 @@ final petByUuidProvider =
 final latestWeightForPetProvider =
     StreamProvider.family<PetWeight?, String>((ref, petUuid) {
   return ref.watch(petsRepositoryProvider).watchLatestWeightForUuid(petUuid);
+});
+
+final passportDocsForPetProvider =
+    StreamProvider.family<List<PetPassportDocument>, String>((ref, petUuid) {
+  return ref.watch(petsRepositoryProvider).watchPassportDocs(petUuid);
 });

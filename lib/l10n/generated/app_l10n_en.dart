@@ -1145,6 +1145,24 @@ class AppL10nEn extends AppL10n {
   String get pdfColVet => 'Vet';
 
   @override
+  String get passportTitle => 'Vaccination passport';
+
+  @override
+  String get passportNumberLabel => 'Passport number';
+
+  @override
+  String get passportNumberHelp => 'Number on the physical passport booklet.';
+
+  @override
+  String get passportNumberSavedSnack => 'Number saved.';
+
+  @override
+  String get passportDocumentsSection => 'Documents';
+
+  @override
+  String get passportDocumentsEmpty => 'No documents attached yet.';
+
+  @override
   String get medicationWithFoodLabel => 'Take with food';
 
   @override

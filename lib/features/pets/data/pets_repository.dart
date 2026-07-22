@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
+import '../../../core/media/media_service.dart';
 import '../domain/pet.dart';
 import '../domain/pet_enums.dart';
+import '../domain/pet_passport_document.dart';
 
 class PetsRepository {
-  PetsRepository(this._dao, {Uuid? uuid}) : _uuid = uuid ?? const Uuid();
+  PetsRepository(this._dao, {this.media, Uuid? uuid})
+      : _uuid = uuid ?? const Uuid();
 
   final PetsDao _dao;
+  final MediaService? media;
   final Uuid _uuid;
 
   Stream<List<Pet>> watchActivePets() {
@@ -47,6 +53,7 @@ class PetsRepository {
     String? chipNumber,
     String? tassoNumber,
     DateTime? tassoRegisteredAt,
+    String? vaccinationPassportNumber,
     String? profilePhotoPath,
     String? allergies,
     String? notes,
@@ -67,6 +74,7 @@ class PetsRepository {
         chipNumber: Value(chipNumber),
         tassoNumber: Value(tassoNumber),
         tassoRegisteredAt: Value(tassoRegisteredAt),
+        vaccinationPassportNumber: Value(vaccinationPassportNumber),
         profilePhotoPath: Value(profilePhotoPath),
         allergies: Value(allergies),
         notes: Value(notes),
@@ -90,6 +98,7 @@ class PetsRepository {
     String? chipNumber,
     String? tassoNumber,
     DateTime? tassoRegisteredAt,
+    String? vaccinationPassportNumber,
     String? profilePhotoPath,
     String? allergies,
     String? notes,
@@ -110,12 +119,87 @@ class PetsRepository {
       chipNumber: Value(chipNumber),
       tassoNumber: Value(tassoNumber),
       tassoRegisteredAt: Value(tassoRegisteredAt),
+      vaccinationPassportNumber: Value(vaccinationPassportNumber),
       profilePhotoPath: Value(profilePhotoPath),
       allergies: Value(allergies),
       notes: Value(notes),
       updatedAt: DateTime.now(),
     );
     await _dao.updatePet(updated);
+  }
+
+  /// Update only the vaccination passport number without touching other
+  /// pet fields.
+  Future<void> updatePassportNumber({
+    required String petUuid,
+    String? number,
+  }) async {
+    final row = await _dao.getByUuid(petUuid);
+    if (row == null) throw StateError('Pet with uuid=$petUuid not found');
+    await _dao.updatePet(row.copyWith(
+      vaccinationPassportNumber: Value(number),
+      updatedAt: DateTime.now(),
+    ));
+  }
+
+  Stream<List<PetPassportDocument>> watchPassportDocs(String petUuid) async* {
+    final row = await _dao.getByUuid(petUuid);
+    if (row == null) {
+      yield const [];
+      return;
+    }
+    yield* _dao.watchPassportDocsForPet(row.id).map(
+          (rows) => rows.map(_toPassportDoc).toList(growable: false),
+        );
+  }
+
+  Future<String> attachPassportDoc({
+    required String petUuid,
+    required File source,
+    required String mimeType,
+    String? originalFilename,
+    int? sizeBytes,
+  }) async {
+    final m = media;
+    if (m == null) {
+      throw StateError('MediaService required to attach documents.');
+    }
+    final row = await _dao.getByUuid(petUuid);
+    if (row == null) throw StateError('Pet with uuid=$petUuid not found');
+    final docUuid = _uuid.v4();
+    final relative = await m.savePassportDocument(
+      petUuid: petUuid,
+      docUuid: docUuid,
+      source: source,
+    );
+    await _dao.insertPassportDoc(PetPassportDocumentsCompanion.insert(
+      uuid: docUuid,
+      petId: row.id,
+      filePath: relative,
+      mimeType: mimeType,
+      originalFilename: Value(originalFilename),
+      sizeBytes: Value(sizeBytes),
+      createdAt: DateTime.now(),
+    ));
+    return docUuid;
+  }
+
+  Future<void> removePassportDoc(String docUuid) async {
+    final row = await _dao.getPassportDocByUuid(docUuid);
+    if (row == null) return;
+    await media?.deleteFile(row.filePath);
+    await _dao.deletePassportDocByUuid(docUuid);
+  }
+
+  PetPassportDocument _toPassportDoc(PetPassportDocumentRow row) {
+    return PetPassportDocument(
+      uuid: row.uuid,
+      filePath: row.filePath,
+      mimeType: row.mimeType,
+      originalFilename: row.originalFilename,
+      sizeBytes: row.sizeBytes,
+      createdAt: row.createdAt,
+    );
   }
 
   Future<void> softDelete(String uuid) {
@@ -153,6 +237,7 @@ class PetsRepository {
       chipNumber: row.chipNumber,
       tassoNumber: row.tassoNumber,
       tassoRegisteredAt: row.tassoRegisteredAt,
+      vaccinationPassportNumber: row.vaccinationPassportNumber,
       profilePhotoPath: row.profilePhotoPath,
       allergies: row.allergies,
       notes: row.notes,

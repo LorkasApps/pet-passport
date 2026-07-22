@@ -391,6 +391,8 @@ class ImportService {
             chipNumber: Value(raw['chip_number'] as String?),
             tassoNumber: Value(raw['tasso_number'] as String?),
             tassoRegisteredAt: Value(_parseDt(raw['tasso_registered_at'])),
+            vaccinationPassportNumber:
+                Value(raw['vaccination_passport_number'] as String?),
             profilePhotoPath: Value(raw['profile_photo_path'] as String?),
             allergies: Value(raw['allergies'] as String?),
             notes: Value(raw['notes'] as String?),
@@ -413,6 +415,8 @@ class ImportService {
       chipNumber: Value(raw['chip_number'] as String?),
       tassoNumber: Value(raw['tasso_number'] as String?),
       tassoRegisteredAt: Value(_parseDt(raw['tasso_registered_at'])),
+      vaccinationPassportNumber:
+          Value(raw['vaccination_passport_number'] as String?),
       profilePhotoPath: Value(raw['profile_photo_path'] as String?),
       allergies: Value(raw['allergies'] as String?),
       notes: Value(raw['notes'] as String?),

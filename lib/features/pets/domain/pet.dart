@@ -17,6 +17,7 @@ class Pet {
     this.chipNumber,
     this.tassoNumber,
     this.tassoRegisteredAt,
+    this.vaccinationPassportNumber,
     this.profilePhotoPath,
     this.allergies,
     this.notes,
@@ -38,6 +39,7 @@ class Pet {
   final String? chipNumber;
   final String? tassoNumber;
   final DateTime? tassoRegisteredAt;
+  final String? vaccinationPassportNumber;
   final String? profilePhotoPath;
   final String? allergies;
   final String? notes;
@@ -58,6 +60,7 @@ class Pet {
     String? Function()? chipNumber,
     String? Function()? tassoNumber,
     DateTime? Function()? tassoRegisteredAt,
+    String? Function()? vaccinationPassportNumber,
     String? Function()? profilePhotoPath,
     String? Function()? allergies,
     String? Function()? notes,
@@ -80,6 +83,9 @@ class Pet {
       tassoRegisteredAt: tassoRegisteredAt != null
           ? tassoRegisteredAt()
           : this.tassoRegisteredAt,
+      vaccinationPassportNumber: vaccinationPassportNumber != null
+          ? vaccinationPassportNumber()
+          : this.vaccinationPassportNumber,
       profilePhotoPath: profilePhotoPath != null
           ? profilePhotoPath()
           : this.profilePhotoPath,

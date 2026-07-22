@@ -73,6 +73,15 @@ Future<pw.Document> buildVaccinationPassport(PdfBundle b) async {
       margin: const pw.EdgeInsets.all(28),
       build: (ctx) => [
         _header(b, photo, b.l.pdfPassportTitle),
+        if (b.pet.vaccinationPassportNumber != null &&
+            b.pet.vaccinationPassportNumber!.isNotEmpty) ...[
+          pw.SizedBox(height: 6),
+          pw.Text(
+            '${b.l.passportNumberLabel}: ${b.pet.vaccinationPassportNumber}',
+            style: pw.TextStyle(
+                fontSize: 11, color: PdfColors.grey700),
+          ),
+        ],
         pw.SizedBox(height: 16),
         pw.Text(b.l.pdfVaccinationsSection,
             style: pw.TextStyle(

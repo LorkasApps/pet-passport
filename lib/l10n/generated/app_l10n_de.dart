@@ -1150,6 +1150,24 @@ class AppL10nDe extends AppL10n {
   String get pdfColVet => 'Tierarzt';
 
   @override
+  String get passportTitle => 'Impfpass';
+
+  @override
+  String get passportNumberLabel => 'Ausweis-Nummer';
+
+  @override
+  String get passportNumberHelp => 'Nummer auf dem Impfausweis-Booklet.';
+
+  @override
+  String get passportNumberSavedSnack => 'Nummer gespeichert.';
+
+  @override
+  String get passportDocumentsSection => 'Dokumente';
+
+  @override
+  String get passportDocumentsEmpty => 'Noch keine Dokumente angehängt.';
+
+  @override
   String get medicationWithFoodLabel => 'Mit Futter einnehmen';
 
   @override

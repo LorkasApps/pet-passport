@@ -101,6 +101,7 @@ class ExportService {
       'chip_number': pet.chipNumber,
       'tasso_number': pet.tassoNumber,
       'tasso_registered_at': _dt(pet.tassoRegisteredAt),
+      'vaccination_passport_number': pet.vaccinationPassportNumber,
       'profile_photo_path': pet.profilePhotoPath,
       'allergies': pet.allergies,
       'notes': pet.notes,

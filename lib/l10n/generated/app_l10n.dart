@@ -2053,6 +2053,42 @@ abstract class AppL10n {
   /// **'Vet'**
   String get pdfColVet;
 
+  /// No description provided for @passportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccination passport'**
+  String get passportTitle;
+
+  /// No description provided for @passportNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport number'**
+  String get passportNumberLabel;
+
+  /// No description provided for @passportNumberHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Number on the physical passport booklet.'**
+  String get passportNumberHelp;
+
+  /// No description provided for @passportNumberSavedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Number saved.'**
+  String get passportNumberSavedSnack;
+
+  /// No description provided for @passportDocumentsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get passportDocumentsSection;
+
+  /// No description provided for @passportDocumentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents attached yet.'**
+  String get passportDocumentsEmpty;
+
   /// No description provided for @medicationWithFoodLabel.
   ///
   /// In en, this message translates to:

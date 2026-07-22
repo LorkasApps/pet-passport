@@ -29,6 +29,7 @@ import 'tables/insurances_table.dart';
 import 'tables/medication_intakes_table.dart';
 import 'tables/medication_reminders_table.dart';
 import 'tables/medications_table.dart';
+import 'tables/pet_passport_documents_table.dart';
 import 'tables/pet_weights_table.dart';
 import 'tables/pets_table.dart';
 import 'tables/vaccination_documents_table.dart';
@@ -58,6 +59,7 @@ part 'database.g.dart';
     MedicationReminders,
     MedicationIntakes,
     Foods,
+    PetPassportDocuments,
   ],
   daos: [
     PetsDao,
@@ -77,7 +79,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -129,6 +131,10 @@ class AppDatabase extends _$AppDatabase {
             if (from >= 8) {
               await m.addColumn(medications, medications.withFood);
             }
+          }
+          if (from < 10 && to >= 10) {
+            await m.addColumn(pets, pets.vaccinationPassportNumber);
+            await m.createTable(petPassportDocuments);
           }
         },
         beforeOpen: (details) async {

@@ -377,6 +377,13 @@
   "pdfColNextDue": "Nächste fällig",
   "pdfColVet": "Tierarzt",
 
+  "passportTitle": "Impfpass",
+  "passportNumberLabel": "Ausweis-Nummer",
+  "passportNumberHelp": "Nummer auf dem Impfausweis-Booklet.",
+  "passportNumberSavedSnack": "Nummer gespeichert.",
+  "passportDocumentsSection": "Dokumente",
+  "passportDocumentsEmpty": "Noch keine Dokumente angehängt.",
+
   "medicationWithFoodLabel": "Mit Futter einnehmen",
   "medicationWithFoodHint": "Erinnerung fügt „mit Futter“ am Ende hinzu.",
   "medicationWithFoodChip": "Mit Futter",

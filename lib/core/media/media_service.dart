@@ -102,6 +102,21 @@ class MediaService {
     );
   }
 
+  /// Copies [source] to `<media>/pets/<petUuid>/passport/<docUuid><ext>` and
+  /// returns the relative path. Passport docs live under the pet folder so
+  /// the startup sweep prunes them together with a deleted pet.
+  Future<String> savePassportDocument({
+    required String petUuid,
+    required String docUuid,
+    required File source,
+  }) async {
+    return _copyDocument(
+      source: source,
+      relativeDir: p.join('pets', petUuid, 'passport'),
+      docUuid: docUuid,
+    );
+  }
+
   /// Removes media directories whose owning entity no longer exists in the
   /// DB. Called once on cold start. Best-effort — filesystem errors are
   /// swallowed since the DB is source of truth.
