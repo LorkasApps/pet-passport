@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../features/appointments/application/appointments_providers.dart';
+import '../features/diet/application/foods_providers.dart';
 import '../features/medications/application/medications_providers.dart';
 import '../features/pets/application/current_pet_provider.dart';
+import '../features/pets/application/pets_providers.dart';
 import '../features/security/presentation/app_lock_gate.dart';
 import '../features/settings/application/settings_providers.dart';
 import '../features/vaccinations/application/vaccinations_providers.dart';
@@ -20,10 +22,12 @@ class PetPassportApp extends ConsumerStatefulWidget {
   ConsumerState<PetPassportApp> createState() => _PetPassportAppState();
 }
 
-class _PetPassportAppState extends ConsumerState<PetPassportApp> {
+class _PetPassportAppState extends ConsumerState<PetPassportApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Wire notification taps to router deep-links once the app is built.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final notif = ref.read(notificationServiceProvider);
@@ -54,19 +58,17 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp> {
           } else {
             unawaited(router.push('/medications'));
           }
+        } else if (payload.entity == 'feed') {
+          if (pet != null) {
+            unawaited(router.push('/diet'));
+          } else {
+            unawaited(router.push('/diet'));
+          }
         }
       });
-      // Re-arm scheduled reminders after cold start / reboot / permission
-      // changes. Deterministic IDs keep this idempotent.
-      await ref
-          .read(vaccinationsRepositoryProvider)
-          .rescheduleAllUpcomingReminders();
-      await ref
-          .read(appointmentsRepositoryProvider)
-          .rescheduleAllUpcomingReminders();
-      await ref
-          .read(medicationsRepositoryProvider)
-          .rescheduleAllUpcomingReminders();
+      await _rescheduleAll();
+      // Prune orphan media once per cold start.
+      await _sweepMedia();
     });
 
     // React to reminder-lead changes: user picks 3 days instead of 7, all
@@ -77,6 +79,47 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp> {
           .read(vaccinationsRepositoryProvider)
           .rescheduleAllUpcomingReminders();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-run the scheduler when the app comes back to the foreground so a
+    // TZ change or system-clock adjustment is picked up without a restart.
+    // Deterministic IDs keep this idempotent — no duplicate notifications.
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_rescheduleAll());
+    }
+  }
+
+  Future<void> _sweepMedia() async {
+    try {
+      final media = ref.read(mediaServiceProvider);
+      final db = ref.read(databaseProvider);
+      await media.sweep(db);
+    } catch (_) {
+      // best-effort startup housekeeping — never fatal.
+    }
+  }
+
+  Future<void> _rescheduleAll() async {
+    await ref
+        .read(vaccinationsRepositoryProvider)
+        .rescheduleAllUpcomingReminders();
+    await ref
+        .read(appointmentsRepositoryProvider)
+        .rescheduleAllUpcomingReminders();
+    await ref
+        .read(medicationsRepositoryProvider)
+        .rescheduleAllUpcomingReminders();
+    await ref
+        .read(foodsRepositoryProvider)
+        .rescheduleAllUpcomingReminders();
   }
 
   @override

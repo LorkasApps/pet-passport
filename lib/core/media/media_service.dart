@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../db/database.dart';
+
 /// Stores paths in the DB as **relative** to the app documents dir.
 /// Resolves them to absolute paths at read time.
 class MediaService {
@@ -98,6 +100,52 @@ class MediaService {
       relativeDir: p.join('events', eventUuid),
       docUuid: photoUuid,
     );
+  }
+
+  /// Removes media directories whose owning entity no longer exists in the
+  /// DB. Called once on cold start. Best-effort — filesystem errors are
+  /// swallowed since the DB is source of truth.
+  ///
+  /// Layout: `<media>/{pets|insurances|vaccinations|events}/<uuid>/…`.
+  /// Soft-deleted pets are treated as still-present so their profile photo
+  /// survives an undo.
+  Future<void> sweep(AppDatabase db) async {
+    final root = await _root();
+    await _sweepDir(
+      p.join(root.path, 'pets'),
+      (uuid) async => (await db.petsDao.getByUuid(uuid)) != null,
+    );
+    await _sweepDir(
+      p.join(root.path, 'insurances'),
+      (uuid) async => (await db.insurancesDao.getByUuid(uuid)) != null,
+    );
+    await _sweepDir(
+      p.join(root.path, 'vaccinations'),
+      (uuid) async => (await db.vaccinationsDao.getByUuid(uuid)) != null,
+    );
+    await _sweepDir(
+      p.join(root.path, 'events'),
+      (uuid) async => (await db.eventsDao.getByUuid(uuid)) != null,
+    );
+  }
+
+  Future<void> _sweepDir(
+    String dirPath,
+    Future<bool> Function(String uuid) stillExists,
+  ) async {
+    final dir = Directory(dirPath);
+    if (!await dir.exists()) return;
+    await for (final entity in dir.list(followLinks: false)) {
+      if (entity is! Directory) continue;
+      final uuid = p.basename(entity.path);
+      try {
+        if (!await stillExists(uuid)) {
+          await entity.delete(recursive: true);
+        }
+      } catch (_) {
+        // best-effort — leave the folder in place for the next sweep.
+      }
+    }
   }
 
   Future<String> _copyDocument({
