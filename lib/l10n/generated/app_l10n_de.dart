@@ -1099,6 +1099,54 @@ class AppL10nDe extends AppL10n {
   String get timelineKindAppointment => 'Termine';
 
   @override
+  String get morePdf => 'PDF-Export';
+
+  @override
+  String get pdfMenuTitle => 'PDF-Export';
+
+  @override
+  String get pdfPassportTitle => 'Impfpass';
+
+  @override
+  String get pdfPassportSubtitle =>
+      'Alle Impfungen mit Datum und Chargennummer.';
+
+  @override
+  String get pdfOverviewTitle => 'Steckbrief';
+
+  @override
+  String get pdfOverviewSubtitle =>
+      'Vollständige Übersicht inkl. Tierärzten und Versicherungen.';
+
+  @override
+  String get pdfEmergencyTitle => 'Notfall-Blatt';
+
+  @override
+  String get pdfEmergencySubtitle =>
+      'Kontakte, Chip und Warnhinweise für den Ernstfall.';
+
+  @override
+  String get pdfVaccinationsSection => 'Impfungen';
+
+  @override
+  String get pdfNoVaccinations => 'Keine Impfungen erfasst.';
+
+  @override
+  String get pdfColDate => 'Datum';
+
+  @override
+  String get pdfColVaccine => 'Impfung';
+
+  @override
+  String get pdfColBatch => 'Charge';
+
+  @override
+  String get pdfColNextDue => 'Nächste fällig';
+
+  @override
+  String get pdfColVet => 'Tierarzt';
+
+  @override
   String get medicationWithFoodLabel => 'Mit Futter einnehmen';
 
   @override

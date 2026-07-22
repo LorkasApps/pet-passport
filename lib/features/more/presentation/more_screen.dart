@@ -65,6 +65,11 @@ class MoreScreen extends ConsumerWidget {
         ),
         const Divider(),
         ListTile(
+          leading: const Icon(Icons.picture_as_pdf_outlined),
+          title: Text(l.morePdf),
+          onTap: () => context.push('/pdf'),
+        ),
+        ListTile(
           leading: const Icon(Icons.ios_share),
           title: Text(l.exportTitle),
           onTap: () => context.push('/export'),

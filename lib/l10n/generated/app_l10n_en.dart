@@ -1095,6 +1095,53 @@ class AppL10nEn extends AppL10n {
   String get timelineKindAppointment => 'Appointments';
 
   @override
+  String get morePdf => 'PDF export';
+
+  @override
+  String get pdfMenuTitle => 'PDF export';
+
+  @override
+  String get pdfPassportTitle => 'Vaccination passport';
+
+  @override
+  String get pdfPassportSubtitle =>
+      'All vaccinations with date and batch number.';
+
+  @override
+  String get pdfOverviewTitle => 'Profile sheet';
+
+  @override
+  String get pdfOverviewSubtitle => 'Full overview incl. vets and insurances.';
+
+  @override
+  String get pdfEmergencyTitle => 'Emergency sheet';
+
+  @override
+  String get pdfEmergencySubtitle =>
+      'Contacts, chip and warnings for an emergency.';
+
+  @override
+  String get pdfVaccinationsSection => 'Vaccinations';
+
+  @override
+  String get pdfNoVaccinations => 'No vaccinations recorded.';
+
+  @override
+  String get pdfColDate => 'Date';
+
+  @override
+  String get pdfColVaccine => 'Vaccine';
+
+  @override
+  String get pdfColBatch => 'Batch';
+
+  @override
+  String get pdfColNextDue => 'Next due';
+
+  @override
+  String get pdfColVet => 'Vet';
+
+  @override
   String get medicationWithFoodLabel => 'Take with food';
 
   @override

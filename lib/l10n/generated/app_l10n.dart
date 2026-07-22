@@ -1957,6 +1957,96 @@ abstract class AppL10n {
   /// **'Appointments'**
   String get timelineKindAppointment;
 
+  /// No description provided for @morePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF export'**
+  String get morePdf;
+
+  /// No description provided for @pdfMenuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF export'**
+  String get pdfMenuTitle;
+
+  /// No description provided for @pdfPassportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccination passport'**
+  String get pdfPassportTitle;
+
+  /// No description provided for @pdfPassportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All vaccinations with date and batch number.'**
+  String get pdfPassportSubtitle;
+
+  /// No description provided for @pdfOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile sheet'**
+  String get pdfOverviewTitle;
+
+  /// No description provided for @pdfOverviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full overview incl. vets and insurances.'**
+  String get pdfOverviewSubtitle;
+
+  /// No description provided for @pdfEmergencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency sheet'**
+  String get pdfEmergencyTitle;
+
+  /// No description provided for @pdfEmergencySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts, chip and warnings for an emergency.'**
+  String get pdfEmergencySubtitle;
+
+  /// No description provided for @pdfVaccinationsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccinations'**
+  String get pdfVaccinationsSection;
+
+  /// No description provided for @pdfNoVaccinations.
+  ///
+  /// In en, this message translates to:
+  /// **'No vaccinations recorded.'**
+  String get pdfNoVaccinations;
+
+  /// No description provided for @pdfColDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get pdfColDate;
+
+  /// No description provided for @pdfColVaccine.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine'**
+  String get pdfColVaccine;
+
+  /// No description provided for @pdfColBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch'**
+  String get pdfColBatch;
+
+  /// No description provided for @pdfColNextDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due'**
+  String get pdfColNextDue;
+
+  /// No description provided for @pdfColVet.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet'**
+  String get pdfColVet;
+
   /// No description provided for @medicationWithFoodLabel.
   ///
   /// In en, this message translates to:

@@ -22,6 +22,7 @@ import '../features/insurances/presentation/insurance_edit_screen.dart';
 import '../features/insurances/presentation/insurances_list_screen.dart';
 import '../features/more/presentation/more_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
+import '../features/pdf/presentation/pdf_menu_screen.dart';
 import '../features/pets/application/current_pet_provider.dart';
 import '../features/pets/presentation/pet_edit_screen.dart';
 import '../features/pets/presentation/pet_management_screen.dart';
@@ -287,6 +288,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/timeline',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const TimelineScreen(),
+      ),
+      GoRoute(
+        path: '/pdf',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const PdfMenuScreen(),
       ),
       GoRoute(
         path: '/pets/:petId/events/new',
