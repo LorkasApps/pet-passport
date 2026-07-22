@@ -146,44 +146,40 @@ class _FilterBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(children: [
-            Expanded(
-              child: DropdownButtonFormField<String?>(
-                initialValue: filter.petUuid,
-                decoration: InputDecoration(
-                  labelText: l.timelineFilterPet,
-                  isDense: true,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
-                  DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text(l.timelineFilterAllPets),
-                  ),
-                  for (final p in pets)
-                    DropdownMenuItem<String?>(
-                      value: p.uuid as String,
-                      child: Text(p.name as String),
-                    ),
-                ],
-                onChanged: onPetChanged,
-              ),
+          DropdownButtonFormField<String?>(
+            initialValue: filter.petUuid,
+            decoration: InputDecoration(
+              labelText: l.timelineFilterPet,
+              isDense: true,
+              border: const OutlineInputBorder(),
             ),
-            const SizedBox(width: 8),
-            OutlinedButton.icon(
-              onPressed: onPickRange,
-              icon: const Icon(Icons.date_range),
-              label: Flexible(
-                child: Text(
-                  rangeLabel,
-                  overflow: TextOverflow.ellipsis,
-                ),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l.timelineFilterAllPets),
               ),
+              for (final p in pets)
+                DropdownMenuItem<String?>(
+                  value: p.uuid as String,
+                  child: Text(p.name as String, overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: onPetChanged,
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: onPickRange,
+            icon: const Icon(Icons.date_range),
+            label: Text(
+              rangeLabel,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-          ]),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 6,
+            runSpacing: 4,
             children: [
               for (final k in TimelineKind.values)
                 FilterChip(

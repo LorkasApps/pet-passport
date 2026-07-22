@@ -260,11 +260,15 @@ class _CountTile extends ConsumerWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.titleSmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
                 l.overviewCount(count),
                 style: TextStyle(color: scheme.onSurfaceVariant),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

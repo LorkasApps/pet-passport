@@ -17,6 +17,19 @@ class PetAvatar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final path = pet.profilePhotoPath;
+    return Semantics(
+      image: true,
+      label: pet.name,
+      child: _buildAvatar(context, ref, scheme, path),
+    );
+  }
+
+  Widget _buildAvatar(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme scheme,
+    String? path,
+  ) {
     if (path == null || path.isEmpty) {
       return CircleAvatar(
         radius: radius,

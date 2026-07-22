@@ -304,6 +304,7 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
                 if (_endsAt != null)
                   IconButton(
                     icon: const Icon(Icons.clear),
+                    tooltip: l.actionClear,
                     onPressed: () => setState(() => _endsAt = null),
                   ),
               ]),

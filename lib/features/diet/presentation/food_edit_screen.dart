@@ -297,6 +297,7 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
                 if (_endsAt != null)
                   IconButton(
                     icon: const Icon(Icons.clear),
+                    tooltip: l.actionClear,
                     onPressed: () => setState(() => _endsAt = null),
                   ),
               ]),
