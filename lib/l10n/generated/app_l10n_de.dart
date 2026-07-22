@@ -1060,4 +1060,106 @@ class AppL10nDe extends AppL10n {
 
   @override
   String get moreMedications => 'Medikamente';
+
+  @override
+  String get moreDiet => 'Ernährung';
+
+  @override
+  String get moreWeightChart => 'Gewichtsverlauf';
+
+  @override
+  String get medicationWithFoodLabel => 'Mit Futter einnehmen';
+
+  @override
+  String get medicationWithFoodHint =>
+      'Erinnerung fügt „mit Futter“ am Ende hinzu.';
+
+  @override
+  String get medicationWithFoodChip => 'Mit Futter';
+
+  @override
+  String get dietListTitle => 'Ernährung';
+
+  @override
+  String get dietEmptyTitle => 'Noch keine Futter-Einträge';
+
+  @override
+  String get dietEmptyMessage => 'Aktuelle Diät und Historie erscheinen hier.';
+
+  @override
+  String get dietActiveSection => 'Aktiv';
+
+  @override
+  String get dietInactiveSection => 'Verlauf';
+
+  @override
+  String get dietNewTitle => 'Neuer Futter-Eintrag';
+
+  @override
+  String get foodEditTitle => 'Futter bearbeiten';
+
+  @override
+  String get foodBrandLabel => 'Marke';
+
+  @override
+  String get foodNameLabel => 'Bezeichnung';
+
+  @override
+  String get foodTypeLabel => 'Futterart';
+
+  @override
+  String get foodTypeDry => 'Trocken';
+
+  @override
+  String get foodTypeWet => 'Nass';
+
+  @override
+  String get foodTypeRaw => 'Roh';
+
+  @override
+  String get foodTypeBarf => 'BARF';
+
+  @override
+  String get foodTypeTreat => 'Leckerli';
+
+  @override
+  String get foodTypeOther => 'Andere';
+
+  @override
+  String get foodPortionGramsLabel => 'Portion (g)';
+
+  @override
+  String get foodFrequencyPerDayLabel => 'Mahlzeiten / Tag';
+
+  @override
+  String get foodTimesOfDayLabel => 'Fütterungszeiten';
+
+  @override
+  String get foodStartsAtLabel => 'Beginn';
+
+  @override
+  String get foodEndsAtLabel => 'Ende (optional)';
+
+  @override
+  String get foodActiveLabel => 'Aktiv';
+
+  @override
+  String get foodRemindersEnabledLabel => 'Fütterungs-Erinnerungen';
+
+  @override
+  String get foodRemindersEnabledHint =>
+      'Tägliche Notifications zu den Fütterungszeiten.';
+
+  @override
+  String get foodRemindersOnChip => 'Erinnerung an';
+
+  @override
+  String get weightChartTitle => 'Gewichtsverlauf';
+
+  @override
+  String get weightChartEmptyTitle => 'Noch keine Kurve';
+
+  @override
+  String get weightChartEmptyMessage =>
+      'Ab dem zweiten Gewichts-Event wird eine Kurve angezeigt.';
 }

@@ -51,6 +51,9 @@ dependencies:
   # Biometric app-lock
   local_auth: ^2.3.0
 
+  # Charts (weight/growth over time)
+  fl_chart: ^0.69.0
+
   # Utility
   path_provider: ^2.1.5
   path: ^1.9.1

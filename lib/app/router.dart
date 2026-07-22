@@ -7,6 +7,9 @@ import '../features/appointments/presentation/appointment_detail_screen.dart';
 import '../features/appointments/presentation/appointment_edit_screen.dart';
 import '../features/appointments/presentation/appointments_list_screen.dart';
 import '../features/appointments/presentation/termine_screen.dart';
+import '../features/charts/presentation/weight_chart_screen.dart';
+import '../features/diet/presentation/diet_list_screen.dart';
+import '../features/diet/presentation/food_edit_screen.dart';
 import '../features/medications/presentation/medication_detail_screen.dart';
 import '../features/medications/presentation/medication_edit_screen.dart';
 import '../features/medications/presentation/medication_intake_history_screen.dart';
@@ -189,6 +192,33 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, s) => MedicationIntakeHistoryScreen(
           petUuid: s.pathParameters['petId']!,
           medicationUuid: s.pathParameters['medId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/diet',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const DietListScreen(),
+      ),
+      GoRoute(
+        path: '/pets/:petId/diet/new',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => FoodEditScreen(
+          petUuid: s.pathParameters['petId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/diet/:foodId/edit',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => FoodEditScreen(
+          petUuid: s.pathParameters['petId']!,
+          foodUuid: s.pathParameters['foodId'],
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/charts/weight',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => WeightChartScreen(
+          petUuid: s.pathParameters['petId']!,
         ),
       ),
       GoRoute(

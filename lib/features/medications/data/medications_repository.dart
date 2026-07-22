@@ -95,6 +95,7 @@ class MedicationsRepository {
     String? notes,
     String? prescribedByVetUuid,
     List<int> reminderOffsetsMinutes = const [0],
+    bool withFood = false,
   }) async {
     final pet = await _petsDao.getByUuid(petUuid);
     if (pet == null) throw StateError('Pet not found: $petUuid');
@@ -118,6 +119,7 @@ class MedicationsRepository {
       isActive: Value(isActive),
       notes: Value(notes),
       prescribedByVetId: Value(vetId),
+      withFood: Value(withFood),
       createdAt: now,
       updatedAt: now,
     ));
@@ -145,6 +147,7 @@ class MedicationsRepository {
     String? notes,
     String? prescribedByVetUuid,
     List<int> reminderOffsetsMinutes = const [0],
+    bool withFood = false,
   }) async {
     final existing = await _medDao.getByUuid(uuid);
     if (existing == null) {
@@ -166,6 +169,7 @@ class MedicationsRepository {
       isActive: isActive,
       notes: Value(notes),
       prescribedByVetId: Value(vetId),
+      withFood: withFood,
       updatedAt: DateTime.now(),
     ));
     await _medDao.deleteRemindersFor(existing.id);
@@ -359,12 +363,13 @@ class MedicationsRepository {
   }
 
   String _buildBody(MedicationRow row) {
-    if (row.dosageAmount <= 0) return row.name;
+    final withFoodSuffix = row.withFood ? ' · mit Futter' : '';
+    if (row.dosageAmount <= 0) return '${row.name}$withFoodSuffix';
     final unit = row.dosageUnit.isEmpty ? '' : ' ${row.dosageUnit}';
     final amount = row.dosageAmount % 1 == 0
         ? row.dosageAmount.toStringAsFixed(0)
         : row.dosageAmount.toString();
-    return '${row.name} — $amount$unit';
+    return '${row.name} — $amount$unit$withFoodSuffix';
   }
 
   Future<Medication> _toDomain(MedicationRow row, String petUuid) async {
@@ -392,6 +397,7 @@ class MedicationsRepository {
       prescribedByVetUuid: vetUuid,
       reminderOffsetsMinutes:
           reminderRows.map((r) => r.offsetMinutes).toList(growable: false),
+      withFood: row.withFood,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

@@ -1056,4 +1056,106 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get moreMedications => 'Medications';
+
+  @override
+  String get moreDiet => 'Diet';
+
+  @override
+  String get moreWeightChart => 'Weight chart';
+
+  @override
+  String get medicationWithFoodLabel => 'Take with food';
+
+  @override
+  String get medicationWithFoodHint =>
+      'Reminder body will include \"with food\".';
+
+  @override
+  String get medicationWithFoodChip => 'With food';
+
+  @override
+  String get dietListTitle => 'Diet';
+
+  @override
+  String get dietEmptyTitle => 'No food entries yet';
+
+  @override
+  String get dietEmptyMessage => 'Current diet and history show up here.';
+
+  @override
+  String get dietActiveSection => 'Active';
+
+  @override
+  String get dietInactiveSection => 'History';
+
+  @override
+  String get dietNewTitle => 'New food entry';
+
+  @override
+  String get foodEditTitle => 'Edit food';
+
+  @override
+  String get foodBrandLabel => 'Brand';
+
+  @override
+  String get foodNameLabel => 'Product';
+
+  @override
+  String get foodTypeLabel => 'Food type';
+
+  @override
+  String get foodTypeDry => 'Dry';
+
+  @override
+  String get foodTypeWet => 'Wet';
+
+  @override
+  String get foodTypeRaw => 'Raw';
+
+  @override
+  String get foodTypeBarf => 'BARF';
+
+  @override
+  String get foodTypeTreat => 'Treat';
+
+  @override
+  String get foodTypeOther => 'Other';
+
+  @override
+  String get foodPortionGramsLabel => 'Portion (g)';
+
+  @override
+  String get foodFrequencyPerDayLabel => 'Meals / day';
+
+  @override
+  String get foodTimesOfDayLabel => 'Feeding times';
+
+  @override
+  String get foodStartsAtLabel => 'Starts';
+
+  @override
+  String get foodEndsAtLabel => 'Ends (optional)';
+
+  @override
+  String get foodActiveLabel => 'Active';
+
+  @override
+  String get foodRemindersEnabledLabel => 'Feeding reminders';
+
+  @override
+  String get foodRemindersEnabledHint =>
+      'Daily notifications at each feeding time.';
+
+  @override
+  String get foodRemindersOnChip => 'Reminders on';
+
+  @override
+  String get weightChartTitle => 'Weight chart';
+
+  @override
+  String get weightChartEmptyTitle => 'No curve yet';
+
+  @override
+  String get weightChartEmptyMessage =>
+      'The chart shows up once at least two weight events exist.';
 }

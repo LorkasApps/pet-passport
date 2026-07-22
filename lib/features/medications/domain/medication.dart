@@ -20,6 +20,7 @@ class Medication {
     this.notes,
     this.prescribedByVetUuid,
     this.reminderOffsetsMinutes = const [0],
+    this.withFood = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -39,6 +40,7 @@ class Medication {
   final String? notes;
   final String? prescribedByVetUuid;
   final List<int> reminderOffsetsMinutes;
+  final bool withFood;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

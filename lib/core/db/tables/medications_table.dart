@@ -30,6 +30,8 @@ class Medications extends Table {
   IntColumn get prescribedByVetId => integer()
       .nullable()
       .references(Vets, #id, onDelete: KeyAction.setNull)();
+  BoolColumn get withFood =>
+      boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 }

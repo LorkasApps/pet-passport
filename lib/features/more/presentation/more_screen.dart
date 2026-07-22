@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../pets/application/current_pet_provider.dart';
+
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppL10n.of(context);
+    final petAsync = ref.watch(currentPetProvider);
+    final petUuid = petAsync.valueOrNull?.uuid;
     return ListView(
       children: [
         ListTile(
@@ -20,6 +24,19 @@ class MoreScreen extends ConsumerWidget {
           leading: const Icon(Icons.medication_outlined),
           title: Text(l.moreMedications),
           onTap: () => context.push('/medications'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.restaurant_outlined),
+          title: Text(l.moreDiet),
+          onTap: () => context.push('/diet'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.show_chart),
+          title: Text(l.moreWeightChart),
+          enabled: petUuid != null,
+          onTap: petUuid == null
+              ? null
+              : () => context.push('/pets/$petUuid/charts/weight'),
         ),
         ListTile(
           leading: const Icon(Icons.vaccines_outlined),

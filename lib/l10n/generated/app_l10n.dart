@@ -1884,6 +1884,204 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Medications'**
   String get moreMedications;
+
+  /// No description provided for @moreDiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Diet'**
+  String get moreDiet;
+
+  /// No description provided for @moreWeightChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight chart'**
+  String get moreWeightChart;
+
+  /// No description provided for @medicationWithFoodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Take with food'**
+  String get medicationWithFoodLabel;
+
+  /// No description provided for @medicationWithFoodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder body will include \"with food\".'**
+  String get medicationWithFoodHint;
+
+  /// No description provided for @medicationWithFoodChip.
+  ///
+  /// In en, this message translates to:
+  /// **'With food'**
+  String get medicationWithFoodChip;
+
+  /// No description provided for @dietListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diet'**
+  String get dietListTitle;
+
+  /// No description provided for @dietEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No food entries yet'**
+  String get dietEmptyTitle;
+
+  /// No description provided for @dietEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Current diet and history show up here.'**
+  String get dietEmptyMessage;
+
+  /// No description provided for @dietActiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get dietActiveSection;
+
+  /// No description provided for @dietInactiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get dietInactiveSection;
+
+  /// No description provided for @dietNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New food entry'**
+  String get dietNewTitle;
+
+  /// No description provided for @foodEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit food'**
+  String get foodEditTitle;
+
+  /// No description provided for @foodBrandLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get foodBrandLabel;
+
+  /// No description provided for @foodNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get foodNameLabel;
+
+  /// No description provided for @foodTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Food type'**
+  String get foodTypeLabel;
+
+  /// No description provided for @foodTypeDry.
+  ///
+  /// In en, this message translates to:
+  /// **'Dry'**
+  String get foodTypeDry;
+
+  /// No description provided for @foodTypeWet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wet'**
+  String get foodTypeWet;
+
+  /// No description provided for @foodTypeRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get foodTypeRaw;
+
+  /// No description provided for @foodTypeBarf.
+  ///
+  /// In en, this message translates to:
+  /// **'BARF'**
+  String get foodTypeBarf;
+
+  /// No description provided for @foodTypeTreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Treat'**
+  String get foodTypeTreat;
+
+  /// No description provided for @foodTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get foodTypeOther;
+
+  /// No description provided for @foodPortionGramsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Portion (g)'**
+  String get foodPortionGramsLabel;
+
+  /// No description provided for @foodFrequencyPerDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals / day'**
+  String get foodFrequencyPerDayLabel;
+
+  /// No description provided for @foodTimesOfDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Feeding times'**
+  String get foodTimesOfDayLabel;
+
+  /// No description provided for @foodStartsAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get foodStartsAtLabel;
+
+  /// No description provided for @foodEndsAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends (optional)'**
+  String get foodEndsAtLabel;
+
+  /// No description provided for @foodActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get foodActiveLabel;
+
+  /// No description provided for @foodRemindersEnabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Feeding reminders'**
+  String get foodRemindersEnabledLabel;
+
+  /// No description provided for @foodRemindersEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily notifications at each feeding time.'**
+  String get foodRemindersEnabledHint;
+
+  /// No description provided for @foodRemindersOnChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders on'**
+  String get foodRemindersOnChip;
+
+  /// No description provided for @weightChartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight chart'**
+  String get weightChartTitle;
+
+  /// No description provided for @weightChartEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No curve yet'**
+  String get weightChartEmptyTitle;
+
+  /// No description provided for @weightChartEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The chart shows up once at least two weight events exist.'**
+  String get weightChartEmptyMessage;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

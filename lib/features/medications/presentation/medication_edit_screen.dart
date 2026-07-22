@@ -44,6 +44,7 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
   bool _isActive = true;
   String? _prescribedByVetUuid;
   List<int> _reminderOffsets = const [0];
+  bool _withFood = false;
   bool _prefilled = false;
   bool _saving = false;
 
@@ -73,6 +74,7 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
     _isActive = m.isActive;
     _prescribedByVetUuid = m.prescribedByVetUuid;
     _reminderOffsets = m.reminderOffsetsMinutes.toList();
+    _withFood = m.withFood;
   }
 
   Future<void> _pickStart() async {
@@ -137,6 +139,7 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
           notes: _emptyToNull(_notesCtrl.text),
           prescribedByVetUuid: _prescribedByVetUuid,
           reminderOffsetsMinutes: _reminderOffsets,
+          withFood: _withFood,
         );
       } else {
         await repo.createMedication(
@@ -154,6 +157,7 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
           notes: _emptyToNull(_notesCtrl.text),
           prescribedByVetUuid: _prescribedByVetUuid,
           reminderOffsetsMinutes: _reminderOffsets,
+          withFood: _withFood,
         );
       }
       if (mounted) context.pop();
@@ -309,6 +313,13 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
               title: Text(l.medicationActiveLabel),
               value: _isActive,
               onChanged: (v) => setState(() => _isActive = v),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l.medicationWithFoodLabel),
+              subtitle: Text(l.medicationWithFoodHint),
+              value: _withFood,
+              onChanged: (v) => setState(() => _withFood = v),
             ),
             const SizedBox(height: 12),
             vetsAsync.when(

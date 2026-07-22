@@ -430,5 +430,41 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "moreAppointments": "Appointments",
-  "moreMedications": "Medications"
+  "moreMedications": "Medications",
+  "moreDiet": "Diet",
+  "moreWeightChart": "Weight chart",
+
+  "medicationWithFoodLabel": "Take with food",
+  "medicationWithFoodHint": "Reminder body will include \"with food\".",
+  "medicationWithFoodChip": "With food",
+
+  "dietListTitle": "Diet",
+  "dietEmptyTitle": "No food entries yet",
+  "dietEmptyMessage": "Current diet and history show up here.",
+  "dietActiveSection": "Active",
+  "dietInactiveSection": "History",
+  "dietNewTitle": "New food entry",
+  "foodEditTitle": "Edit food",
+  "foodBrandLabel": "Brand",
+  "foodNameLabel": "Product",
+  "foodTypeLabel": "Food type",
+  "foodTypeDry": "Dry",
+  "foodTypeWet": "Wet",
+  "foodTypeRaw": "Raw",
+  "foodTypeBarf": "BARF",
+  "foodTypeTreat": "Treat",
+  "foodTypeOther": "Other",
+  "foodPortionGramsLabel": "Portion (g)",
+  "foodFrequencyPerDayLabel": "Meals / day",
+  "foodTimesOfDayLabel": "Feeding times",
+  "foodStartsAtLabel": "Starts",
+  "foodEndsAtLabel": "Ends (optional)",
+  "foodActiveLabel": "Active",
+  "foodRemindersEnabledLabel": "Feeding reminders",
+  "foodRemindersEnabledHint": "Daily notifications at each feeding time.",
+  "foodRemindersOnChip": "Reminders on",
+
+  "weightChartTitle": "Weight chart",
+  "weightChartEmptyTitle": "No curve yet",
+  "weightChartEmptyMessage": "The chart shows up once at least two weight events exist."
 }

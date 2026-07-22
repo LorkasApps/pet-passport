@@ -112,6 +112,14 @@ class _MedicationDetailScreenState
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(m.timesOfDay.join(' • ')),
               ),
+            if (m.withFood)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Chip(
+                  avatar: const Icon(Icons.restaurant, size: 16),
+                  label: Text(l.medicationWithFoodChip),
+                ),
+              ),
             const SizedBox(height: 24),
             Text(l.medicationAdherenceTitle,
                 style: Theme.of(context).textTheme.titleSmall),

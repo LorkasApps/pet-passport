@@ -2,11 +2,13 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../features/appointments/domain/appointment_enums.dart';
+import '../../features/diet/domain/food_enums.dart';
 import '../../features/medications/domain/medication_enums.dart';
 import '../../features/pets/domain/pet_enums.dart';
 import '../../features/protocol/domain/event_enums.dart';
 import 'daos/appointments_dao.dart';
 import 'daos/events_dao.dart';
+import 'daos/foods_dao.dart';
 import 'daos/insurances_dao.dart';
 import 'daos/medications_dao.dart';
 import 'daos/pets_dao.dart';
@@ -21,6 +23,7 @@ import 'tables/event_photos_table.dart';
 import 'tables/event_tag_links_table.dart';
 import 'tables/event_tags_table.dart';
 import 'tables/events_table.dart';
+import 'tables/foods_table.dart';
 import 'tables/insurance_documents_table.dart';
 import 'tables/insurances_table.dart';
 import 'tables/medication_intakes_table.dart';
@@ -54,6 +57,7 @@ part 'database.g.dart';
     Medications,
     MedicationReminders,
     MedicationIntakes,
+    Foods,
   ],
   daos: [
     PetsDao,
@@ -64,6 +68,7 @@ part 'database.g.dart';
     EventsDao,
     AppointmentsDao,
     MedicationsDao,
+    FoodsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -72,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,6 +120,15 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(medications);
             await m.createTable(medicationReminders);
             await m.createTable(medicationIntakes);
+          }
+          if (from < 9) {
+            await m.createTable(foods);
+            // `medications` was recreated with the current shape (incl.
+            // with_food) in the from<8 block, so only add the column when
+            // we're stepping from an existing v8 install.
+            if (from >= 8) {
+              await m.addColumn(medications, medications.withFood);
+            }
           }
         },
         beforeOpen: (details) async {
