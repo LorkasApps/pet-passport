@@ -1,0 +1,207 @@
+{
+  "@@locale": "en",
+  "appTitle": "Pet Passport",
+  "@appTitle": {},
+
+  "navDashboard": "Dashboard",
+  "navPets": "Pets",
+  "navSettings": "Settings",
+  "navHome": "Home",
+  "navTermine": "Schedule",
+  "navAlltag": "Daily",
+  "navMore": "More",
+
+  "termineEmptyTitle": "Nothing scheduled yet",
+  "termineEmptyMessage": "Vaccinations, medications and appointments will appear here.",
+  "alltagEmptyTitle": "No entries yet",
+  "alltagEmptyMessage": "Diet and daily events will appear here.",
+
+  "switchPetTitle": "Switch pet",
+  "moreManagePets": "Manage pets",
+
+  "actionSave": "Save",
+  "actionCancel": "Cancel",
+  "actionDelete": "Delete",
+  "actionEdit": "Edit",
+  "actionAdd": "Add",
+  "actionConfirm": "Confirm",
+  "actionSkip": "Skip",
+  "actionNext": "Next",
+  "actionBack": "Back",
+  "actionFinish": "Finish",
+
+  "confirmDeleteTitle": "Delete?",
+  "confirmDeleteMessage": "This action cannot be undone.",
+
+  "onboardingWelcomeTitle": "Welcome to Pet Passport",
+  "onboardingWelcomeBody": "Track your pets' health, appointments, and daily life — all in one place, stored only on your device.",
+  "onboardingAddFirstPetTitle": "Add your first pet",
+  "onboardingAddFirstPetBody": "Let's set up a profile for your pet. You can add more later.",
+
+  "petsListTitle": "My pets",
+  "petsListEmpty": "No pets yet",
+  "petsListEmptyAction": "Add a pet",
+
+  "petEditNewTitle": "New pet",
+  "petEditEditTitle": "Edit pet",
+  "petFieldName": "Name",
+  "petFieldSpecies": "Species",
+  "petFieldBreed": "Breed",
+  "petFieldSex": "Sex",
+  "petFieldDateOfBirth": "Date of birth",
+  "petFieldColor": "Colour / markings",
+  "petFieldChipNumber": "Chip number",
+  "petFieldTassoNumber": "Tasso number",
+  "petFieldNotes": "Notes",
+  "petPickProfilePhoto": "Choose profile photo",
+  "petReplaceProfilePhoto": "Replace profile photo",
+  "petRemoveProfilePhoto": "Remove photo",
+
+  "speciesDog": "Dog",
+  "speciesCat": "Cat",
+
+  "sexMale": "Male",
+  "sexFemale": "Female",
+  "sexNeutered": "Neutered",
+  "petFieldNeutered": "Neutered / spayed",
+  "petFieldNeuteredHelp": "Independent of biological sex.",
+
+  "lifeStagePuppy": "Puppy",
+  "lifeStageJunior": "Junior",
+  "lifeStageAdult": "Adult",
+  "lifeStageSenior": "Senior",
+
+  "ageYears": "{count, plural, =1{1 year} other{{count} years}}",
+  "@ageYears": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "ageMonths": "{count, plural, =1{1 month} other{{count} months}}",
+  "@ageMonths": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "ageUnknown": "Age unknown",
+
+  "petDetailOverview": "Overview",
+
+  "settingsTitle": "Settings",
+  "settingsAppearance": "Appearance",
+  "settingsThemeMode": "Theme",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "System default",
+  "settingsLanguageGerman": "Deutsch",
+  "settingsLanguageEnglish": "English",
+
+  "validationRequired": "Required",
+  "validationTooLong": "Too long",
+
+  "vetsListTitle": "Vets",
+  "vetsEmptyTitle": "No vets yet",
+  "vetsEmptyMessage": "Save your pet's vet contacts for quick access.",
+  "vetsEmptyAction": "Add vet",
+  "vetEditNewTitle": "New vet",
+  "vetEditEditTitle": "Edit vet",
+  "vetFieldName": "Name",
+  "vetFieldPractice": "Practice / clinic",
+  "vetFieldAddress": "Address",
+  "vetFieldPhone": "Phone",
+  "vetFieldEmail": "Email",
+
+  "insurancesListTitle": "Insurances",
+  "insurancesEmptyTitle": "No insurances yet",
+  "insurancesEmptyMessage": "Track policies and attach the paperwork.",
+  "insurancesEmptyAction": "Add insurance",
+  "insuranceEditNewTitle": "New insurance",
+  "insuranceEditEditTitle": "Edit insurance",
+  "insuranceFieldProvider": "Provider",
+  "insuranceFieldPolicy": "Policy number",
+  "insuranceFieldContractStart": "Contract start",
+  "insuranceFieldContractEnd": "Contract end",
+  "insuranceDocumentsSection": "Documents",
+  "insuranceDocumentsEmpty": "No documents attached yet.",
+
+  "overviewVetsTile": "Vets",
+  "overviewInsurancesTile": "Insurances",
+  "launchFailed": "No app available for this action.",
+  "copiedToClipboard": "Copied to clipboard",
+
+  "vaccinationsListTitle": "Vaccinations",
+  "vaccinationsEmptyTitle": "No vaccinations recorded",
+  "vaccinationsEmptyMessage": "Track shots and their next-due dates.",
+  "vaccinationsEmptyAction": "Add vaccination",
+  "vaccinationEditNewTitle": "New vaccination",
+  "vaccinationEditEditTitle": "Edit vaccination",
+  "vaccinationFieldName": "Vaccine",
+  "vaccinationFieldAdministered": "Administered on",
+  "vaccinationFieldNextDue": "Next due",
+  "vaccinationFieldVet": "Given by",
+  "vaccinationFieldBatch": "Batch / lot",
+  "vaccinationVetNone": "Not specified",
+  "vaccinationAdministeredOn": "Administered {date}",
+  "@vaccinationAdministeredOn": {
+    "placeholders": {"date": {"type": "String"}}
+  },
+  "vaccinationNextDue": "Next due {date}",
+  "@vaccinationNextDue": {
+    "placeholders": {"date": {"type": "String"}}
+  },
+  "vaccinationOverdue": "Overdue",
+  "vaccinationOverdueMessage": "This vaccination is overdue. Contact your vet to schedule a booster.",
+  "vaccinationDueIn": "{days, plural, =0{Due today · {date}} =1{Due tomorrow · {date}} other{Due in {days} days · {date}}}",
+  "@vaccinationDueIn": {
+    "placeholders": {
+      "days": {"type": "int"},
+      "date": {"type": "String"}
+    }
+  },
+  "vaccinationOverdueBy": "{days, plural, =1{Overdue by 1 day} other{Overdue by {days} days}}",
+  "@vaccinationOverdueBy": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+
+  "termineUpcomingVaccinations": "Upcoming vaccinations",
+
+  "overviewVaccinationsTitle": "Vaccinations",
+  "overviewVaccinationsEmpty": "No upcoming shots recorded.",
+
+  "emergencyTitle": "Emergency info",
+  "emergencyVetsSection": "Vets",
+  "emergencyCallAction": "Call",
+  "emergencyWeightTitle": "Latest weight",
+  "emergencyWeightValue": "{weight} kg · measured {date}",
+  "@emergencyWeightValue": {
+    "placeholders": {
+      "weight": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "emergencyQrTitle": "Emergency QR",
+  "emergencyQrHelp": "Scan to read all key info in one place. Tap the icon for a full-screen version.",
+  "emergencyQrExpand": "Full screen",
+
+  "petFieldAllergies": "Allergies",
+  "petFieldAllergiesHelp": "Medications, ingredients or environmental triggers to avoid.",
+
+  "vaccinationDocumentsSection": "Documents",
+  "vaccinationDocumentsEmpty": "No documents attached yet.",
+
+  "settingsReminders": "Reminders",
+  "settingsReminderLead": "Vaccination reminder lead",
+  "settingsReminderLeadValue": "{days, plural, =1{1 day before} other{{days} days before}}",
+  "@settingsReminderLeadValue": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+
+  "overviewCount": "{count, plural, =0{None} =1{1 entry} other{{count} entries}}",
+  "@overviewCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
+}

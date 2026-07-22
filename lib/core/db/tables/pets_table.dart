@@ -1,0 +1,26 @@
+import 'package:drift/drift.dart';
+
+import '../../../features/pets/domain/pet_enums.dart';
+
+@DataClassName('PetRow')
+class Pets extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uuid => text().unique()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  IntColumn get species => intEnum<Species>()();
+  TextColumn get breed => text().nullable()();
+  IntColumn get sex => intEnum<Sex>()();
+  BoolColumn get isNeutered => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get dateOfBirth => dateTime().nullable()();
+  TextColumn get color => text().nullable()();
+  TextColumn get markings => text().nullable()();
+  TextColumn get chipNumber => text().nullable()();
+  TextColumn get tassoNumber => text().nullable()();
+  DateTimeColumn get tassoRegisteredAt => dateTime().nullable()();
+  TextColumn get profilePhotoPath => text().nullable()();
+  TextColumn get allergies => text().nullable()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+}
