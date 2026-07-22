@@ -11,6 +11,7 @@ import '../application/events_providers.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
 import '../domain/event_payload.dart';
+import '../domain/event_photo.dart';
 import '../domain/event_tag.dart';
 
 class EventEditScreen extends ConsumerStatefulWidget {
@@ -48,6 +49,10 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
   SymptomSeverity _severity = SymptomSeverity.low;
   ActivityType _activityType = ActivityType.walk;
   final Set<String> _selectedTagUuids = {};
+  // Files picked before the event has a uuid — flushed in _save() after
+  // createEvent() returns. Only used on new entries; edit mode attaches
+  // straight through the repository as before.
+  final List<_PendingPhoto> _pendingPhotos = [];
   bool _prefilled = false;
   bool _saving = false;
 
@@ -190,6 +195,14 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
         for (final tagUuid in _selectedTagUuids) {
           await repo.assignTag(eventUuid: eventUuid, tagUuid: tagUuid);
         }
+        for (final p in _pendingPhotos) {
+          await repo.attachPhoto(
+            eventUuid: eventUuid,
+            source: p.file,
+            mimeType: p.mimeType,
+            sizeBytes: p.sizeBytes,
+          );
+        }
       }
       if (mounted) context.pop();
     } finally {
@@ -198,7 +211,6 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
   }
 
   Future<void> _attachPhoto() async {
-    if (!widget.isEdit) return;
     final picked = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
@@ -207,12 +219,25 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
     final file = picked.files.single;
     final path = file.path;
     if (path == null) return;
-    await ref.read(eventsRepositoryProvider).attachPhoto(
-          eventUuid: widget.eventUuid!,
-          source: File(path),
-          mimeType: _mimeFor(file.extension),
-          sizeBytes: file.size,
-        );
+    final mime = _mimeFor(file.extension);
+    if (widget.isEdit) {
+      // Existing event: attach through the repository right away so the
+      // detail view reflects the new photo without needing another save.
+      await ref.read(eventsRepositoryProvider).attachPhoto(
+            eventUuid: widget.eventUuid!,
+            source: File(path),
+            mimeType: mime,
+            sizeBytes: file.size,
+          );
+    } else {
+      // Fresh entry: buffer until save() has an eventUuid to attach to.
+      setState(() => _pendingPhotos.add(_PendingPhoto(
+            file: File(path),
+            displayName: file.name,
+            mimeType: mime,
+            sizeBytes: file.size,
+          )));
+    }
   }
 
   String _mimeFor(String? ext) {
@@ -345,15 +370,16 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
               }),
               onNewTag: () => _newTagDialog(l),
             ),
-            if (widget.isEdit && event != null) ...[
-              const SizedBox(height: 24),
-              _PhotoSection(
-                event: event,
-                onAdd: _attachPhoto,
-                onRemove: (uuid) =>
-                    ref.read(eventsRepositoryProvider).removePhoto(uuid),
-              ),
-            ],
+            const SizedBox(height: 24),
+            _PhotoSection(
+              savedPhotos: event?.photos ?? const [],
+              pending: _pendingPhotos,
+              onAdd: _attachPhoto,
+              onRemoveSaved: (uuid) =>
+                  ref.read(eventsRepositoryProvider).removePhoto(uuid),
+              onRemovePending: (index) =>
+                  setState(() => _pendingPhotos.removeAt(index)),
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -563,20 +589,58 @@ class _TagSection extends ConsumerWidget {
   }
 }
 
-class _PhotoSection extends ConsumerWidget {
-  const _PhotoSection({
-    required this.event,
-    required this.onAdd,
-    required this.onRemove,
+class _PendingPhoto {
+  const _PendingPhoto({
+    required this.file,
+    required this.displayName,
+    required this.mimeType,
+    required this.sizeBytes,
   });
 
-  final Event event;
+  final File file;
+  final String displayName;
+  final String mimeType;
+  final int sizeBytes;
+}
+
+class _PhotoSection extends StatelessWidget {
+  const _PhotoSection({
+    required this.savedPhotos,
+    required this.pending,
+    required this.onAdd,
+    required this.onRemoveSaved,
+    required this.onRemovePending,
+  });
+
+  final List<EventPhoto> savedPhotos;
+  final List<_PendingPhoto> pending;
   final VoidCallback onAdd;
-  final ValueChanged<String> onRemove;
+  final ValueChanged<String> onRemoveSaved;
+  final ValueChanged<int> onRemovePending;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = AppL10n.of(context);
+    final chips = <Widget>[
+      for (final p in savedPhotos)
+        Chip(
+          avatar: const Icon(Icons.image_outlined, size: 18),
+          label: Text(
+            p.uuid.substring(0, 6),
+            style: const TextStyle(fontSize: 12),
+          ),
+          onDeleted: () => onRemoveSaved(p.uuid),
+        ),
+      for (var i = 0; i < pending.length; i++)
+        Chip(
+          avatar: const Icon(Icons.hourglass_top_outlined, size: 18),
+          label: Text(
+            pending[i].displayName,
+            style: const TextStyle(fontSize: 12),
+          ),
+          onDeleted: () => onRemovePending(i),
+        ),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -596,7 +660,7 @@ class _PhotoSection extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 8),
-        if (event.photos.isEmpty)
+        if (chips.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
@@ -607,21 +671,7 @@ class _PhotoSection extends ConsumerWidget {
             ),
           )
         else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final p in event.photos)
-                Chip(
-                  avatar: const Icon(Icons.image_outlined, size: 18),
-                  label: Text(
-                    p.uuid.substring(0, 6),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onDeleted: () => onRemove(p.uuid),
-                ),
-            ],
-          ),
+          Wrap(spacing: 8, runSpacing: 8, children: chips),
       ],
     );
   }

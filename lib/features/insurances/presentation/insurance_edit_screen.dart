@@ -36,6 +36,8 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
   final _notesCtrl = TextEditingController();
   DateTime? _start;
   DateTime? _end;
+  // Files picked before this insurance has a uuid — flushed on save.
+  final List<_PendingDoc> _pendingDocs = [];
   bool _prefilled = false;
   bool _saving = false;
 
@@ -100,7 +102,7 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
           notes: notes,
         );
       } else {
-        await repo.createInsurance(
+        final newUuid = await repo.createInsurance(
           petUuid: widget.petUuid,
           provider: provider,
           policyNumber: policy,
@@ -108,6 +110,15 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
           contractEnd: _end,
           notes: notes,
         );
+        for (final d in _pendingDocs) {
+          await repo.attachDocument(
+            insuranceUuid: newUuid,
+            source: d.file,
+            mimeType: d.mimeType,
+            originalFilename: d.originalFilename,
+            sizeBytes: d.sizeBytes,
+          );
+        }
       }
       if (mounted) context.pop();
     } finally {
@@ -116,7 +127,6 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
   }
 
   Future<void> _attachDocument() async {
-    if (!widget.isEdit) return;
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
@@ -126,13 +136,22 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
     final path = file.path;
     if (path == null) return;
     final mime = _mimeFor(file.extension);
-    await ref.read(insurancesRepositoryProvider).attachDocument(
-          insuranceUuid: widget.insuranceUuid!,
-          source: File(path),
-          mimeType: mime,
-          originalFilename: file.name,
-          sizeBytes: file.size,
-        );
+    if (widget.isEdit) {
+      await ref.read(insurancesRepositoryProvider).attachDocument(
+            insuranceUuid: widget.insuranceUuid!,
+            source: File(path),
+            mimeType: mime,
+            originalFilename: file.name,
+            sizeBytes: file.size,
+          );
+    } else {
+      setState(() => _pendingDocs.add(_PendingDoc(
+            file: File(path),
+            originalFilename: file.name,
+            mimeType: mime,
+            sizeBytes: file.size,
+          )));
+    }
   }
 
   String _mimeFor(String? ext) {
@@ -273,10 +292,8 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
               maxLines: 3,
             ),
             const SizedBox(height: 24),
-            if (widget.isEdit && insurance != null) ...[
-              _documentsSection(context, l, insurance),
-              const SizedBox(height: 24),
-            ],
+            _documentsSection(context, l, insurance),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
@@ -328,8 +345,9 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
   Widget _documentsSection(
     BuildContext context,
     AppL10n l,
-    Insurance ins,
+    Insurance? ins,
   ) {
+    final saved = ins?.documents ?? const <InsuranceDocument>[];
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -354,7 +372,7 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
                 ],
               ),
             ),
-            if (ins.documents.isEmpty)
+            if (saved.isEmpty && _pendingDocs.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
@@ -363,32 +381,48 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-              )
-            else
-              for (final doc in ins.documents)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    doc.mimeType == 'application/pdf'
-                        ? Icons.picture_as_pdf_outlined
-                        : Icons.image_outlined,
-                  ),
-                  title: Text(
-                    doc.originalFilename ?? doc.uuid,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: doc.sizeBytes == null
-                      ? null
-                      : Text(_formatSize(doc.sizeBytes!)),
-                  onTap: () => _openDoc(context, doc.filePath),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => ref
-                        .read(insurancesRepositoryProvider)
-                        .removeDocument(doc.uuid),
-                  ),
+              ),
+            for (final doc in saved)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  doc.mimeType == 'application/pdf'
+                      ? Icons.picture_as_pdf_outlined
+                      : Icons.image_outlined,
                 ),
+                title: Text(
+                  doc.originalFilename ?? doc.uuid,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: doc.sizeBytes == null
+                    ? null
+                    : Text(_formatSize(doc.sizeBytes!)),
+                onTap: () => _openDoc(context, doc.filePath),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => ref
+                      .read(insurancesRepositoryProvider)
+                      .removeDocument(doc.uuid),
+                ),
+              ),
+            for (var i = 0; i < _pendingDocs.length; i++)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.hourglass_top_outlined),
+                title: Text(
+                  _pendingDocs[i].originalFilename,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(_formatSize(_pendingDocs[i].sizeBytes)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: l.actionClear,
+                  onPressed: () =>
+                      setState(() => _pendingDocs.removeAt(i)),
+                ),
+              ),
           ],
         ),
       ),
@@ -412,4 +446,18 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
       );
     }
   }
+}
+
+class _PendingDoc {
+  const _PendingDoc({
+    required this.file,
+    required this.originalFilename,
+    required this.mimeType,
+    required this.sizeBytes,
+  });
+
+  final File file;
+  final String originalFilename;
+  final String mimeType;
+  final int sizeBytes;
 }
