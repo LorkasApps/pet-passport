@@ -162,22 +162,31 @@ class _FilterRow extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            children: [
-              const Icon(Icons.date_range_outlined, size: 18),
-              const SizedBox(width: 8),
-              Text(l.alltagFilterRangeLabel(rangeDays)),
-              const Spacer(),
-              for (final d in const [7, 30, 90, 365])
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: ChoiceChip(
-                    label: Text('${d}d'),
-                    selected: rangeDays == d,
-                    onSelected: (_) => onRangeChanged(d),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: PopupMenuButton<int>(
+              initialValue: rangeDays,
+              onSelected: onRangeChanged,
+              itemBuilder: (_) => [
+                for (final d in const [7, 30, 90, 365])
+                  PopupMenuItem<int>(
+                    value: d,
+                    child: Text(l.alltagFilterRangeLabel(d)),
                   ),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.date_range_outlined, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l.alltagFilterRangeLabel(rangeDays)),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
                 ),
-            ],
+              ),
+            ),
           ),
         ],
       ),
