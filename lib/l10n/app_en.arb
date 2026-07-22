@@ -215,6 +215,26 @@
   "exportJsonAction": "Export & share",
   "exportMediaNote": "Attached documents and photos are referenced by path. To keep them, back up the app's storage folder separately.",
 
+  "importJsonTitle": "JSON restore",
+  "importJsonHelp": "Restore pets, vets, insurances and vaccinations from a JSON backup file. Entries with the same UUID are updated; new ones are added.",
+  "importJsonAction": "Pick file & import",
+  "importConfirmTitle": "Import backup?",
+  "importConfirmBody": "Existing entries with matching UUIDs will be overwritten. Continue?",
+  "importConfirm": "Import",
+  "importCancel": "Cancel",
+  "importResultTitle": "Import complete",
+  "importResultBody": "{added, plural, =0{No new entries} =1{1 new entry} other{{added} new entries}}, {updated, plural, =0{no updates} =1{1 updated} other{{updated} updated}}.",
+  "@importResultBody": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "updated": {"type": "int"}
+    }
+  },
+  "importResultErrors": "{count, plural, =1{1 entry was skipped due to errors} other{{count} entries were skipped due to errors}}.",
+  "@importResultErrors": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+
   "overviewCount": "{count, plural, =0{None} =1{1 entry} other{{count} entries}}",
   "@overviewCount": {
     "placeholders": {

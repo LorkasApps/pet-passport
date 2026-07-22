@@ -525,6 +525,62 @@ class AppL10nDe extends AppL10n {
       'Angehängte Dokumente und Fotos werden nur per Pfad referenziert. Um sie mitzusichern, den App-Speicherordner separat sichern.';
 
   @override
+  String get importJsonTitle => 'JSON wiederherstellen';
+
+  @override
+  String get importJsonHelp =>
+      'Stellt Tiere, Tierärzte, Versicherungen und Impfungen aus einer JSON-Sicherung wieder her. Einträge mit gleicher UUID werden aktualisiert, neue hinzugefügt.';
+
+  @override
+  String get importJsonAction => 'Datei wählen & importieren';
+
+  @override
+  String get importConfirmTitle => 'Sicherung importieren?';
+
+  @override
+  String get importConfirmBody =>
+      'Bestehende Einträge mit passender UUID werden überschrieben. Fortfahren?';
+
+  @override
+  String get importConfirm => 'Importieren';
+
+  @override
+  String get importCancel => 'Abbrechen';
+
+  @override
+  String get importResultTitle => 'Import abgeschlossen';
+
+  @override
+  String importResultBody(int added, int updated) {
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added neue Einträge',
+      one: '1 neuer Eintrag',
+      zero: 'Keine neuen Einträge',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      updated,
+      locale: localeName,
+      other: '$updated aktualisiert',
+      one: '1 aktualisiert',
+      zero: 'keine Aktualisierungen',
+    );
+    return '$_temp0, $_temp1.';
+  }
+
+  @override
+  String importResultErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge wurden wegen Fehler übersprungen',
+      one: '1 Eintrag wurde wegen Fehler übersprungen',
+    );
+    return '$_temp0.';
+  }
+
+  @override
   String overviewCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

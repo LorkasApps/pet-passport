@@ -1003,6 +1003,66 @@ abstract class AppL10n {
   /// **'Attached documents and photos are referenced by path. To keep them, back up the app\'s storage folder separately.'**
   String get exportMediaNote;
 
+  /// No description provided for @importJsonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON restore'**
+  String get importJsonTitle;
+
+  /// No description provided for @importJsonHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore pets, vets, insurances and vaccinations from a JSON backup file. Entries with the same UUID are updated; new ones are added.'**
+  String get importJsonHelp;
+
+  /// No description provided for @importJsonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick file & import'**
+  String get importJsonAction;
+
+  /// No description provided for @importConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import backup?'**
+  String get importConfirmTitle;
+
+  /// No description provided for @importConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing entries with matching UUIDs will be overwritten. Continue?'**
+  String get importConfirmBody;
+
+  /// No description provided for @importConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importConfirm;
+
+  /// No description provided for @importCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get importCancel;
+
+  /// No description provided for @importResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import complete'**
+  String get importResultTitle;
+
+  /// No description provided for @importResultBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{added, plural, =0{No new entries} =1{1 new entry} other{{added} new entries}}, {updated, plural, =0{no updates} =1{1 updated} other{{updated} updated}}.'**
+  String importResultBody(int added, int updated);
+
+  /// No description provided for @importResultErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry was skipped due to errors} other{{count} entries were skipped due to errors}}.'**
+  String importResultErrors(int count);
+
   /// No description provided for @overviewCount.
   ///
   /// In en, this message translates to:
