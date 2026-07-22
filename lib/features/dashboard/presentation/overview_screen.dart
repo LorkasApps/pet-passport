@@ -60,6 +60,14 @@ class _OverviewContent extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         Center(child: AgeBadge(pet: pet)),
+        const SizedBox(height: 12),
+        Center(
+          child: FilledButton.tonalIcon(
+            onPressed: () => context.push('/emergency'),
+            icon: const Icon(Icons.medical_information_outlined),
+            label: Text(l.emergencyTitle),
+          ),
+        ),
         const SizedBox(height: 24),
         _sectionCard(context, children: [
           _row(l.petFieldSpecies, _speciesLabel(l, pet.species)),
@@ -115,15 +123,6 @@ class _OverviewContent extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.medical_information_outlined),
-            title: Text(l.emergencyTitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/emergency'),
-          ),
-        ),
-        const SizedBox(height: 4),
         Card(
           child: ListTile(
             leading: const Icon(Icons.edit_outlined),

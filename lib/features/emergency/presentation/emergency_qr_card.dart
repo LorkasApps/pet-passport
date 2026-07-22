@@ -116,6 +116,12 @@ class EmergencyQrCard extends StatelessWidget {
         if (v.phone != null && v.phone!.isNotEmpty) {
           b.writeln('  ${l.vetFieldPhone}: ${v.phone}');
         }
+        if (v.email != null && v.email!.isNotEmpty) {
+          b.writeln('  ${l.vetFieldEmail}: ${v.email}');
+        }
+        if (v.address != null && v.address!.isNotEmpty) {
+          b.writeln('  ${l.vetFieldAddress}: ${v.address}');
+        }
       }
     }
     return b.toString();

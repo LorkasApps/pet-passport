@@ -192,41 +192,145 @@ class _VetRow extends StatelessWidget {
   final Vet vet;
   final AppL10n l;
 
+  bool _has(String? v) => v != null && v.trim().isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
-    final phone = vet.phone;
     final scheme = Theme.of(context).colorScheme;
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: scheme.secondaryContainer,
-        child: Icon(Icons.medical_services_outlined,
-            color: scheme.onSecondaryContainer),
-      ),
-      title: Text(vet.name),
-      subtitle: phone == null || phone.isEmpty
-          ? Text(vet.practice ?? '')
-          : Text(phone),
-      trailing: phone == null || phone.isEmpty
-          ? null
-          : FilledButton.tonalIcon(
-              onPressed: () => _call(context, phone, l),
-              icon: const Icon(Icons.phone),
-              label: Text(l.emergencyCallAction),
+    final textTheme = Theme.of(context).textTheme;
+    final details = <Widget>[];
+    if (_has(vet.practice)) {
+      details.add(Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Text(vet.practice!, style: textTheme.bodyMedium),
+      ));
+    }
+    if (_has(vet.phone)) {
+      details.add(_ContactLine(
+        icon: Icons.phone_outlined,
+        text: vet.phone!,
+        onTap: () => _launch(
+          context,
+          Uri(
+            scheme: 'tel',
+            path: vet.phone!.replaceAll(RegExp(r'[^\d+]'), ''),
+          ),
+        ),
+      ));
+    }
+    if (_has(vet.email)) {
+      details.add(_ContactLine(
+        icon: Icons.mail_outline,
+        text: vet.email!,
+        onTap: () => _launch(context, Uri(scheme: 'mailto', path: vet.email!)),
+      ));
+    }
+    if (_has(vet.address)) {
+      details.add(_ContactLine(
+        icon: Icons.location_on_outlined,
+        text: vet.address!,
+        maxLines: 2,
+        onTap: () => _launch(
+          context,
+          Uri.parse(
+              'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(vet.address!)}'),
+        ),
+      ));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 12, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2, right: 12),
+            child: CircleAvatar(
+              backgroundColor: scheme.secondaryContainer,
+              child: Icon(Icons.medical_services_outlined,
+                  color: scheme.onSecondaryContainer),
             ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(vet.name, style: textTheme.titleMedium),
+                ...details,
+              ],
+            ),
+          ),
+          if (_has(vet.phone))
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: FilledButton.tonalIcon(
+                onPressed: () => _launch(
+                  context,
+                  Uri(
+                    scheme: 'tel',
+                    path: vet.phone!.replaceAll(RegExp(r'[^\d+]'), ''),
+                  ),
+                ),
+                icon: const Icon(Icons.phone),
+                label: Text(l.emergencyCallAction),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
-  Future<void> _call(BuildContext context, String phone, AppL10n l) async {
-    final uri = Uri(
-      scheme: 'tel',
-      path: phone.replaceAll(RegExp(r'[^\d+]'), ''),
-    );
-    final ok = await launchUrl(uri);
+  Future<void> _launch(BuildContext context, Uri uri) async {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l.launchFailed)),
       );
     }
+  }
+}
+
+class _ContactLine extends StatelessWidget {
+  const _ContactLine({
+    required this.icon,
+    required this.text,
+    required this.onTap,
+    this.maxLines = 1,
+  });
+
+  final IconData icon;
+  final String text;
+  final VoidCallback onTap;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 16, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                text,
+                maxLines: maxLines,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.primary,
+                      decoration: TextDecoration.underline,
+                      decorationColor: scheme.primary.withValues(alpha: 0.4),
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
