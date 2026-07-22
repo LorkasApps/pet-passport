@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' show Value;
 
 import '../../../core/db/database.dart';
 import '../../pets/domain/pet_enums.dart';
+import '../../protocol/domain/event_enums.dart';
 
 class ImportSummary {
   const ImportSummary({
@@ -16,6 +17,9 @@ class ImportSummary {
     required this.insurancesUpdated,
     required this.vaccinationsInserted,
     required this.vaccinationsUpdated,
+    required this.eventsInserted,
+    required this.eventsUpdated,
+    required this.tagsInserted,
     required this.errors,
   });
 
@@ -27,13 +31,25 @@ class ImportSummary {
   final int insurancesUpdated;
   final int vaccinationsInserted;
   final int vaccinationsUpdated;
+  final int eventsInserted;
+  final int eventsUpdated;
+  final int tagsInserted;
   final List<String> errors;
 
   int get totalInserted =>
-      petsInserted + vetsInserted + insurancesInserted + vaccinationsInserted;
+      petsInserted +
+      vetsInserted +
+      insurancesInserted +
+      vaccinationsInserted +
+      eventsInserted +
+      tagsInserted;
 
   int get totalUpdated =>
-      petsUpdated + vetsUpdated + insurancesUpdated + vaccinationsUpdated;
+      petsUpdated +
+      vetsUpdated +
+      insurancesUpdated +
+      vaccinationsUpdated +
+      eventsUpdated;
 }
 
 class ImportException implements Exception {
@@ -53,7 +69,7 @@ class ImportService {
 
   final AppDatabase _db;
 
-  static const int supportedSchemaVersion = 1;
+  static const Set<int> supportedSchemaVersions = {1, 2};
 
   Future<ImportSummary> importFromFile(File file) async {
     final content = await file.readAsString();
@@ -71,19 +87,26 @@ class ImportService {
       throw ImportException('Root element must be an object');
     }
     final schema = decoded['schema_version'];
-    if (schema != supportedSchemaVersion) {
+    if (schema is! int || !supportedSchemaVersions.contains(schema)) {
       throw ImportException(
-        'Unsupported schema_version: $schema (expected $supportedSchemaVersion)',
+        'Unsupported schema_version: $schema (expected one of $supportedSchemaVersions)',
       );
     }
     final rawPets = decoded['pets'];
     if (rawPets is! List) {
       throw ImportException('Missing "pets" array');
     }
-    return _apply(rawPets.cast<dynamic>());
+    final rawTags = decoded['tags'];
+    return _apply(
+      rawPets.cast<dynamic>(),
+      rawTags is List ? rawTags.cast<dynamic>() : const [],
+    );
   }
 
-  Future<ImportSummary> _apply(List<dynamic> rawPets) async {
+  Future<ImportSummary> _apply(
+    List<dynamic> rawPets,
+    List<dynamic> rawTags,
+  ) async {
     int petsInserted = 0;
     int petsUpdated = 0;
     int vetsInserted = 0;
@@ -92,9 +115,23 @@ class ImportService {
     int insurancesUpdated = 0;
     int vaccinationsInserted = 0;
     int vaccinationsUpdated = 0;
+    int eventsInserted = 0;
+    int eventsUpdated = 0;
+    int tagsInserted = 0;
     final errors = <String>[];
 
     await _db.transaction(() async {
+      final tagIdByUuid = <String, int>{};
+      for (final rt in rawTags) {
+        if (rt is! Map<String, dynamic>) continue;
+        try {
+          final id =
+              await _upsertTag(rt, () => tagsInserted++);
+          if (id != null) tagIdByUuid[rt['uuid'] as String] = id;
+        } catch (e) {
+          errors.add('Tag ${rt['uuid']}: $e');
+        }
+      }
       for (final rawPet in rawPets) {
         if (rawPet is! Map<String, dynamic>) {
           errors.add('Skipped a pet entry: not an object');
@@ -164,6 +201,19 @@ class ImportService {
               }
             }
           }
+
+          final rawEvents = rawPet['events'];
+          if (rawEvents is List) {
+            for (final re in rawEvents) {
+              if (re is! Map<String, dynamic>) continue;
+              try {
+                await _upsertEvent(petId, re, tagIdByUuid,
+                    () => eventsInserted++, () => eventsUpdated++);
+              } catch (e) {
+                errors.add('Event ${re['uuid']}: $e');
+              }
+            }
+          }
         } catch (e) {
           errors.add('Pet ${rawPet['uuid']}: $e');
         }
@@ -179,9 +229,134 @@ class ImportService {
       insurancesUpdated: insurancesUpdated,
       vaccinationsInserted: vaccinationsInserted,
       vaccinationsUpdated: vaccinationsUpdated,
+      eventsInserted: eventsInserted,
+      eventsUpdated: eventsUpdated,
+      tagsInserted: tagsInserted,
       errors: errors,
     );
   }
+
+  Future<int?> _upsertTag(
+    Map<String, dynamic> raw,
+    void Function() onInsert,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    final label = (raw['label'] as String?)?.trim();
+    if (uuid == null || uuid.isEmpty || label == null || label.isEmpty) {
+      throw ImportException('Missing uuid or label');
+    }
+    final existing = await (_db.select(_db.eventTags)
+          ..where((t) => t.uuid.equals(uuid)))
+        .getSingleOrNull();
+    if (existing != null) return existing.id;
+    final now = DateTime.now();
+    final id = await _db.into(_db.eventTags).insert(EventTagsCompanion.insert(
+          uuid: uuid,
+          label: label,
+          color: Value((raw['color'] as num?)?.toInt()),
+          createdAt: _parseDt(raw['created_at']) ?? now,
+        ));
+    onInsert();
+    return id;
+  }
+
+  Future<void> _upsertEvent(
+    int petId,
+    Map<String, dynamic> raw,
+    Map<String, int> tagIdByUuid,
+    void Function() onInsert,
+    void Function() onUpdate,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    if (uuid == null || uuid.isEmpty) throw ImportException('Missing uuid');
+    final type = _parseEventType(raw['event_type']);
+    final occurred = _parseDt(raw['occurred_at']);
+    if (occurred == null) throw ImportException('Missing occurred_at');
+    final payloadRaw = raw['payload'];
+    final payloadJson = payloadRaw is Map<String, dynamic> && payloadRaw.isNotEmpty
+        ? jsonEncode(payloadRaw)
+        : null;
+    final existing = await (_db.select(_db.events)
+          ..where((e) => e.uuid.equals(uuid)))
+        .getSingleOrNull();
+    final now = DateTime.now();
+    final int eventId;
+    if (existing == null) {
+      eventId = await _db.into(_db.events).insert(EventsCompanion.insert(
+            uuid: uuid,
+            petId: petId,
+            eventType: type,
+            occurredAt: occurred,
+            title: Value(raw['title'] as String?),
+            note: Value(raw['note'] as String?),
+            payloadJson: Value(payloadJson),
+            createdAt: _parseDt(raw['created_at']) ?? now,
+            updatedAt: now,
+          ));
+      onInsert();
+    } else {
+      await (_db.update(_db.events)..where((e) => e.uuid.equals(uuid)))
+          .write(EventsCompanion(
+        petId: Value(petId),
+        eventType: Value(type),
+        occurredAt: Value(occurred),
+        title: Value(raw['title'] as String?),
+        note: Value(raw['note'] as String?),
+        payloadJson: Value(payloadJson),
+        updatedAt: Value(now),
+      ));
+      eventId = existing.id;
+      onUpdate();
+    }
+
+    // Reset tag links from scratch — cheaper than diffing.
+    await (_db.delete(_db.eventTagLinks)
+          ..where((l) => l.eventId.equals(eventId)))
+        .go();
+    final tagUuids = raw['tag_uuids'];
+    if (tagUuids is List) {
+      for (final tu in tagUuids) {
+        if (tu is! String) continue;
+        final tagId = tagIdByUuid[tu];
+        if (tagId == null) continue;
+        await _db.into(_db.eventTagLinks).insertOnConflictUpdate(
+              EventTagLinksCompanion.insert(eventId: eventId, tagId: tagId),
+            );
+      }
+    }
+
+    // Rebuild photo rows for this event.
+    await (_db.delete(_db.eventPhotos)
+          ..where((p) => p.eventId.equals(eventId)))
+        .go();
+    final photos = raw['photos'];
+    if (photos is List) {
+      for (final rp in photos) {
+        if (rp is! Map<String, dynamic>) continue;
+        final photoUuid = rp['uuid'] as String?;
+        final filePath = rp['file_path'] as String?;
+        final mimeType = rp['mime_type'] as String?;
+        if (photoUuid == null || filePath == null || mimeType == null) continue;
+        await _db.into(_db.eventPhotos).insert(EventPhotosCompanion.insert(
+              uuid: photoUuid,
+              eventId: eventId,
+              filePath: filePath,
+              mimeType: mimeType,
+              sizeBytes: Value((rp['size_bytes'] as num?)?.toInt()),
+              createdAt: _parseDt(rp['created_at']) ?? now,
+            ));
+      }
+    }
+  }
+
+  EventType _parseEventType(dynamic v) => switch (v) {
+        'weight' => EventType.weight,
+        'feeding' => EventType.feeding,
+        'symptom' => EventType.symptom,
+        'activity' => EventType.activity,
+        'generic' => EventType.generic,
+        _ => throw ImportException('Unknown event_type: $v'),
+      };
 
   Future<int> _upsertPet(
     Map<String, dynamic> raw,

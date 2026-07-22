@@ -578,6 +578,146 @@ class AppL10nEn extends AppL10n {
   }
 
   @override
+  String get eventTypeWeight => 'Weight';
+
+  @override
+  String get eventTypeFeeding => 'Feeding';
+
+  @override
+  String get eventTypeSymptom => 'Symptom';
+
+  @override
+  String get eventTypeActivity => 'Activity';
+
+  @override
+  String get eventTypeGeneric => 'Note';
+
+  @override
+  String get eventTypeAll => 'All';
+
+  @override
+  String get eventFeedingMealMorning => 'Morning';
+
+  @override
+  String get eventFeedingMealNoon => 'Noon';
+
+  @override
+  String get eventFeedingMealEvening => 'Evening';
+
+  @override
+  String get eventFeedingMealSnack => 'Snack';
+
+  @override
+  String get eventSymptomSeverityLow => 'Mild';
+
+  @override
+  String get eventSymptomSeverityMedium => 'Moderate';
+
+  @override
+  String get eventSymptomSeverityHigh => 'Severe';
+
+  @override
+  String get eventActivityTypeWalk => 'Walk';
+
+  @override
+  String get eventActivityTypePlay => 'Play';
+
+  @override
+  String get eventActivityTypeTraining => 'Training';
+
+  @override
+  String get eventActivityTypeOther => 'Other';
+
+  @override
+  String get alltagFilterAll => 'All';
+
+  @override
+  String alltagFilterRangeLabel(int days) {
+    return 'Range: $days days';
+  }
+
+  @override
+  String get alltagNoEventsForFilter => 'No entries match the current filter.';
+
+  @override
+  String get alltagAddEventFabTooltip => 'Add entry';
+
+  @override
+  String get eventEditNewTitle => 'New entry';
+
+  @override
+  String get eventEditEditTitle => 'Edit entry';
+
+  @override
+  String get eventPickTypeTitle => 'What did you observe?';
+
+  @override
+  String get eventFieldOccurredAt => 'When';
+
+  @override
+  String get eventFieldTitle => 'Title';
+
+  @override
+  String get eventFieldNote => 'Note';
+
+  @override
+  String get eventFieldWeightKg => 'Weight (kg)';
+
+  @override
+  String get eventFieldFoodName => 'Food';
+
+  @override
+  String get eventFieldAmountG => 'Amount (g)';
+
+  @override
+  String get eventFieldMeal => 'Meal';
+
+  @override
+  String get eventFieldSymptomDescription => 'Description';
+
+  @override
+  String get eventFieldSymptomSeverity => 'Severity';
+
+  @override
+  String get eventFieldActivityType => 'Type';
+
+  @override
+  String get eventFieldDistanceM => 'Distance (m)';
+
+  @override
+  String get eventFieldDurationMin => 'Duration (min)';
+
+  @override
+  String get eventTagsHeader => 'Tags';
+
+  @override
+  String get eventTagAddNew => 'New tag';
+
+  @override
+  String get eventTagNewDialogTitle => 'New tag';
+
+  @override
+  String get eventTagNewDialogLabel => 'Label';
+
+  @override
+  String get eventPhotosHeader => 'Photos';
+
+  @override
+  String get eventPhotoAdd => 'Add photo';
+
+  @override
+  String get eventValidationRequired => 'Required';
+
+  @override
+  String get eventValidationInvalidNumber => 'Not a valid number';
+
+  @override
+  String get eventDeleteConfirmTitle => 'Delete entry?';
+
+  @override
+  String get eventDeleteConfirmBody => 'This can\'t be undone.';
+
+  @override
   String overviewCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

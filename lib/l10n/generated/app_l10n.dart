@@ -1063,6 +1063,282 @@ abstract class AppL10n {
   /// **'{count, plural, =1{1 entry was skipped due to errors} other{{count} entries were skipped due to errors}}.'**
   String importResultErrors(int count);
 
+  /// No description provided for @eventTypeWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get eventTypeWeight;
+
+  /// No description provided for @eventTypeFeeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Feeding'**
+  String get eventTypeFeeding;
+
+  /// No description provided for @eventTypeSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptom'**
+  String get eventTypeSymptom;
+
+  /// No description provided for @eventTypeActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get eventTypeActivity;
+
+  /// No description provided for @eventTypeGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get eventTypeGeneric;
+
+  /// No description provided for @eventTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get eventTypeAll;
+
+  /// No description provided for @eventFeedingMealMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get eventFeedingMealMorning;
+
+  /// No description provided for @eventFeedingMealNoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Noon'**
+  String get eventFeedingMealNoon;
+
+  /// No description provided for @eventFeedingMealEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get eventFeedingMealEvening;
+
+  /// No description provided for @eventFeedingMealSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Snack'**
+  String get eventFeedingMealSnack;
+
+  /// No description provided for @eventSymptomSeverityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mild'**
+  String get eventSymptomSeverityLow;
+
+  /// No description provided for @eventSymptomSeverityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get eventSymptomSeverityMedium;
+
+  /// No description provided for @eventSymptomSeverityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe'**
+  String get eventSymptomSeverityHigh;
+
+  /// No description provided for @eventActivityTypeWalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk'**
+  String get eventActivityTypeWalk;
+
+  /// No description provided for @eventActivityTypePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get eventActivityTypePlay;
+
+  /// No description provided for @eventActivityTypeTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get eventActivityTypeTraining;
+
+  /// No description provided for @eventActivityTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get eventActivityTypeOther;
+
+  /// No description provided for @alltagFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get alltagFilterAll;
+
+  /// No description provided for @alltagFilterRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Range: {days} days'**
+  String alltagFilterRangeLabel(int days);
+
+  /// No description provided for @alltagNoEventsForFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries match the current filter.'**
+  String get alltagNoEventsForFilter;
+
+  /// No description provided for @alltagAddEventFabTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry'**
+  String get alltagAddEventFabTooltip;
+
+  /// No description provided for @eventEditNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New entry'**
+  String get eventEditNewTitle;
+
+  /// No description provided for @eventEditEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit entry'**
+  String get eventEditEditTitle;
+
+  /// No description provided for @eventPickTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you observe?'**
+  String get eventPickTypeTitle;
+
+  /// No description provided for @eventFieldOccurredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get eventFieldOccurredAt;
+
+  /// No description provided for @eventFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get eventFieldTitle;
+
+  /// No description provided for @eventFieldNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get eventFieldNote;
+
+  /// No description provided for @eventFieldWeightKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get eventFieldWeightKg;
+
+  /// No description provided for @eventFieldFoodName.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get eventFieldFoodName;
+
+  /// No description provided for @eventFieldAmountG.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (g)'**
+  String get eventFieldAmountG;
+
+  /// No description provided for @eventFieldMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get eventFieldMeal;
+
+  /// No description provided for @eventFieldSymptomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get eventFieldSymptomDescription;
+
+  /// No description provided for @eventFieldSymptomSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Severity'**
+  String get eventFieldSymptomSeverity;
+
+  /// No description provided for @eventFieldActivityType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get eventFieldActivityType;
+
+  /// No description provided for @eventFieldDistanceM.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (m)'**
+  String get eventFieldDistanceM;
+
+  /// No description provided for @eventFieldDurationMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (min)'**
+  String get eventFieldDurationMin;
+
+  /// No description provided for @eventTagsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get eventTagsHeader;
+
+  /// No description provided for @eventTagAddNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New tag'**
+  String get eventTagAddNew;
+
+  /// No description provided for @eventTagNewDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New tag'**
+  String get eventTagNewDialogTitle;
+
+  /// No description provided for @eventTagNewDialogLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get eventTagNewDialogLabel;
+
+  /// No description provided for @eventPhotosHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get eventPhotosHeader;
+
+  /// No description provided for @eventPhotoAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get eventPhotoAdd;
+
+  /// No description provided for @eventValidationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get eventValidationRequired;
+
+  /// No description provided for @eventValidationInvalidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a valid number'**
+  String get eventValidationInvalidNumber;
+
+  /// No description provided for @eventDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry?'**
+  String get eventDeleteConfirmTitle;
+
+  /// No description provided for @eventDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get eventDeleteConfirmBody;
+
   /// No description provided for @overviewCount.
   ///
   /// In en, this message translates to:

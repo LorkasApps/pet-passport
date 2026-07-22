@@ -111,12 +111,12 @@ void main() {
         provider: 'DeleteMe',
       );
 
-      var listBefore = await insurances.watchForPetUuid(petUuid).first;
+      final listBefore = await insurances.watchForPetUuid(petUuid).first;
       expect(listBefore, hasLength(1));
 
       await insurances.deleteByUuid(insUuid);
 
-      var listAfter = await insurances.watchForPetUuid(petUuid).first;
+      final listAfter = await insurances.watchForPetUuid(petUuid).first;
       expect(listAfter, isEmpty);
     });
 

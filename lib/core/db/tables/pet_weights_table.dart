@@ -10,4 +10,5 @@ class PetWeights extends Table {
   DateTimeColumn get measuredAt => dateTime()();
   RealColumn get weightKg => real()();
   TextColumn get note => text().nullable()();
+  TextColumn get sourceEventUuid => text().nullable()();
 }

@@ -235,6 +235,66 @@
     "placeholders": {"count": {"type": "int"}}
   },
 
+  "eventTypeWeight": "Weight",
+  "eventTypeFeeding": "Feeding",
+  "eventTypeSymptom": "Symptom",
+  "eventTypeActivity": "Activity",
+  "eventTypeGeneric": "Note",
+  "eventTypeAll": "All",
+
+  "eventFeedingMealMorning": "Morning",
+  "eventFeedingMealNoon": "Noon",
+  "eventFeedingMealEvening": "Evening",
+  "eventFeedingMealSnack": "Snack",
+
+  "eventSymptomSeverityLow": "Mild",
+  "eventSymptomSeverityMedium": "Moderate",
+  "eventSymptomSeverityHigh": "Severe",
+
+  "eventActivityTypeWalk": "Walk",
+  "eventActivityTypePlay": "Play",
+  "eventActivityTypeTraining": "Training",
+  "eventActivityTypeOther": "Other",
+
+  "alltagFilterAll": "All",
+  "alltagFilterRangeLabel": "Range: {days} days",
+  "@alltagFilterRangeLabel": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+  "alltagNoEventsForFilter": "No entries match the current filter.",
+  "alltagAddEventFabTooltip": "Add entry",
+
+  "eventEditNewTitle": "New entry",
+  "eventEditEditTitle": "Edit entry",
+  "eventPickTypeTitle": "What did you observe?",
+
+  "eventFieldOccurredAt": "When",
+  "eventFieldTitle": "Title",
+  "eventFieldNote": "Note",
+  "eventFieldWeightKg": "Weight (kg)",
+  "eventFieldFoodName": "Food",
+  "eventFieldAmountG": "Amount (g)",
+  "eventFieldMeal": "Meal",
+  "eventFieldSymptomDescription": "Description",
+  "eventFieldSymptomSeverity": "Severity",
+  "eventFieldActivityType": "Type",
+  "eventFieldDistanceM": "Distance (m)",
+  "eventFieldDurationMin": "Duration (min)",
+
+  "eventTagsHeader": "Tags",
+  "eventTagAddNew": "New tag",
+  "eventTagNewDialogTitle": "New tag",
+  "eventTagNewDialogLabel": "Label",
+
+  "eventPhotosHeader": "Photos",
+  "eventPhotoAdd": "Add photo",
+
+  "eventValidationRequired": "Required",
+  "eventValidationInvalidNumber": "Not a valid number",
+
+  "eventDeleteConfirmTitle": "Delete entry?",
+  "eventDeleteConfirmBody": "This can't be undone.",
+
   "overviewCount": "{count, plural, =0{None} =1{1 entry} other{{count} entries}}",
   "@overviewCount": {
     "placeholders": {

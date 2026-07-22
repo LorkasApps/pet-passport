@@ -2,12 +2,18 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../features/pets/domain/pet_enums.dart';
+import '../../features/protocol/domain/event_enums.dart';
+import 'daos/events_dao.dart';
 import 'daos/insurances_dao.dart';
 import 'daos/pets_dao.dart';
 import 'daos/settings_dao.dart';
 import 'daos/vaccinations_dao.dart';
 import 'daos/vets_dao.dart';
 import 'tables/app_settings_table.dart';
+import 'tables/event_photos_table.dart';
+import 'tables/event_tag_links_table.dart';
+import 'tables/event_tags_table.dart';
+import 'tables/events_table.dart';
 import 'tables/insurance_documents_table.dart';
 import 'tables/insurances_table.dart';
 import 'tables/pet_weights_table.dart';
@@ -28,8 +34,19 @@ part 'database.g.dart';
     Vaccinations,
     VaccinationDocuments,
     AppSettings,
+    Events,
+    EventTags,
+    EventTagLinks,
+    EventPhotos,
   ],
-  daos: [PetsDao, VetsDao, InsurancesDao, VaccinationsDao, SettingsDao],
+  daos: [
+    PetsDao,
+    VetsDao,
+    InsurancesDao,
+    VaccinationsDao,
+    SettingsDao,
+    EventsDao,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -37,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -65,6 +82,13 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 6) {
             await m.addColumn(pets, pets.allergies);
+          }
+          if (from < 7) {
+            await m.createTable(events);
+            await m.createTable(eventTags);
+            await m.createTable(eventTagLinks);
+            await m.createTable(eventPhotos);
+            await m.addColumn(petWeights, petWeights.sourceEventUuid);
           }
         },
         beforeOpen: (details) async {

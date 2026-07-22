@@ -86,6 +86,20 @@ class MediaService {
     );
   }
 
+  /// Copies [source] to `<media>/events/<eventUuid>/<photoUuid><ext>` and
+  /// returns the relative path.
+  Future<String> saveEventPhoto({
+    required String eventUuid,
+    required String photoUuid,
+    required File source,
+  }) async {
+    return _copyDocument(
+      source: source,
+      relativeDir: p.join('events', eventUuid),
+      docUuid: photoUuid,
+    );
+  }
+
   Future<String> _copyDocument({
     required File source,
     required String relativeDir,

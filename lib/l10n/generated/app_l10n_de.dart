@@ -581,6 +581,147 @@ class AppL10nDe extends AppL10n {
   }
 
   @override
+  String get eventTypeWeight => 'Gewicht';
+
+  @override
+  String get eventTypeFeeding => 'Fütterung';
+
+  @override
+  String get eventTypeSymptom => 'Symptom';
+
+  @override
+  String get eventTypeActivity => 'Aktivität';
+
+  @override
+  String get eventTypeGeneric => 'Notiz';
+
+  @override
+  String get eventTypeAll => 'Alle';
+
+  @override
+  String get eventFeedingMealMorning => 'Morgens';
+
+  @override
+  String get eventFeedingMealNoon => 'Mittags';
+
+  @override
+  String get eventFeedingMealEvening => 'Abends';
+
+  @override
+  String get eventFeedingMealSnack => 'Snack';
+
+  @override
+  String get eventSymptomSeverityLow => 'Leicht';
+
+  @override
+  String get eventSymptomSeverityMedium => 'Mittel';
+
+  @override
+  String get eventSymptomSeverityHigh => 'Schwer';
+
+  @override
+  String get eventActivityTypeWalk => 'Spaziergang';
+
+  @override
+  String get eventActivityTypePlay => 'Spielen';
+
+  @override
+  String get eventActivityTypeTraining => 'Training';
+
+  @override
+  String get eventActivityTypeOther => 'Sonstiges';
+
+  @override
+  String get alltagFilterAll => 'Alle';
+
+  @override
+  String alltagFilterRangeLabel(int days) {
+    return 'Zeitraum: $days Tage';
+  }
+
+  @override
+  String get alltagNoEventsForFilter => 'Keine Einträge im aktuellen Filter.';
+
+  @override
+  String get alltagAddEventFabTooltip => 'Eintrag hinzufügen';
+
+  @override
+  String get eventEditNewTitle => 'Neuer Eintrag';
+
+  @override
+  String get eventEditEditTitle => 'Eintrag bearbeiten';
+
+  @override
+  String get eventPickTypeTitle => 'Was hast du beobachtet?';
+
+  @override
+  String get eventFieldOccurredAt => 'Wann';
+
+  @override
+  String get eventFieldTitle => 'Titel';
+
+  @override
+  String get eventFieldNote => 'Notiz';
+
+  @override
+  String get eventFieldWeightKg => 'Gewicht (kg)';
+
+  @override
+  String get eventFieldFoodName => 'Futter';
+
+  @override
+  String get eventFieldAmountG => 'Menge (g)';
+
+  @override
+  String get eventFieldMeal => 'Mahlzeit';
+
+  @override
+  String get eventFieldSymptomDescription => 'Beschreibung';
+
+  @override
+  String get eventFieldSymptomSeverity => 'Schweregrad';
+
+  @override
+  String get eventFieldActivityType => 'Art';
+
+  @override
+  String get eventFieldDistanceM => 'Distanz (m)';
+
+  @override
+  String get eventFieldDurationMin => 'Dauer (min)';
+
+  @override
+  String get eventTagsHeader => 'Tags';
+
+  @override
+  String get eventTagAddNew => 'Neuer Tag';
+
+  @override
+  String get eventTagNewDialogTitle => 'Neuer Tag';
+
+  @override
+  String get eventTagNewDialogLabel => 'Bezeichnung';
+
+  @override
+  String get eventPhotosHeader => 'Fotos';
+
+  @override
+  String get eventPhotoAdd => 'Foto hinzufügen';
+
+  @override
+  String get eventValidationRequired => 'Pflichtfeld';
+
+  @override
+  String get eventValidationInvalidNumber => 'Keine gültige Zahl';
+
+  @override
+  String get eventDeleteConfirmTitle => 'Eintrag löschen?';
+
+  @override
+  String get eventDeleteConfirmBody =>
+      'Das kann nicht rückgängig gemacht werden.';
+
+  @override
   String overviewCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -7,6 +7,7 @@ import 'package:pet_passport/features/export_import/data/export_service.dart';
 import 'package:pet_passport/features/insurances/data/insurances_repository.dart';
 import 'package:pet_passport/features/pets/data/pets_repository.dart';
 import 'package:pet_passport/features/pets/domain/pet_enums.dart';
+import 'package:pet_passport/features/protocol/data/events_repository.dart';
 import 'package:pet_passport/features/vaccinations/data/vaccinations_repository.dart';
 import 'package:pet_passport/features/vets/data/vets_repository.dart';
 
@@ -33,7 +34,14 @@ void main() {
         db.petsDao,
         db.vetsDao,
       );
-      exportService = ExportService(pets, vets, insurances, vaccinations);
+      final events = EventsRepository(
+        db,
+        db.eventsDao,
+        db.petsDao,
+        mediaService,
+      );
+      exportService =
+          ExportService(pets, vets, insurances, vaccinations, events);
     });
 
     test('buildSnapshot with empty database produces valid JSON structure', () async {
@@ -47,9 +55,9 @@ void main() {
         'pets',
       ]));
 
-      expect(snapshot['schema_version'], equals(1));
+      expect(snapshot['schema_version'], equals(2));
       expect(snapshot['app_version'], equals('0.1.0+1'));
-      expect(snapshot['pets'], isA<List>());
+      expect(snapshot['pets'], isA<List<dynamic>>());
       expect(snapshot['pets'], isEmpty);
       expect(snapshot['exported_at'], isA<String>());
 
@@ -151,7 +159,7 @@ void main() {
         expect(insuranceJson['uuid'], equals(insuranceUuid));
         expect(insuranceJson['provider'], equals('Allianz'));
         expect(insuranceJson['policy_number'], equals('POL-2026-123456'));
-        expect(insuranceJson['documents'], isA<List>());
+        expect(insuranceJson['documents'], isA<List<dynamic>>());
         expect(insuranceJson['documents'], isEmpty);
 
         // Verify vaccination data
@@ -162,7 +170,7 @@ void main() {
         expect(vaccinationJson['vet_uuid'], equals(vetUuid));
         expect(vaccinationJson['batch_number'], equals('BATCH-2026-001'));
         expect(vaccinationJson['notes'], equals('Booster shot'));
-        expect(vaccinationJson['documents'], isA<List>());
+        expect(vaccinationJson['documents'], isA<List<dynamic>>());
         expect(vaccinationJson['documents'], isEmpty);
       },
     );
@@ -187,15 +195,15 @@ void main() {
 
       // Verify it can be parsed back
       final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
-      expect(decoded['schema_version'], equals(1));
-      expect(decoded['pets'], isA<List>());
+      expect(decoded['schema_version'], equals(2));
+      expect(decoded['pets'], isA<List<dynamic>>());
       expect(decoded['pets'][0]['name'], equals('Fluffy'));
     });
 
     test('buildSnapshot has expected top-level keys', () async {
       final snapshot = await exportService.buildSnapshot();
 
-      final expectedKeys = {'schema_version', 'exported_at', 'app_version', 'pets'};
+      final expectedKeys = {'schema_version', 'exported_at', 'app_version', 'tags', 'pets'};
       expect(snapshot.keys.toSet(), equals(expectedKeys));
     });
 

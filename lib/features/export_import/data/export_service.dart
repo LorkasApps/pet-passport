@@ -9,6 +9,9 @@ import '../../insurances/domain/insurance.dart';
 import '../../pets/data/pets_repository.dart';
 import '../../pets/domain/pet.dart';
 import '../../pets/domain/pet_enums.dart';
+import '../../protocol/data/events_repository.dart';
+import '../../protocol/domain/event.dart';
+import '../../protocol/domain/event_enums.dart';
 import '../../vaccinations/data/vaccinations_repository.dart';
 import '../../vaccinations/domain/vaccination.dart';
 import '../../vets/data/vets_repository.dart';
@@ -20,14 +23,16 @@ class ExportService {
     this._vets,
     this._insurances,
     this._vaccinations,
+    this._events,
   );
 
   final PetsRepository _pets;
   final VetsRepository _vets;
   final InsurancesRepository _insurances;
   final VaccinationsRepository _vaccinations;
+  final EventsRepository _events;
 
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
   static const String appVersion = '0.1.0+1';
 
   /// Builds a plain-JSON snapshot of every active pet. Media files are
@@ -42,12 +47,23 @@ class ExportService {
       final insurances = await _insurances.watchForPetUuid(pet.uuid).first;
       final vaccinations =
           await _vaccinations.watchForPetUuid(pet.uuid).first;
-      result.add(_petToJson(pet, vets, insurances, vaccinations));
+      final events = await _events.watchForPetUuid(pet.uuid).first;
+      result.add(_petToJson(pet, vets, insurances, vaccinations, events));
     }
+    final tags = await _events.watchAllTags().first;
     return {
       'schema_version': schemaVersion,
       'exported_at': DateTime.now().toUtc().toIso8601String(),
       'app_version': appVersion,
+      'tags': [
+        for (final t in tags)
+          {
+            'uuid': t.uuid,
+            'label': t.label,
+            'color': t.color,
+            'created_at': _dt(t.createdAt),
+          },
+      ],
       'pets': result,
     };
   }
@@ -70,6 +86,7 @@ class ExportService {
     List<Vet> vets,
     List<Insurance> insurances,
     List<Vaccination> vaccinations,
+    List<Event> events,
   ) {
     return {
       'uuid': pet.uuid,
@@ -135,6 +152,30 @@ class ExportService {
             ],
           },
       ],
+      'events': [
+        for (final e in events)
+          {
+            'uuid': e.uuid,
+            'event_type': _eventTypeString(e.type),
+            'occurred_at': _dt(e.occurredAt),
+            'title': e.title,
+            'note': e.note,
+            'payload': e.payload.toJson(),
+            'tag_uuids': [for (final t in e.tags) t.uuid],
+            'photos': [
+              for (final p in e.photos)
+                {
+                  'uuid': p.uuid,
+                  'file_path': p.filePath,
+                  'mime_type': p.mimeType,
+                  'size_bytes': p.sizeBytes,
+                  'created_at': _dt(p.createdAt),
+                },
+            ],
+            'created_at': _dt(e.createdAt),
+            'updated_at': _dt(e.updatedAt),
+          },
+      ],
       'vaccinations': [
         for (final vac in vaccinations)
           {
@@ -174,4 +215,13 @@ class ExportService {
         Sex.male => 'male',
         Sex.female => 'female',
       };
+
+  String _eventTypeString(EventType t) => switch (t) {
+        EventType.weight => 'weight',
+        EventType.feeding => 'feeding',
+        EventType.symptom => 'symptom',
+        EventType.activity => 'activity',
+        EventType.generic => 'generic',
+      };
 }
+

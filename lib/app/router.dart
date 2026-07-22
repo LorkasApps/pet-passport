@@ -17,7 +17,10 @@ import '../features/pets/presentation/pet_edit_screen.dart';
 import '../features/pets/presentation/pet_management_screen.dart';
 import '../features/pets/presentation/pet_switcher_sheet.dart';
 import '../features/pets/presentation/widgets/pet_avatar.dart';
+import '../features/protocol/domain/event_enums.dart';
 import '../features/protocol/presentation/alltag_screen.dart';
+import '../features/protocol/presentation/event_detail_screen.dart';
+import '../features/protocol/presentation/event_edit_screen.dart';
 import '../features/settings/application/settings_providers.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/vaccinations/presentation/vaccination_detail_screen.dart';
@@ -176,6 +179,39 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/export',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const ExportScreen(),
+      ),
+      GoRoute(
+        path: '/pets/:petId/events/new',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) {
+          final typeName = s.uri.queryParameters['type'];
+          final type = typeName == null
+              ? null
+              : EventType.values.firstWhere(
+                  (t) => t.name == typeName,
+                  orElse: () => EventType.generic,
+                );
+          return EventEditScreen(
+            petUuid: s.pathParameters['petId']!,
+            initialType: type,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/pets/:petId/events/:eventUuid',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => EventDetailScreen(
+          petUuid: s.pathParameters['petId']!,
+          eventUuid: s.pathParameters['eventUuid']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/events/:eventUuid/edit',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => EventEditScreen(
+          petUuid: s.pathParameters['petId']!,
+          eventUuid: s.pathParameters['eventUuid'],
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

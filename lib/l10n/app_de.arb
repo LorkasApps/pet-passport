@@ -191,5 +191,62 @@
   "importResultBody": "{added, plural, =0{Keine neuen Einträge} =1{1 neuer Eintrag} other{{added} neue Einträge}}, {updated, plural, =0{keine Aktualisierungen} =1{1 aktualisiert} other{{updated} aktualisiert}}.",
   "importResultErrors": "{count, plural, =1{1 Eintrag wurde wegen Fehler übersprungen} other{{count} Einträge wurden wegen Fehler übersprungen}}.",
 
+  "eventTypeWeight": "Gewicht",
+  "eventTypeFeeding": "Fütterung",
+  "eventTypeSymptom": "Symptom",
+  "eventTypeActivity": "Aktivität",
+  "eventTypeGeneric": "Notiz",
+  "eventTypeAll": "Alle",
+
+  "eventFeedingMealMorning": "Morgens",
+  "eventFeedingMealNoon": "Mittags",
+  "eventFeedingMealEvening": "Abends",
+  "eventFeedingMealSnack": "Snack",
+
+  "eventSymptomSeverityLow": "Leicht",
+  "eventSymptomSeverityMedium": "Mittel",
+  "eventSymptomSeverityHigh": "Schwer",
+
+  "eventActivityTypeWalk": "Spaziergang",
+  "eventActivityTypePlay": "Spielen",
+  "eventActivityTypeTraining": "Training",
+  "eventActivityTypeOther": "Sonstiges",
+
+  "alltagFilterAll": "Alle",
+  "alltagFilterRangeLabel": "Zeitraum: {days} Tage",
+  "alltagNoEventsForFilter": "Keine Einträge im aktuellen Filter.",
+  "alltagAddEventFabTooltip": "Eintrag hinzufügen",
+
+  "eventEditNewTitle": "Neuer Eintrag",
+  "eventEditEditTitle": "Eintrag bearbeiten",
+  "eventPickTypeTitle": "Was hast du beobachtet?",
+
+  "eventFieldOccurredAt": "Wann",
+  "eventFieldTitle": "Titel",
+  "eventFieldNote": "Notiz",
+  "eventFieldWeightKg": "Gewicht (kg)",
+  "eventFieldFoodName": "Futter",
+  "eventFieldAmountG": "Menge (g)",
+  "eventFieldMeal": "Mahlzeit",
+  "eventFieldSymptomDescription": "Beschreibung",
+  "eventFieldSymptomSeverity": "Schweregrad",
+  "eventFieldActivityType": "Art",
+  "eventFieldDistanceM": "Distanz (m)",
+  "eventFieldDurationMin": "Dauer (min)",
+
+  "eventTagsHeader": "Tags",
+  "eventTagAddNew": "Neuer Tag",
+  "eventTagNewDialogTitle": "Neuer Tag",
+  "eventTagNewDialogLabel": "Bezeichnung",
+
+  "eventPhotosHeader": "Fotos",
+  "eventPhotoAdd": "Foto hinzufügen",
+
+  "eventValidationRequired": "Pflichtfeld",
+  "eventValidationInvalidNumber": "Keine gültige Zahl",
+
+  "eventDeleteConfirmTitle": "Eintrag löschen?",
+  "eventDeleteConfirmBody": "Das kann nicht rückgängig gemacht werden.",
+
   "overviewCount": "{count, plural, =0{Keine} =1{1 Eintrag} other{{count} Einträge}}"
 }
