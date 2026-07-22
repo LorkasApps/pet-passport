@@ -12,6 +12,16 @@ class MoreScreen extends ConsumerWidget {
     return ListView(
       children: [
         ListTile(
+          leading: const Icon(Icons.event_outlined),
+          title: Text(l.moreAppointments),
+          onTap: () => context.push('/appointments'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.medication_outlined),
+          title: Text(l.moreMedications),
+          onTap: () => context.push('/medications'),
+        ),
+        ListTile(
           leading: const Icon(Icons.vaccines_outlined),
           title: Text(l.vaccinationsListTitle),
           onTap: () => context.push('/vaccinations'),

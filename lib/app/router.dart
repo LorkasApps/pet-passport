@@ -3,7 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../features/appointments/presentation/appointment_detail_screen.dart';
+import '../features/appointments/presentation/appointment_edit_screen.dart';
+import '../features/appointments/presentation/appointments_list_screen.dart';
 import '../features/appointments/presentation/termine_screen.dart';
+import '../features/medications/presentation/medication_detail_screen.dart';
+import '../features/medications/presentation/medication_edit_screen.dart';
+import '../features/medications/presentation/medication_intake_history_screen.dart';
+import '../features/medications/presentation/medications_list_screen.dart';
 import '../features/dashboard/presentation/overview_screen.dart';
 import '../features/emergency/presentation/emergency_screen.dart';
 import '../features/export_import/presentation/export_screen.dart';
@@ -118,6 +125,71 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/vaccinations',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const VaccinationsListScreen(),
+      ),
+      GoRoute(
+        path: '/appointments',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const AppointmentsListScreen(),
+      ),
+      GoRoute(
+        path: '/pets/:petId/appointments/new',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => AppointmentEditScreen(
+          petUuid: s.pathParameters['petId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/appointments/:apptId',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => AppointmentDetailScreen(
+          petUuid: s.pathParameters['petId']!,
+          appointmentUuid: s.pathParameters['apptId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/appointments/:apptId/edit',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => AppointmentEditScreen(
+          petUuid: s.pathParameters['petId']!,
+          appointmentUuid: s.pathParameters['apptId'],
+        ),
+      ),
+      GoRoute(
+        path: '/medications',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const MedicationsListScreen(),
+      ),
+      GoRoute(
+        path: '/pets/:petId/medications/new',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => MedicationEditScreen(
+          petUuid: s.pathParameters['petId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/medications/:medId',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => MedicationDetailScreen(
+          petUuid: s.pathParameters['petId']!,
+          medicationUuid: s.pathParameters['medId']!,
+          autoLog: s.uri.queryParameters['log'] == '1',
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/medications/:medId/edit',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => MedicationEditScreen(
+          petUuid: s.pathParameters['petId']!,
+          medicationUuid: s.pathParameters['medId'],
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/medications/:medId/intakes',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => MedicationIntakeHistoryScreen(
+          petUuid: s.pathParameters['petId']!,
+          medicationUuid: s.pathParameters['medId']!,
+        ),
       ),
       GoRoute(
         path: '/pets/:petId/vaccinations/new',

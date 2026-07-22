@@ -732,4 +732,332 @@ class AppL10nDe extends AppL10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String get notesLabel => 'Notizen';
+
+  @override
+  String get errorRequired => 'Pflichtfeld';
+
+  @override
+  String get optionNone => 'Keine';
+
+  @override
+  String get actionClear => 'Löschen';
+
+  @override
+  String get notFound => 'Nicht gefunden.';
+
+  @override
+  String get appointmentsListTitle => 'Termine';
+
+  @override
+  String get appointmentsEmptyTitle => 'Noch keine Termine';
+
+  @override
+  String get appointmentsEmptyMessage =>
+      'Tierarzt, Fellpflege und Training erscheinen hier.';
+
+  @override
+  String get appointmentNewTitle => 'Neuer Termin';
+
+  @override
+  String get appointmentEditTitle => 'Termin bearbeiten';
+
+  @override
+  String get appointmentDetailTitle => 'Termin';
+
+  @override
+  String get appointmentTypeLabel => 'Art';
+
+  @override
+  String get appointmentTypeVet => 'Tierarzt';
+
+  @override
+  String get appointmentTypeGrooming => 'Fellpflege';
+
+  @override
+  String get appointmentTypeTraining => 'Training';
+
+  @override
+  String get appointmentTypeWalk => 'Gassi';
+
+  @override
+  String get appointmentTypeCheckup => 'Vorsorge';
+
+  @override
+  String get appointmentTypeOther => 'Sonstiges';
+
+  @override
+  String get appointmentTitleLabel => 'Titel';
+
+  @override
+  String get appointmentStartsAtLabel => 'Beginn';
+
+  @override
+  String get appointmentDurationLabel => 'Dauer (min)';
+
+  @override
+  String get appointmentVetLabel => 'Tierarzt';
+
+  @override
+  String get appointmentLocationLabel => 'Ort';
+
+  @override
+  String durationMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get upcomingOccurrencesTitle => 'Nächste Termine';
+
+  @override
+  String get noUpcomingOccurrences => 'Keine anstehenden Termine.';
+
+  @override
+  String get recurrenceSectionTitle => 'Wiederholung';
+
+  @override
+  String get remindersSectionTitle => 'Erinnerungen';
+
+  @override
+  String get recurrenceFrequencyLabel => 'Häufigkeit';
+
+  @override
+  String get recurrenceNone => 'Einmalig';
+
+  @override
+  String get recurrenceDaily => 'Täglich';
+
+  @override
+  String get recurrenceWeekly => 'Wöchentlich';
+
+  @override
+  String get recurrenceMonthly => 'Monatlich';
+
+  @override
+  String get recurrenceIntervalLabel => 'Alle';
+
+  @override
+  String recurrenceHintDaily(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Tage',
+      one: 'Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceHintWeekly(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Wochen',
+      one: 'Woche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceHintMonthly(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Monate',
+      one: 'Monat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurrenceUntilNone => 'Ohne Enddatum';
+
+  @override
+  String recurrenceUntilLabel(String date) {
+    return 'Bis $date';
+  }
+
+  @override
+  String get recurrenceUntilPick => 'Enddatum wählen';
+
+  @override
+  String get weekdayShortMon => 'Mo';
+
+  @override
+  String get weekdayShortTue => 'Di';
+
+  @override
+  String get weekdayShortWed => 'Mi';
+
+  @override
+  String get weekdayShortThu => 'Do';
+
+  @override
+  String get weekdayShortFri => 'Fr';
+
+  @override
+  String get weekdayShortSat => 'Sa';
+
+  @override
+  String get weekdayShortSun => 'So';
+
+  @override
+  String get reminderOffsetAtTime => 'Zum Zeitpunkt';
+
+  @override
+  String reminderOffsetMinutes(int n) {
+    return '$n min vorher';
+  }
+
+  @override
+  String reminderOffsetHours(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Std vorher',
+      one: '1 Std vorher',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderOffsetDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Tage vorher',
+      one: '1 Tag vorher',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get medicationsListTitle => 'Medikamente';
+
+  @override
+  String get medicationsEmptyTitle => 'Noch keine Medikamente';
+
+  @override
+  String get medicationsEmptyMessage =>
+      'Behandlungen und Dosierungen erscheinen hier.';
+
+  @override
+  String get medicationNewTitle => 'Neues Medikament';
+
+  @override
+  String get medicationEditTitle => 'Medikament bearbeiten';
+
+  @override
+  String get medicationDetailTitle => 'Medikament';
+
+  @override
+  String get medicationNameLabel => 'Name';
+
+  @override
+  String get medicationDosageAmountLabel => 'Dosis';
+
+  @override
+  String get medicationDosageUnitLabel => 'Einheit';
+
+  @override
+  String get medicationFreqTypeLabel => 'Häufigkeit';
+
+  @override
+  String get medicationFreqDaily => 'Täglich';
+
+  @override
+  String get medicationFreqWeekly => 'Wöchentlich';
+
+  @override
+  String get medicationFreqIntervalDays => 'Alle N Tage';
+
+  @override
+  String get medicationFreqIntervalLabel => 'Intervall';
+
+  @override
+  String get medicationTimesOfDayLabel => 'Uhrzeiten';
+
+  @override
+  String get medicationAddTimeButton => 'Uhrzeit hinzufügen';
+
+  @override
+  String get medicationStartsAtLabel => 'Beginn';
+
+  @override
+  String get medicationEndsAtLabel => 'Ende (optional)';
+
+  @override
+  String get medicationActiveLabel => 'Aktiv';
+
+  @override
+  String get medicationPrescribedByLabel => 'Verordnet von';
+
+  @override
+  String get medicationActiveSection => 'Aktiv';
+
+  @override
+  String get medicationInactiveSection => 'Inaktiv';
+
+  @override
+  String get medicationAdherenceTitle => 'Einnahme — letzte 7 Tage';
+
+  @override
+  String medicationAdherenceCount(int taken, int expected) {
+    return '$taken/$expected genommen';
+  }
+
+  @override
+  String get medicationLogIntakeButton => 'Einnahme protokollieren';
+
+  @override
+  String get medicationLogSkippedButton => 'Ausgelassen protokollieren';
+
+  @override
+  String get medicationIntakeHistoryTitle => 'Einnahmehistorie';
+
+  @override
+  String get medicationIntakeHistoryEmpty => 'Noch keine Einträge.';
+
+  @override
+  String get medicationIntakeSkippedChip => 'Ausgelassen';
+
+  @override
+  String get medicationIntakeLoggedSnack => 'Einnahme protokolliert.';
+
+  @override
+  String get termineSectionAppointments => 'Anstehende Termine';
+
+  @override
+  String get termineSectionMedicationsToday => 'Medikamente heute';
+
+  @override
+  String get overviewNextAppointmentTitle => 'Nächster Termin';
+
+  @override
+  String get overviewNoAppointment => 'Keine anstehenden Termine.';
+
+  @override
+  String get overviewActiveMedicationsTitle => 'Aktive Medikamente';
+
+  @override
+  String get overviewNoActiveMedications => 'Keine aktiven Medikamente.';
+
+  @override
+  String overviewActiveMedicationsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Medikamente',
+      one: '1 Medikament',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moreAppointments => 'Termine';
+
+  @override
+  String get moreMedications => 'Medikamente';
 }

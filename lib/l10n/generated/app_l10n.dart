@@ -1344,6 +1344,546 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'{count, plural, =0{None} =1{1 entry} other{{count} entries}}'**
   String overviewCount(int count);
+
+  /// No description provided for @notesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notesLabel;
+
+  /// No description provided for @errorRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get errorRequired;
+
+  /// No description provided for @optionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get optionNone;
+
+  /// No description provided for @actionClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get actionClear;
+
+  /// No description provided for @notFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found.'**
+  String get notFound;
+
+  /// No description provided for @appointmentsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get appointmentsListTitle;
+
+  /// No description provided for @appointmentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No appointments yet'**
+  String get appointmentsEmptyTitle;
+
+  /// No description provided for @appointmentsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet visits, grooming, and training show up here.'**
+  String get appointmentsEmptyMessage;
+
+  /// No description provided for @appointmentNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New appointment'**
+  String get appointmentNewTitle;
+
+  /// No description provided for @appointmentEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit appointment'**
+  String get appointmentEditTitle;
+
+  /// No description provided for @appointmentDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment'**
+  String get appointmentDetailTitle;
+
+  /// No description provided for @appointmentTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get appointmentTypeLabel;
+
+  /// No description provided for @appointmentTypeVet.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet'**
+  String get appointmentTypeVet;
+
+  /// No description provided for @appointmentTypeGrooming.
+  ///
+  /// In en, this message translates to:
+  /// **'Grooming'**
+  String get appointmentTypeGrooming;
+
+  /// No description provided for @appointmentTypeTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get appointmentTypeTraining;
+
+  /// No description provided for @appointmentTypeWalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk'**
+  String get appointmentTypeWalk;
+
+  /// No description provided for @appointmentTypeCheckup.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkup'**
+  String get appointmentTypeCheckup;
+
+  /// No description provided for @appointmentTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get appointmentTypeOther;
+
+  /// No description provided for @appointmentTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get appointmentTitleLabel;
+
+  /// No description provided for @appointmentStartsAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at'**
+  String get appointmentStartsAtLabel;
+
+  /// No description provided for @appointmentDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (min)'**
+  String get appointmentDurationLabel;
+
+  /// No description provided for @appointmentVetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet'**
+  String get appointmentVetLabel;
+
+  /// No description provided for @appointmentLocationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get appointmentLocationLabel;
+
+  /// No description provided for @durationMinutesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutesValue(int minutes);
+
+  /// No description provided for @upcomingOccurrencesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next occurrences'**
+  String get upcomingOccurrencesTitle;
+
+  /// No description provided for @noUpcomingOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming occurrences.'**
+  String get noUpcomingOccurrences;
+
+  /// No description provided for @recurrenceSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence'**
+  String get recurrenceSectionTitle;
+
+  /// No description provided for @remindersSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get remindersSectionTitle;
+
+  /// No description provided for @recurrenceFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get recurrenceFrequencyLabel;
+
+  /// No description provided for @recurrenceNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get recurrenceNone;
+
+  /// No description provided for @recurrenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get recurrenceDaily;
+
+  /// No description provided for @recurrenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get recurrenceWeekly;
+
+  /// No description provided for @recurrenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get recurrenceMonthly;
+
+  /// No description provided for @recurrenceIntervalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get recurrenceIntervalLabel;
+
+  /// No description provided for @recurrenceHintDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{day} other{{n} days}}'**
+  String recurrenceHintDaily(int n);
+
+  /// No description provided for @recurrenceHintWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{week} other{{n} weeks}}'**
+  String recurrenceHintWeekly(int n);
+
+  /// No description provided for @recurrenceHintMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{month} other{{n} months}}'**
+  String recurrenceHintMonthly(int n);
+
+  /// No description provided for @recurrenceUntilNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No end date'**
+  String get recurrenceUntilNone;
+
+  /// No description provided for @recurrenceUntilLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String recurrenceUntilLabel(String date);
+
+  /// No description provided for @recurrenceUntilPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick end date'**
+  String get recurrenceUntilPick;
+
+  /// No description provided for @weekdayShortMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get weekdayShortMon;
+
+  /// No description provided for @weekdayShortTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get weekdayShortTue;
+
+  /// No description provided for @weekdayShortWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get weekdayShortWed;
+
+  /// No description provided for @weekdayShortThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get weekdayShortThu;
+
+  /// No description provided for @weekdayShortFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get weekdayShortFri;
+
+  /// No description provided for @weekdayShortSat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get weekdayShortSat;
+
+  /// No description provided for @weekdayShortSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get weekdayShortSun;
+
+  /// No description provided for @reminderOffsetAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'At time'**
+  String get reminderOffsetAtTime;
+
+  /// No description provided for @reminderOffsetMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min before'**
+  String reminderOffsetMinutes(int n);
+
+  /// No description provided for @reminderOffsetHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 h before} other{{n} h before}}'**
+  String reminderOffsetHours(int n);
+
+  /// No description provided for @reminderOffsetDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 day before} other{{n} days before}}'**
+  String reminderOffsetDays(int n);
+
+  /// No description provided for @medicationsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get medicationsListTitle;
+
+  /// No description provided for @medicationsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No medications yet'**
+  String get medicationsEmptyTitle;
+
+  /// No description provided for @medicationsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing treatments and doses show up here.'**
+  String get medicationsEmptyMessage;
+
+  /// No description provided for @medicationNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New medication'**
+  String get medicationNewTitle;
+
+  /// No description provided for @medicationEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit medication'**
+  String get medicationEditTitle;
+
+  /// No description provided for @medicationDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication'**
+  String get medicationDetailTitle;
+
+  /// No description provided for @medicationNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get medicationNameLabel;
+
+  /// No description provided for @medicationDosageAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dosage'**
+  String get medicationDosageAmountLabel;
+
+  /// No description provided for @medicationDosageUnitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get medicationDosageUnitLabel;
+
+  /// No description provided for @medicationFreqTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get medicationFreqTypeLabel;
+
+  /// No description provided for @medicationFreqDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get medicationFreqDaily;
+
+  /// No description provided for @medicationFreqWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get medicationFreqWeekly;
+
+  /// No description provided for @medicationFreqIntervalDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Every N days'**
+  String get medicationFreqIntervalDays;
+
+  /// No description provided for @medicationFreqIntervalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get medicationFreqIntervalLabel;
+
+  /// No description provided for @medicationTimesOfDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Times of day'**
+  String get medicationTimesOfDayLabel;
+
+  /// No description provided for @medicationAddTimeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time'**
+  String get medicationAddTimeButton;
+
+  /// No description provided for @medicationStartsAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get medicationStartsAtLabel;
+
+  /// No description provided for @medicationEndsAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends (optional)'**
+  String get medicationEndsAtLabel;
+
+  /// No description provided for @medicationActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get medicationActiveLabel;
+
+  /// No description provided for @medicationPrescribedByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Prescribed by'**
+  String get medicationPrescribedByLabel;
+
+  /// No description provided for @medicationActiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get medicationActiveSection;
+
+  /// No description provided for @medicationInactiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get medicationInactiveSection;
+
+  /// No description provided for @medicationAdherenceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adherence — last 7 days'**
+  String get medicationAdherenceTitle;
+
+  /// No description provided for @medicationAdherenceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{taken}/{expected} taken'**
+  String medicationAdherenceCount(int taken, int expected);
+
+  /// No description provided for @medicationLogIntakeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Log intake'**
+  String get medicationLogIntakeButton;
+
+  /// No description provided for @medicationLogSkippedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Log skipped'**
+  String get medicationLogSkippedButton;
+
+  /// No description provided for @medicationIntakeHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Intake history'**
+  String get medicationIntakeHistoryTitle;
+
+  /// No description provided for @medicationIntakeHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries yet.'**
+  String get medicationIntakeHistoryEmpty;
+
+  /// No description provided for @medicationIntakeSkippedChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get medicationIntakeSkippedChip;
+
+  /// No description provided for @medicationIntakeLoggedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Intake logged.'**
+  String get medicationIntakeLoggedSnack;
+
+  /// No description provided for @termineSectionAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming appointments'**
+  String get termineSectionAppointments;
+
+  /// No description provided for @termineSectionMedicationsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications today'**
+  String get termineSectionMedicationsToday;
+
+  /// No description provided for @overviewNextAppointmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next appointment'**
+  String get overviewNextAppointmentTitle;
+
+  /// No description provided for @overviewNoAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming appointment.'**
+  String get overviewNoAppointment;
+
+  /// No description provided for @overviewActiveMedicationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active medications'**
+  String get overviewActiveMedicationsTitle;
+
+  /// No description provided for @overviewNoActiveMedications.
+  ///
+  /// In en, this message translates to:
+  /// **'No active medications.'**
+  String get overviewNoActiveMedications;
+
+  /// No description provided for @overviewActiveMedicationsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 medication} other{{count} medications}}'**
+  String overviewActiveMedicationsCount(int count);
+
+  /// No description provided for @moreAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get moreAppointments;
+
+  /// No description provided for @moreMedications.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get moreMedications;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

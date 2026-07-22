@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../features/appointments/application/appointments_providers.dart';
+import '../features/medications/application/medications_providers.dart';
 import '../features/pets/application/current_pet_provider.dart';
 import '../features/security/presentation/app_lock_gate.dart';
 import '../features/settings/application/settings_providers.dart';
@@ -29,14 +31,28 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp> {
       await notif.requestPermissions();
       notif.setTapHandler((payload) async {
         final router = ref.read(routerProvider);
-        if (payload.entity == 'vaccination') {
-          // Best-effort: route into the current pet's vaccination detail.
-          final pet = await ref.read(currentPetProvider.future);
+        final pet = await ref.read(currentPetProvider.future);
+        if (payload.entity == 'vac') {
           if (pet != null) {
             unawaited(router
                 .push('/pets/${pet.uuid}/vaccinations/${payload.uuid}'));
           } else {
             unawaited(router.push('/vaccinations'));
+          }
+        } else if (payload.entity == 'appt') {
+          if (pet != null) {
+            unawaited(router
+                .push('/pets/${pet.uuid}/appointments/${payload.uuid}'));
+          } else {
+            unawaited(router.push('/appointments'));
+          }
+        } else if (payload.entity == 'med') {
+          final autoLog = payload.extra['action'] == 'log' ? '?log=1' : '';
+          if (pet != null) {
+            unawaited(router.push(
+                '/pets/${pet.uuid}/medications/${payload.uuid}$autoLog'));
+          } else {
+            unawaited(router.push('/medications'));
           }
         }
       });
@@ -44,6 +60,12 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp> {
       // changes. Deterministic IDs keep this idempotent.
       await ref
           .read(vaccinationsRepositoryProvider)
+          .rescheduleAllUpcomingReminders();
+      await ref
+          .read(appointmentsRepositoryProvider)
+          .rescheduleAllUpcomingReminders();
+      await ref
+          .read(medicationsRepositoryProvider)
           .rescheduleAllUpcomingReminders();
     });
 

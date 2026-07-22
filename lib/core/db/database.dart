@@ -1,21 +1,31 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../features/appointments/domain/appointment_enums.dart';
+import '../../features/medications/domain/medication_enums.dart';
 import '../../features/pets/domain/pet_enums.dart';
 import '../../features/protocol/domain/event_enums.dart';
+import 'daos/appointments_dao.dart';
 import 'daos/events_dao.dart';
 import 'daos/insurances_dao.dart';
+import 'daos/medications_dao.dart';
 import 'daos/pets_dao.dart';
 import 'daos/settings_dao.dart';
 import 'daos/vaccinations_dao.dart';
 import 'daos/vets_dao.dart';
 import 'tables/app_settings_table.dart';
+import 'tables/appointment_exceptions_table.dart';
+import 'tables/appointment_reminders_table.dart';
+import 'tables/appointments_table.dart';
 import 'tables/event_photos_table.dart';
 import 'tables/event_tag_links_table.dart';
 import 'tables/event_tags_table.dart';
 import 'tables/events_table.dart';
 import 'tables/insurance_documents_table.dart';
 import 'tables/insurances_table.dart';
+import 'tables/medication_intakes_table.dart';
+import 'tables/medication_reminders_table.dart';
+import 'tables/medications_table.dart';
 import 'tables/pet_weights_table.dart';
 import 'tables/pets_table.dart';
 import 'tables/vaccination_documents_table.dart';
@@ -38,6 +48,12 @@ part 'database.g.dart';
     EventTags,
     EventTagLinks,
     EventPhotos,
+    Appointments,
+    AppointmentReminders,
+    AppointmentExceptions,
+    Medications,
+    MedicationReminders,
+    MedicationIntakes,
   ],
   daos: [
     PetsDao,
@@ -46,6 +62,8 @@ part 'database.g.dart';
     VaccinationsDao,
     SettingsDao,
     EventsDao,
+    AppointmentsDao,
+    MedicationsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -54,7 +72,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,6 +107,14 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(eventTagLinks);
             await m.createTable(eventPhotos);
             await m.addColumn(petWeights, petWeights.sourceEventUuid);
+          }
+          if (from < 8) {
+            await m.createTable(appointments);
+            await m.createTable(appointmentReminders);
+            await m.createTable(appointmentExceptions);
+            await m.createTable(medications);
+            await m.createTable(medicationReminders);
+            await m.createTable(medicationIntakes);
           }
         },
         beforeOpen: (details) async {

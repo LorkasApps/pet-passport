@@ -300,5 +300,135 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "notesLabel": "Notes",
+  "errorRequired": "Required",
+  "optionNone": "None",
+  "actionClear": "Clear",
+  "notFound": "Not found.",
+
+  "appointmentsListTitle": "Appointments",
+  "appointmentsEmptyTitle": "No appointments yet",
+  "appointmentsEmptyMessage": "Vet visits, grooming, and training show up here.",
+  "appointmentNewTitle": "New appointment",
+  "appointmentEditTitle": "Edit appointment",
+  "appointmentDetailTitle": "Appointment",
+  "appointmentTypeLabel": "Type",
+  "appointmentTypeVet": "Vet",
+  "appointmentTypeGrooming": "Grooming",
+  "appointmentTypeTraining": "Training",
+  "appointmentTypeWalk": "Walk",
+  "appointmentTypeCheckup": "Checkup",
+  "appointmentTypeOther": "Other",
+  "appointmentTitleLabel": "Title",
+  "appointmentStartsAtLabel": "Starts at",
+  "appointmentDurationLabel": "Duration (min)",
+  "appointmentVetLabel": "Vet",
+  "appointmentLocationLabel": "Location",
+  "durationMinutesValue": "{minutes} min",
+  "@durationMinutesValue": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "upcomingOccurrencesTitle": "Next occurrences",
+  "noUpcomingOccurrences": "No upcoming occurrences.",
+
+  "recurrenceSectionTitle": "Recurrence",
+  "remindersSectionTitle": "Reminders",
+  "recurrenceFrequencyLabel": "Frequency",
+  "recurrenceNone": "Once",
+  "recurrenceDaily": "Daily",
+  "recurrenceWeekly": "Weekly",
+  "recurrenceMonthly": "Monthly",
+  "recurrenceIntervalLabel": "Every",
+  "recurrenceHintDaily": "{n, plural, =1{day} other{{n} days}}",
+  "@recurrenceHintDaily": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "recurrenceHintWeekly": "{n, plural, =1{week} other{{n} weeks}}",
+  "@recurrenceHintWeekly": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "recurrenceHintMonthly": "{n, plural, =1{month} other{{n} months}}",
+  "@recurrenceHintMonthly": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "recurrenceUntilNone": "No end date",
+  "recurrenceUntilLabel": "Until {date}",
+  "@recurrenceUntilLabel": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "recurrenceUntilPick": "Pick end date",
+
+  "weekdayShortMon": "Mon",
+  "weekdayShortTue": "Tue",
+  "weekdayShortWed": "Wed",
+  "weekdayShortThu": "Thu",
+  "weekdayShortFri": "Fri",
+  "weekdayShortSat": "Sat",
+  "weekdayShortSun": "Sun",
+
+  "reminderOffsetAtTime": "At time",
+  "reminderOffsetMinutes": "{n} min before",
+  "@reminderOffsetMinutes": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "reminderOffsetHours": "{n, plural, =1{1 h before} other{{n} h before}}",
+  "@reminderOffsetHours": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "reminderOffsetDays": "{n, plural, =1{1 day before} other{{n} days before}}",
+  "@reminderOffsetDays": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+
+  "medicationsListTitle": "Medications",
+  "medicationsEmptyTitle": "No medications yet",
+  "medicationsEmptyMessage": "Ongoing treatments and doses show up here.",
+  "medicationNewTitle": "New medication",
+  "medicationEditTitle": "Edit medication",
+  "medicationDetailTitle": "Medication",
+  "medicationNameLabel": "Name",
+  "medicationDosageAmountLabel": "Dosage",
+  "medicationDosageUnitLabel": "Unit",
+  "medicationFreqTypeLabel": "Frequency",
+  "medicationFreqDaily": "Daily",
+  "medicationFreqWeekly": "Weekly",
+  "medicationFreqIntervalDays": "Every N days",
+  "medicationFreqIntervalLabel": "Interval",
+  "medicationTimesOfDayLabel": "Times of day",
+  "medicationAddTimeButton": "Add time",
+  "medicationStartsAtLabel": "Starts",
+  "medicationEndsAtLabel": "Ends (optional)",
+  "medicationActiveLabel": "Active",
+  "medicationPrescribedByLabel": "Prescribed by",
+  "medicationActiveSection": "Active",
+  "medicationInactiveSection": "Inactive",
+  "medicationAdherenceTitle": "Adherence — last 7 days",
+  "medicationAdherenceCount": "{taken}/{expected} taken",
+  "@medicationAdherenceCount": {
+    "placeholders": {
+      "taken": { "type": "int" },
+      "expected": { "type": "int" }
+    }
+  },
+  "medicationLogIntakeButton": "Log intake",
+  "medicationLogSkippedButton": "Log skipped",
+  "medicationIntakeHistoryTitle": "Intake history",
+  "medicationIntakeHistoryEmpty": "No entries yet.",
+  "medicationIntakeSkippedChip": "Skipped",
+  "medicationIntakeLoggedSnack": "Intake logged.",
+
+  "termineSectionAppointments": "Upcoming appointments",
+  "termineSectionMedicationsToday": "Medications today",
+  "overviewNextAppointmentTitle": "Next appointment",
+  "overviewNoAppointment": "No upcoming appointment.",
+  "overviewActiveMedicationsTitle": "Active medications",
+  "overviewNoActiveMedications": "No active medications.",
+  "overviewActiveMedicationsCount": "{count, plural, =1{1 medication} other{{count} medications}}",
+  "@overviewActiveMedicationsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "moreAppointments": "Appointments",
+  "moreMedications": "Medications"
 }
