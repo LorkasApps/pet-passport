@@ -196,12 +196,14 @@ class _FilterRow extends StatelessWidget {
                   child: Text(l.alltagFilterRangeLabel(d)),
                 ),
             ],
-            child: InputDecorator(
-              decoration: const InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
