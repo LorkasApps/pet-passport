@@ -54,6 +54,11 @@ class MoreScreen extends ConsumerWidget {
           onTap: () => context.push('/insurances'),
         ),
         ListTile(
+          leading: const Icon(Icons.timeline_outlined),
+          title: Text(l.moreTimeline),
+          onTap: () => context.push('/timeline'),
+        ),
+        ListTile(
           leading: const Icon(Icons.medical_information_outlined),
           title: Text(l.emergencyTitle),
           onTap: () => context.push('/emergency'),

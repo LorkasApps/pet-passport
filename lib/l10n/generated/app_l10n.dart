@@ -1897,6 +1897,66 @@ abstract class AppL10n {
   /// **'Weight chart'**
   String get moreWeightChart;
 
+  /// No description provided for @moreTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get moreTimeline;
+
+  /// No description provided for @timelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get timelineTitle;
+
+  /// No description provided for @timelineEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in range'**
+  String get timelineEmptyTitle;
+
+  /// No description provided for @timelineEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Events, vaccinations, medications and appointments show up here.'**
+  String get timelineEmptyMessage;
+
+  /// No description provided for @timelineFilterPet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get timelineFilterPet;
+
+  /// No description provided for @timelineFilterAllPets.
+  ///
+  /// In en, this message translates to:
+  /// **'All pets'**
+  String get timelineFilterAllPets;
+
+  /// No description provided for @timelineKindEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get timelineKindEvent;
+
+  /// No description provided for @timelineKindVaccination.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccinations'**
+  String get timelineKindVaccination;
+
+  /// No description provided for @timelineKindMedication.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get timelineKindMedication;
+
+  /// No description provided for @timelineKindAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get timelineKindAppointment;
+
   /// No description provided for @medicationWithFoodLabel.
   ///
   /// In en, this message translates to:

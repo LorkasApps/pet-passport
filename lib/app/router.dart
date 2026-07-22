@@ -33,6 +33,7 @@ import '../features/protocol/presentation/event_detail_screen.dart';
 import '../features/protocol/presentation/event_edit_screen.dart';
 import '../features/settings/application/settings_providers.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/timeline/presentation/timeline_screen.dart';
 import '../features/vaccinations/presentation/vaccination_detail_screen.dart';
 import '../features/vaccinations/presentation/vaccination_edit_screen.dart';
 import '../features/vaccinations/presentation/vaccinations_list_screen.dart';
@@ -281,6 +282,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/export',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const ExportScreen(),
+      ),
+      GoRoute(
+        path: '/timeline',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const TimelineScreen(),
       ),
       GoRoute(
         path: '/pets/:petId/events/new',

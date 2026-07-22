@@ -25,6 +25,21 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
         .watch();
   }
 
+  /// Cross-pet stream, filtered by `startsAt` window. Newest first.
+  /// Recurring appointments are returned by their base row only; occurrence
+  /// expansion is a job for the caller.
+  Stream<List<AppointmentRow>> watchAllInRange({DateTime? from, DateTime? to}) {
+    final query = select(appointments);
+    if (from != null) {
+      query.where((a) => a.startsAt.isBiggerOrEqualValue(from));
+    }
+    if (to != null) {
+      query.where((a) => a.startsAt.isSmallerOrEqualValue(to));
+    }
+    query.orderBy([(a) => OrderingTerm.desc(a.startsAt)]);
+    return query.watch();
+  }
+
   Future<AppointmentRow?> getByUuid(String uuid) {
     return (select(appointments)..where((a) => a.uuid.equals(uuid)))
         .getSingleOrNull();

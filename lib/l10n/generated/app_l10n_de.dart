@@ -1068,6 +1068,37 @@ class AppL10nDe extends AppL10n {
   String get moreWeightChart => 'Gewichtsverlauf';
 
   @override
+  String get moreTimeline => 'Verlauf';
+
+  @override
+  String get timelineTitle => 'Verlauf';
+
+  @override
+  String get timelineEmptyTitle => 'Nichts im Zeitraum';
+
+  @override
+  String get timelineEmptyMessage =>
+      'Ereignisse, Impfungen, Medikamente und Termine erscheinen hier.';
+
+  @override
+  String get timelineFilterPet => 'Tier';
+
+  @override
+  String get timelineFilterAllPets => 'Alle Tiere';
+
+  @override
+  String get timelineKindEvent => 'Ereignisse';
+
+  @override
+  String get timelineKindVaccination => 'Impfungen';
+
+  @override
+  String get timelineKindMedication => 'Medikamente';
+
+  @override
+  String get timelineKindAppointment => 'Termine';
+
+  @override
   String get medicationWithFoodLabel => 'Mit Futter einnehmen';
 
   @override

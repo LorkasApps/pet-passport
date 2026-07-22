@@ -11,6 +11,20 @@ class VaccinationsDao extends DatabaseAccessor<AppDatabase>
     with _$VaccinationsDaoMixin {
   VaccinationsDao(super.db);
 
+  /// Cross-pet stream of administered vaccinations, filtered by
+  /// `administeredAt` window. Newest first.
+  Stream<List<VaccinationRow>> watchAllInRange({DateTime? from, DateTime? to}) {
+    final query = select(vaccinations);
+    if (from != null) {
+      query.where((v) => v.administeredAt.isBiggerOrEqualValue(from));
+    }
+    if (to != null) {
+      query.where((v) => v.administeredAt.isSmallerOrEqualValue(to));
+    }
+    query.orderBy([(v) => OrderingTerm.desc(v.administeredAt)]);
+    return query.watch();
+  }
+
   Stream<List<VaccinationRow>> watchForPet(int petId) {
     return (select(vaccinations)
           ..where((v) => v.petId.equals(petId))

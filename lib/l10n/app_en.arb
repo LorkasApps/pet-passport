@@ -433,6 +433,17 @@
   "moreMedications": "Medications",
   "moreDiet": "Diet",
   "moreWeightChart": "Weight chart",
+  "moreTimeline": "Timeline",
+
+  "timelineTitle": "Timeline",
+  "timelineEmptyTitle": "Nothing in range",
+  "timelineEmptyMessage": "Events, vaccinations, medications and appointments show up here.",
+  "timelineFilterPet": "Pet",
+  "timelineFilterAllPets": "All pets",
+  "timelineKindEvent": "Events",
+  "timelineKindVaccination": "Vaccinations",
+  "timelineKindMedication": "Medications",
+  "timelineKindAppointment": "Appointments",
 
   "medicationWithFoodLabel": "Take with food",
   "medicationWithFoodHint": "Reminder body will include \"with food\".",

@@ -1064,6 +1064,37 @@ class AppL10nEn extends AppL10n {
   String get moreWeightChart => 'Weight chart';
 
   @override
+  String get moreTimeline => 'Timeline';
+
+  @override
+  String get timelineTitle => 'Timeline';
+
+  @override
+  String get timelineEmptyTitle => 'Nothing in range';
+
+  @override
+  String get timelineEmptyMessage =>
+      'Events, vaccinations, medications and appointments show up here.';
+
+  @override
+  String get timelineFilterPet => 'Pet';
+
+  @override
+  String get timelineFilterAllPets => 'All pets';
+
+  @override
+  String get timelineKindEvent => 'Events';
+
+  @override
+  String get timelineKindVaccination => 'Vaccinations';
+
+  @override
+  String get timelineKindMedication => 'Medications';
+
+  @override
+  String get timelineKindAppointment => 'Appointments';
+
+  @override
   String get medicationWithFoodLabel => 'Take with food';
 
   @override

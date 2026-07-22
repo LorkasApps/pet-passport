@@ -348,6 +348,17 @@
   "moreMedications": "Medikamente",
   "moreDiet": "Ernährung",
   "moreWeightChart": "Gewichtsverlauf",
+  "moreTimeline": "Verlauf",
+
+  "timelineTitle": "Verlauf",
+  "timelineEmptyTitle": "Nichts im Zeitraum",
+  "timelineEmptyMessage": "Ereignisse, Impfungen, Medikamente und Termine erscheinen hier.",
+  "timelineFilterPet": "Tier",
+  "timelineFilterAllPets": "Alle Tiere",
+  "timelineKindEvent": "Ereignisse",
+  "timelineKindVaccination": "Impfungen",
+  "timelineKindMedication": "Medikamente",
+  "timelineKindAppointment": "Termine",
 
   "medicationWithFoodLabel": "Mit Futter einnehmen",
   "medicationWithFoodHint": "Erinnerung fügt „mit Futter“ am Ende hinzu.",

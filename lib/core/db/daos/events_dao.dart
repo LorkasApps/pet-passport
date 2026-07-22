@@ -33,6 +33,19 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
     return query.watch();
   }
 
+  /// Cross-pet stream, filtered by occurredAt window. Newest first.
+  Stream<List<EventRow>> watchAllInRange({DateTime? from, DateTime? to}) {
+    final query = select(events);
+    if (from != null) {
+      query.where((e) => e.occurredAt.isBiggerOrEqualValue(from));
+    }
+    if (to != null) {
+      query.where((e) => e.occurredAt.isSmallerOrEqualValue(to));
+    }
+    query.orderBy([(e) => OrderingTerm.desc(e.occurredAt)]);
+    return query.watch();
+  }
+
   Future<EventRow?> getByUuid(String uuid) {
     return (select(events)..where((e) => e.uuid.equals(uuid)))
         .getSingleOrNull();

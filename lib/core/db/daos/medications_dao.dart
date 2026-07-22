@@ -81,6 +81,23 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
 
   // --- intakes ---
 
+  /// Cross-medication stream of intakes, filtered by `takenAt` window.
+  /// Newest first. Used by the cross-pet timeline.
+  Stream<List<MedicationIntakeRow>> watchAllIntakesInRange({
+    DateTime? from,
+    DateTime? to,
+  }) {
+    final query = select(medicationIntakes);
+    if (from != null) {
+      query.where((i) => i.takenAt.isBiggerOrEqualValue(from));
+    }
+    if (to != null) {
+      query.where((i) => i.takenAt.isSmallerOrEqualValue(to));
+    }
+    query.orderBy([(i) => OrderingTerm.desc(i.takenAt)]);
+    return query.watch();
+  }
+
   Stream<List<MedicationIntakeRow>> watchIntakesFor(int medicationId) {
     return (select(medicationIntakes)
           ..where((i) => i.medicationId.equals(medicationId))
