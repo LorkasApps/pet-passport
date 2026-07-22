@@ -1,0 +1,16 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        generate_for:
+          - lib/core/db/**.dart
+        options:
+          store_date_time_values_as_text: false
+          named_parameters: true
+          fatal_warnings: false
+      json_serializable:
+        generate_for:
+          - lib/**/*.dart
+        options:
+          explicit_to_json: true
+          field_rename: snake
