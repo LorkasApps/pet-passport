@@ -1171,6 +1171,12 @@ abstract class AppL10n {
   /// **'All'**
   String get alltagFilterAll;
 
+  /// No description provided for @alltagFilterTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get alltagFilterTypeLabel;
+
   /// No description provided for @alltagFilterRangeLabel.
   ///
   /// In en, this message translates to:

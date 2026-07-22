@@ -213,6 +213,7 @@
   "eventActivityTypeOther": "Sonstiges",
 
   "alltagFilterAll": "Alle",
+  "alltagFilterTypeLabel": "Typ",
   "alltagFilterRangeLabel": "Zeitraum: {days} Tage",
   "alltagNoEventsForFilter": "Keine Einträge im aktuellen Filter.",
   "alltagAddEventFabTooltip": "Eintrag hinzufügen",

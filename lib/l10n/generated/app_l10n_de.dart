@@ -635,6 +635,9 @@ class AppL10nDe extends AppL10n {
   String get alltagFilterAll => 'Alle';
 
   @override
+  String get alltagFilterTypeLabel => 'Typ';
+
+  @override
   String alltagFilterRangeLabel(int days) {
     return 'Zeitraum: $days Tage';
   }

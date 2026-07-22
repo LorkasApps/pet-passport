@@ -150,56 +150,71 @@ class _FilterRow extends StatelessWidget {
     final l = AppL10n.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: Column(
+      child: Row(
         children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _typeChip(context, null, l.alltagFilterAll),
+          Expanded(
+            child: DropdownButtonFormField<EventType?>(
+              initialValue: selected,
+              isDense: true,
+              decoration: InputDecoration(
+                labelText: l.alltagFilterTypeLabel,
+                prefixIcon: Icon(
+                  selected == null ? Icons.filter_alt_outlined : _iconFor(selected!),
+                ),
+                isDense: true,
+                border: const OutlineInputBorder(),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+              items: [
+                DropdownMenuItem<EventType?>(
+                  value: null,
+                  child: Text(l.alltagFilterAll),
+                ),
                 for (final t in EventType.values)
-                  _typeChip(context, t, _labelFor(l, t)),
-              ],
-            ),
-          ),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: PopupMenuButton<int>(
-              initialValue: rangeDays,
-              onSelected: onRangeChanged,
-              itemBuilder: (_) => [
-                for (final d in const [7, 30, 90, 365])
-                  PopupMenuItem<int>(
-                    value: d,
-                    child: Text(l.alltagFilterRangeLabel(d)),
+                  DropdownMenuItem<EventType?>(
+                    value: t,
+                    child: Row(children: [
+                      Icon(_iconFor(t), size: 18),
+                      const SizedBox(width: 8),
+                      Text(_labelFor(l, t)),
+                    ]),
                   ),
               ],
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.date_range_outlined, size: 18),
-                    const SizedBox(width: 8),
-                    Text(l.alltagFilterRangeLabel(rangeDays)),
-                    const Icon(Icons.arrow_drop_down),
-                  ],
+              onChanged: onChanged,
+            ),
+          ),
+          const SizedBox(width: 8),
+          PopupMenuButton<int>(
+            initialValue: rangeDays,
+            tooltip: l.alltagFilterRangeLabel(rangeDays),
+            onSelected: onRangeChanged,
+            itemBuilder: (_) => [
+              for (final d in const [7, 30, 90, 365])
+                PopupMenuItem<int>(
+                  value: d,
+                  child: Text(l.alltagFilterRangeLabel(d)),
                 ),
+            ],
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.date_range_outlined, size: 18),
+                  const SizedBox(width: 6),
+                  Text(l.alltagFilterRangeLabel(rangeDays)),
+                  const Icon(Icons.arrow_drop_down),
+                ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _typeChip(BuildContext context, EventType? type, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected == type,
-        onSelected: (_) => onChanged(type),
       ),
     );
   }

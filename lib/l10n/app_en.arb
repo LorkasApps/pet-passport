@@ -257,6 +257,7 @@
   "eventActivityTypeOther": "Other",
 
   "alltagFilterAll": "All",
+  "alltagFilterTypeLabel": "Type",
   "alltagFilterRangeLabel": "Range: {days} days",
   "@alltagFilterRangeLabel": {
     "placeholders": {"days": {"type": "int"}}
