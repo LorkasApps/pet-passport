@@ -476,6 +476,52 @@ class AppL10nEn extends AppL10n {
   }
 
   @override
+  String get settingsSecurity => 'Security';
+
+  @override
+  String get settingsAppLock => 'App lock';
+
+  @override
+  String get settingsAppLockHelp =>
+      'Require biometric or device credential to open the app.';
+
+  @override
+  String get settingsAppLockUnavailable =>
+      'No biometric or device credential set up on this device.';
+
+  @override
+  String get appLockReason => 'Unlock Pet Passport';
+
+  @override
+  String get appLockSignInTitle => 'Authentication required';
+
+  @override
+  String get appLockLockedTitle => 'Locked';
+
+  @override
+  String get appLockLockedBody => 'Authenticate to continue.';
+
+  @override
+  String get appLockUnlock => 'Unlock';
+
+  @override
+  String get exportTitle => 'Export';
+
+  @override
+  String get exportJsonTitle => 'JSON backup';
+
+  @override
+  String get exportJsonHelp =>
+      'Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.';
+
+  @override
+  String get exportJsonAction => 'Export & share';
+
+  @override
+  String get exportMediaNote =>
+      'Attached documents and photos are referenced by path. To keep them, back up the app\'s storage folder separately.';
+
+  @override
   String overviewCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

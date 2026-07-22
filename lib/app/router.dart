@@ -6,6 +6,7 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../features/appointments/presentation/termine_screen.dart';
 import '../features/dashboard/presentation/overview_screen.dart';
 import '../features/emergency/presentation/emergency_screen.dart';
+import '../features/export_import/presentation/export_screen.dart';
 import '../features/insurances/presentation/insurance_detail_screen.dart';
 import '../features/insurances/presentation/insurance_edit_screen.dart';
 import '../features/insurances/presentation/insurances_list_screen.dart';
@@ -33,14 +34,21 @@ final _shellAlltagKey = GlobalKey<NavigatorState>();
 final _shellMoreKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final onboardingAsync = ref.watch(onboardingCompletedProvider);
-  final onboardingCompleted = onboardingAsync.valueOrNull ?? false;
+  final onboardingListenable = ValueNotifier<bool>(
+    ref.read(onboardingCompletedProvider).valueOrNull ?? false,
+  );
+  ref.listen<AsyncValue<bool>>(onboardingCompletedProvider, (_, next) {
+    onboardingListenable.value = next.valueOrNull ?? false;
+  });
+  ref.onDispose(onboardingListenable.dispose);
 
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: '/home',
+    refreshListenable: onboardingListenable,
     redirect: (context, state) {
       final loc = state.matchedLocation;
+      final onboardingCompleted = onboardingListenable.value;
       if (!onboardingCompleted && loc != '/onboarding') {
         return '/onboarding';
       }
@@ -163,6 +171,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/emergency',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const EmergencyScreen(),
+      ),
+      GoRoute(
+        path: '/export',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const ExportScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

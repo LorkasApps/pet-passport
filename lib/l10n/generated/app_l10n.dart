@@ -919,6 +919,90 @@ abstract class AppL10n {
   /// **'{days, plural, =1{1 day before} other{{days} days before}}'**
   String settingsReminderLeadValue(int days);
 
+  /// No description provided for @settingsSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get settingsSecurity;
+
+  /// No description provided for @settingsAppLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get settingsAppLock;
+
+  /// No description provided for @settingsAppLockHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Require biometric or device credential to open the app.'**
+  String get settingsAppLockHelp;
+
+  /// No description provided for @settingsAppLockUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No biometric or device credential set up on this device.'**
+  String get settingsAppLockUnavailable;
+
+  /// No description provided for @appLockReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Pet Passport'**
+  String get appLockReason;
+
+  /// No description provided for @appLockSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required'**
+  String get appLockSignInTitle;
+
+  /// No description provided for @appLockLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get appLockLockedTitle;
+
+  /// No description provided for @appLockLockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticate to continue.'**
+  String get appLockLockedBody;
+
+  /// No description provided for @appLockUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get appLockUnlock;
+
+  /// No description provided for @exportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get exportTitle;
+
+  /// No description provided for @exportJsonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON backup'**
+  String get exportJsonTitle;
+
+  /// No description provided for @exportJsonHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.'**
+  String get exportJsonHelp;
+
+  /// No description provided for @exportJsonAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Export & share'**
+  String get exportJsonAction;
+
+  /// No description provided for @exportMediaNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached documents and photos are referenced by path. To keep them, back up the app\'s storage folder separately.'**
+  String get exportMediaNote;
+
   /// No description provided for @overviewCount.
   ///
   /// In en, this message translates to:

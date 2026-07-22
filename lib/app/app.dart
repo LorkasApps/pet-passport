@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../features/pets/application/current_pet_provider.dart';
+import '../features/security/presentation/app_lock_gate.dart';
 import '../features/settings/application/settings_providers.dart';
 import '../features/vaccinations/application/vaccinations_providers.dart';
 import 'router.dart';
@@ -71,6 +72,8 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp> {
       supportedLocales: AppL10n.supportedLocales,
       localizationsDelegates: AppL10n.localizationsDelegates,
       routerConfig: router,
+      builder: (context, child) =>
+          AppLockGate(child: child ?? const SizedBox.shrink()),
       debugShowCheckedModeBanner: false,
     );
   }

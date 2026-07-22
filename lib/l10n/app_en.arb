@@ -198,6 +198,23 @@
     "placeholders": {"days": {"type": "int"}}
   },
 
+  "settingsSecurity": "Security",
+  "settingsAppLock": "App lock",
+  "settingsAppLockHelp": "Require biometric or device credential to open the app.",
+  "settingsAppLockUnavailable": "No biometric or device credential set up on this device.",
+
+  "appLockReason": "Unlock Pet Passport",
+  "appLockSignInTitle": "Authentication required",
+  "appLockLockedTitle": "Locked",
+  "appLockLockedBody": "Authenticate to continue.",
+  "appLockUnlock": "Unlock",
+
+  "exportTitle": "Export",
+  "exportJsonTitle": "JSON backup",
+  "exportJsonHelp": "Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.",
+  "exportJsonAction": "Export & share",
+  "exportMediaNote": "Attached documents and photos are referenced by path. To keep them, back up the app's storage folder separately.",
+
   "overviewCount": "{count, plural, =0{None} =1{1 entry} other{{count} entries}}",
   "@overviewCount": {
     "placeholders": {

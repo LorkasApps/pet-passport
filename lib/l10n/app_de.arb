@@ -163,5 +163,22 @@
   "settingsReminderLead": "Vorlauf Impf-Erinnerung",
   "settingsReminderLeadValue": "{days, plural, =1{1 Tag vorher} other{{days} Tage vorher}}",
 
+  "settingsSecurity": "Sicherheit",
+  "settingsAppLock": "App-Sperre",
+  "settingsAppLockHelp": "Fingerabdruck oder Gerätcode zum Öffnen der App erforderlich.",
+  "settingsAppLockUnavailable": "Auf diesem Gerät ist keine biometrische oder PIN-Authentifizierung eingerichtet.",
+
+  "appLockReason": "Pet Passport entsperren",
+  "appLockSignInTitle": "Authentifizierung erforderlich",
+  "appLockLockedTitle": "Gesperrt",
+  "appLockLockedBody": "Authentifiziere dich, um fortzufahren.",
+  "appLockUnlock": "Entsperren",
+
+  "exportTitle": "Export",
+  "exportJsonTitle": "JSON-Backup",
+  "exportJsonHelp": "Erstellt eine JSON-Datei mit allen Tieren, Tierärzten, Versicherungen und Impfungen. Über Mail, Cloud oder eine andere App teilen.",
+  "exportJsonAction": "Exportieren & teilen",
+  "exportMediaNote": "Angehängte Dokumente und Fotos werden nur per Pfad referenziert. Um sie mitzusichern, den App-Speicherordner separat sichern.",
+
   "overviewCount": "{count, plural, =0{Keine} =1{1 Eintrag} other{{count} Einträge}}"
 }

@@ -479,6 +479,52 @@ class AppL10nDe extends AppL10n {
   }
 
   @override
+  String get settingsSecurity => 'Sicherheit';
+
+  @override
+  String get settingsAppLock => 'App-Sperre';
+
+  @override
+  String get settingsAppLockHelp =>
+      'Fingerabdruck oder Gerätcode zum Öffnen der App erforderlich.';
+
+  @override
+  String get settingsAppLockUnavailable =>
+      'Auf diesem Gerät ist keine biometrische oder PIN-Authentifizierung eingerichtet.';
+
+  @override
+  String get appLockReason => 'Pet Passport entsperren';
+
+  @override
+  String get appLockSignInTitle => 'Authentifizierung erforderlich';
+
+  @override
+  String get appLockLockedTitle => 'Gesperrt';
+
+  @override
+  String get appLockLockedBody => 'Authentifiziere dich, um fortzufahren.';
+
+  @override
+  String get appLockUnlock => 'Entsperren';
+
+  @override
+  String get exportTitle => 'Export';
+
+  @override
+  String get exportJsonTitle => 'JSON-Backup';
+
+  @override
+  String get exportJsonHelp =>
+      'Erstellt eine JSON-Datei mit allen Tieren, Tierärzten, Versicherungen und Impfungen. Über Mail, Cloud oder eine andere App teilen.';
+
+  @override
+  String get exportJsonAction => 'Exportieren & teilen';
+
+  @override
+  String get exportMediaNote =>
+      'Angehängte Dokumente und Fotos werden nur per Pfad referenziert. Um sie mitzusichern, den App-Speicherordner separat sichern.';
+
+  @override
   String overviewCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

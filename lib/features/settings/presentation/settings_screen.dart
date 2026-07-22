@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../security/application/app_lock_providers.dart';
 import '../application/settings_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -37,6 +38,8 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _pickLead(context, ref, l, leadDays),
           ),
+          _SectionHeader(text: l.settingsSecurity),
+          _AppLockTile(),
         ],
       ),
     );
@@ -151,6 +154,33 @@ class SettingsScreen extends ConsumerWidget {
       'en' => l.settingsLanguageEnglish,
       _ => locale.languageCode,
     };
+  }
+}
+
+class _AppLockTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppL10n.of(context);
+    final enabled = ref.watch(appLockEnabledProvider);
+    final canAsync = ref.watch(canAuthenticateProvider);
+    final canAuth = canAsync.valueOrNull ?? false;
+    return SwitchListTile.adaptive(
+      title: Text(l.settingsAppLock),
+      subtitle: Text(
+        canAuth ? l.settingsAppLockHelp : l.settingsAppLockUnavailable,
+      ),
+      value: enabled && canAuth,
+      onChanged: !canAuth
+          ? null
+          : (v) async {
+              await ref.read(appLockEnabledProvider.notifier).set(v);
+              if (v) {
+                // Turning it on shouldn't immediately lock the current
+                // session — the user is already in front of the phone.
+                ref.read(authenticatedProvider.notifier).state = true;
+              }
+            },
+    );
   }
 }
 
