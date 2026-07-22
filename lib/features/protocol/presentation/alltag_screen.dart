@@ -149,7 +149,7 @@ class _FilterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      padding: const EdgeInsets.fromLTRB(12, 20, 12, 8),
       child: Row(
         children: [
           Expanded(
