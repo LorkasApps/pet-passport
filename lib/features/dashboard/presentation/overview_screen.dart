@@ -50,23 +50,40 @@ class _OverviewContent extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Center(child: PetAvatar(pet: pet, radius: 64)),
-        const SizedBox(height: 16),
-        Center(
-          child: Text(
-            pet.name,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Center(child: AgeBadge(pet: pet)),
-        const SizedBox(height: 12),
-        Center(
-          child: FilledButton.tonalIcon(
-            onPressed: () => context.push('/emergency'),
-            icon: const Icon(Icons.medical_information_outlined),
-            label: Text(l.emergencyTitle),
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            PetAvatar(pet: pet, radius: 48),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    pet.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AgeBadge(pet: pet),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => context.push('/emergency'),
+                      icon: const Icon(Icons.medical_information_outlined),
+                      label: Text(l.emergencyTitle),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         _sectionCard(context, children: [
