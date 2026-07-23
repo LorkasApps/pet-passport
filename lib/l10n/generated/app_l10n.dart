@@ -1012,7 +1012,7 @@ abstract class AppL10n {
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:
-  /// **'Export'**
+  /// **'Import / Export'**
   String get exportTitle;
 
   /// No description provided for @exportJsonTitle.

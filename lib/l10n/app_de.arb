@@ -180,7 +180,7 @@
   "appLockLockedBody": "Authentifiziere dich, um fortzufahren.",
   "appLockUnlock": "Entsperren",
 
-  "exportTitle": "Export",
+  "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON-Backup",
   "exportJsonHelp": "Erstellt eine JSON-Datei mit allen Tieren, Tierärzten, Versicherungen und Impfungen. Über Mail, Cloud oder eine andere App teilen.",
   "exportJsonAction": "Exportieren & teilen",

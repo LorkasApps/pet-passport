@@ -215,7 +215,7 @@
   "appLockLockedBody": "Authenticate to continue.",
   "appLockUnlock": "Unlock",
 
-  "exportTitle": "Export",
+  "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON backup",
   "exportJsonHelp": "Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.",
   "exportJsonAction": "Export & share",

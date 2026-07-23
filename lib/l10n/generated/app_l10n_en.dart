@@ -523,7 +523,7 @@ class AppL10nEn extends AppL10n {
   String get appLockUnlock => 'Unlock';
 
   @override
-  String get exportTitle => 'Export';
+  String get exportTitle => 'Import / Export';
 
   @override
   String get exportJsonTitle => 'JSON backup';

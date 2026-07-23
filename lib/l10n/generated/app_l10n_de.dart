@@ -526,7 +526,7 @@ class AppL10nDe extends AppL10n {
   String get appLockUnlock => 'Entsperren';
 
   @override
-  String get exportTitle => 'Export';
+  String get exportTitle => 'Import / Export';
 
   @override
   String get exportJsonTitle => 'JSON-Backup';
