@@ -414,12 +414,12 @@ Jeder Milestone ist eigenständig shipbar. Zwischen Milestones bleibt die App vo
 | CRDT statt LWW                 | Bewusst nicht. LWW ist für Familien-Haushalt ausreichend                                                |
 | Web-Frontend                   | Bewusst nicht. Nur Mobile                                                                                |
 
-### Wirklich offen — bitte vor M1-Start entscheiden
+### Vor M1-Start festgezurrt (2026-07-24)
 
-- [ ] **Datenschutzhinweis-Text**: Wortlaut für Sign-up-Screen + Settings-Seite. Kann im Erstwurf von mir kommen, brauche aber Bestätigung dass er passt.
-- [ ] **Domain für Universal Links** (später relevant, spätestens M7): eigene Domain (`petpassport.example.com` o.ä.) für `apple-app-site-association` + `assetlinks.json`. Für MVP tut's Custom Scheme, aber vorher entscheiden.
-- [ ] **Anzeigename-Pflicht?**: Muss der User beim Login einen Anzeigenamen setzen, oder wird ein Fallback (E-Mail-Prefix) genommen? Betrifft M1-UX.
-- [ ] **Free-Tier-Wecker konkret**: GitHub-Actions läuft auf welchem Repo (dieses hier, oder separates)? Was pingt er (kleiner Health-Check-Endpoint via Supabase-Edge-Function, oder einfach `SELECT 1` per SDK)?
+- **Datenschutzhinweis-Text**: Erstwurf entsteht im M1-Zug als `docs/PRIVACY_NOTICE.md` und wird im Sign-up-Screen gerendert. Inhalt: lokal vs. Cloud getrennt, Supabase EU-Frankfurt, Zweck = Household-Sync, keine Analytics, DSGVO-Rechte (Export + komplett löschen).
+- **Universal Links**: bewusst out-of-scope. Custom Scheme `petpassport://invite/<token>` für Testphase. Nachrüstung erst bei Store-Release.
+- **Anzeigename**: Pflicht. Nach dem Magic-Link-Login zwingender Onboarding-Screen „Wie sollst du in der App heißen?". Kein Skip. E-Mail bleibt privat; Owner sieht sie nur beim Member-Removal-Bestätigen.
+- **Free-Tier-Wecker**: GitHub Action in diesem Repo, alle 5 Tage per `curl` gegen `<SUPABASE_URL>/rest/v1/households?select=id&limit=1` (Anon-Key im Header). RLS liefert leere Antwort zurück — reicht, der DB-Query wurde intern ausgeführt und resettet den 7-Tage-Idle-Timer.
 
 ### Explizite Nicht-Ziele
 
