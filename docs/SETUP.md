@@ -45,6 +45,25 @@ Under the hood this runs:
 
 First launch shows the onboarding flow. Complete it to reach the pet list.
 
+### Cloud mode (M1+, optional)
+
+The app runs in pure-local mode by default. To activate cloud features
+(household sharing, sync), pass the Supabase project credentials at build
+time:
+
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=https://<project-id>.supabase.co \
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=<publishable-key>
+```
+
+Both values come from the Supabase dashboard under
+**Project Settings → API**. Use the **Publishable key** (safe for client
+use, respects RLS), never the **Secret key**. When both env vars are
+empty at build time, the app boots exactly like before — no cloud client
+is initialized. Same command for `flutter build apk` / `flutter build
+appbundle`.
+
 ## Common edit-cycles
 
 - **Changed a Drift table** → `./scripts/dev.sh codegen`

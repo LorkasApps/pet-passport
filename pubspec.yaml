@@ -51,6 +51,11 @@ dependencies:
   # Biometric app-lock
   local_auth: ^2.3.0
 
+  # Cloud backend (M1+: household sharing, sync)
+  supabase_flutter: ^2.8.0
+  # Session-JWT storage for supabase_flutter (backed by Keychain / Keystore)
+  flutter_secure_storage: ^9.2.2
+
   # Charts (weight/growth over time)
   fl_chart: ^0.69.0
 
