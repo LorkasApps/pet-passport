@@ -11,6 +11,7 @@ import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/supabase/current_user.dart';
 import '../../../core/time/time_of_day_json.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
 import '../domain/food_photo.dart';
@@ -21,6 +22,7 @@ class FoodsRepository {
     this._petsDao, {
     this.notifications,
     this.media,
+    this.outbox,
     Uuid? uuid,
     this.expansionHorizon = const Duration(days: 30),
     this.maxOccurrencesPerFood = 90,
@@ -30,9 +32,26 @@ class FoodsRepository {
   final PetsDao _petsDao;
   final NotificationService? notifications;
   final MediaService? media;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
   final Duration expansionHorizon;
   final int maxOccurrencesPerFood;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _foodsDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'foods',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   static const _channelId = 'feeding';
   static const _channelName = 'Feeding';
@@ -107,8 +126,10 @@ class FoodsRepository {
       createdAt: now,
       updatedAt: now,
       updatedByUserId: Value(currentUserId()),
+      householdId: Value(pet.householdId),
     ));
     await _rescheduleFor(foodUuid);
+    await _enqueue(foodUuid);
     return foodUuid;
   }
 
@@ -145,6 +166,7 @@ class FoodsRepository {
     ));
     await notifications?.cancelAllForEntity(entity: 'feed', uuid: uuid);
     await _rescheduleFor(uuid);
+    await _enqueue(uuid);
   }
 
   Future<void> deleteByUuid(String uuid) async {
@@ -159,6 +181,7 @@ class FoodsRepository {
       }
     }
     await _foodsDao.softDeleteByUuid(uuid, DateTime.now());
+    await _enqueue(uuid);
   }
 
   // --- photos ---

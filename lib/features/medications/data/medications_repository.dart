@@ -11,6 +11,7 @@ import '../../../core/supabase/current_user.dart';
 import '../../../core/time/recurrence.dart';
 import '../../../core/time/time_of_day_json.dart';
 import '../../appointments/domain/appointment_enums.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/medication.dart';
 import '../domain/medication_enums.dart';
 import '../domain/medication_intake.dart';
@@ -21,6 +22,7 @@ class MedicationsRepository {
     this._petsDao,
     this._vetsDao, {
     this.notifications,
+    this.outbox,
     Uuid? uuid,
     this.expansionHorizon = const Duration(days: 30),
     this.maxOccurrencesPerMedication = 60,
@@ -30,9 +32,26 @@ class MedicationsRepository {
   final PetsDao _petsDao;
   final VetsDao _vetsDao;
   final NotificationService? notifications;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
   final Duration expansionHorizon;
   final int maxOccurrencesPerMedication;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _medDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'medications',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   static const _channelId = 'medications';
   static const _channelName = 'Medications';
@@ -124,6 +143,7 @@ class MedicationsRepository {
       createdAt: now,
       updatedAt: now,
       updatedByUserId: Value(currentUserId()),
+      householdId: Value(pet.householdId),
     ));
     for (final offset in reminderOffsetsMinutes) {
       await _medDao.insertReminder(MedicationRemindersCompanion.insert(
@@ -131,6 +151,7 @@ class MedicationsRepository {
       ));
     }
     await _rescheduleFor(medUuid);
+    await _enqueue(medUuid);
     return medUuid;
   }
 
@@ -183,11 +204,13 @@ class MedicationsRepository {
     }
     await notifications?.cancelAllForEntity(entity: 'med', uuid: uuid);
     await _rescheduleFor(uuid);
+    await _enqueue(uuid);
   }
 
   Future<void> deleteByUuid(String uuid) async {
     await notifications?.cancelAllForEntity(entity: 'med', uuid: uuid);
     await _medDao.softDeleteByUuid(uuid, DateTime.now());
+    await _enqueue(uuid);
   }
 
   // --- intake ---

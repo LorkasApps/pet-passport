@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../pets/application/pets_providers.dart';
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/vaccinations_repository.dart';
 import '../domain/vaccination.dart';
 
@@ -11,12 +12,14 @@ final vaccinationsRepositoryProvider =
   final notif = ref.watch(notificationServiceProvider);
   final media = ref.watch(mediaServiceProvider);
   final leadDays = ref.watch(reminderLeadDaysProvider);
+  final outbox = ref.watch(syncOutboxProvider);
   return VaccinationsRepository(
     db.vaccinationsDao,
     db.petsDao,
     db.vetsDao,
     notifications: notif,
     media: media,
+    outbox: outbox,
     reminderLead: Duration(days: leadDays),
   );
 });

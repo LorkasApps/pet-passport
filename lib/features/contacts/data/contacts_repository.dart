@@ -5,16 +5,34 @@ import '../../../core/db/daos/contacts_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/contact.dart';
 import '../domain/contact_enums.dart';
 
 class ContactsRepository {
-  ContactsRepository(this._contactsDao, this._petsDao, {Uuid? uuid})
+  ContactsRepository(this._contactsDao, this._petsDao, {this.outbox, Uuid? uuid})
       : _uuid = uuid ?? const Uuid();
 
   final ContactsDao _contactsDao;
   final PetsDao _petsDao;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _contactsDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'contacts',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   Stream<List<Contact>> watchForPetUuid(String petUuid) async* {
     final pet = await _petsDao.getByUuid(petUuid);
@@ -83,7 +101,9 @@ class ContactsRepository {
       createdAt: now,
       updatedAt: now,
       updatedByUserId: Value(currentUserId()),
+      householdId: Value(pet.householdId),
     ));
+    await _enqueue(contactUuid);
     return contactUuid;
   }
 
@@ -114,6 +134,7 @@ class ContactsRepository {
       updatedAt: DateTime.now(),
       updatedByUserId: Value(currentUserId()),
     ));
+    await _enqueue(uuid);
   }
 
   Future<void> setActive(String uuid, bool isActive) async {
@@ -124,10 +145,12 @@ class ContactsRepository {
       updatedAt: DateTime.now(),
       updatedByUserId: Value(currentUserId()),
     ));
+    await _enqueue(uuid);
   }
 
-  Future<void> deleteByUuid(String uuid) {
-    return _contactsDao.softDeleteByUuid(uuid, DateTime.now());
+  Future<void> deleteByUuid(String uuid) async {
+    await _contactsDao.softDeleteByUuid(uuid, DateTime.now());
+    await _enqueue(uuid);
   }
 
   Contact _toDomain(ContactRow row, String petUuid) {

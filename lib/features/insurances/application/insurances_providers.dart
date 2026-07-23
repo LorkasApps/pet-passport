@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../pets/application/pets_providers.dart';
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/insurances_repository.dart';
 import '../domain/insurance.dart';
 
@@ -9,7 +10,8 @@ final insurancesRepositoryProvider =
     Provider<InsurancesRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
-  return InsurancesRepository(db.insurancesDao, db.petsDao, media);
+  final outbox = ref.watch(syncOutboxProvider);
+  return InsurancesRepository(db.insurancesDao, db.petsDao, media, outbox: outbox);
 });
 
 final insurancesForPetProvider =

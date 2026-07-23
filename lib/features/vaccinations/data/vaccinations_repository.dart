@@ -10,6 +10,7 @@ import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/vaccination.dart';
 
 class VaccinationsRepository {
@@ -19,6 +20,7 @@ class VaccinationsRepository {
     this._vetsDao, {
     this.notifications,
     this.media,
+    this.outbox,
     this.reminderLead = const Duration(days: 7),
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
@@ -28,8 +30,25 @@ class VaccinationsRepository {
   final VetsDao _vetsDao;
   final NotificationService? notifications;
   final MediaService? media;
+  final SyncOutbox? outbox;
   final Duration reminderLead;
   final Uuid _uuid;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _vacDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'vaccinations',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   Stream<List<Vaccination>> watchForPetUuid(String petUuid) async* {
     final pet = await _petsDao.getByUuid(petUuid);
@@ -102,6 +121,7 @@ class VaccinationsRepository {
       createdAt: now,
       updatedAt: now,
       updatedByUserId: Value(currentUserId()),
+      householdId: Value(pet.householdId),
     ));
     await _rescheduleReminder(
       uuid: vacUuid,
@@ -109,6 +129,7 @@ class VaccinationsRepository {
       vaccineName: vaccineName,
       nextDueAt: nextDueAt,
     );
+    await _enqueue(vacUuid);
     return vacUuid;
   }
 
@@ -143,6 +164,7 @@ class VaccinationsRepository {
       vaccineName: vaccineName,
       nextDueAt: nextDueAt,
     );
+    await _enqueue(uuid);
   }
 
   /// Re-arms notifications for every upcoming vaccination. Idempotent (IDs
@@ -179,6 +201,7 @@ class VaccinationsRepository {
     }
     await _vacDao.softDeleteByUuid(uuid, DateTime.now());
     await notifications?.cancelVaccinationReminder(uuid);
+    await _enqueue(uuid);
   }
 
   Future<void> _rescheduleReminder({

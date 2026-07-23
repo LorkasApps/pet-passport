@@ -9,6 +9,7 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
 import '../domain/event_payload.dart';
@@ -21,6 +22,7 @@ class EventsRepository {
     this._eventsDao,
     this._petsDao,
     this._media, {
+    this.outbox,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
@@ -28,7 +30,24 @@ class EventsRepository {
   final EventsDao _eventsDao;
   final PetsDao _petsDao;
   final MediaService _media;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _eventsDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'events',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   Stream<List<Event>> watchForPetUuid(
     String petUuid, {
@@ -89,6 +108,7 @@ class EventsRepository {
         createdAt: now,
         updatedAt: now,
         updatedByUserId: Value(currentUserId()),
+        householdId: Value(pet.householdId),
       ));
       if (type == EventType.weight && payload is WeightPayload) {
         await _petsDao.insertWeight(PetWeightsCompanion.insert(
@@ -100,6 +120,7 @@ class EventsRepository {
         ));
       }
     });
+    await _enqueue(eventUuid);
     return eventUuid;
   }
 
@@ -154,6 +175,7 @@ class EventsRepository {
             .go();
       }
     });
+    await _enqueue(uuid);
   }
 
   Future<void> deleteByUuid(String uuid) async {
@@ -173,6 +195,7 @@ class EventsRepository {
       }
       await _eventsDao.softDeleteByUuid(uuid, DateTime.now());
     });
+    await _enqueue(uuid);
   }
 
   // ── Photos ──────────────────────────────────────────────────────────

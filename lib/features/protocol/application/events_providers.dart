@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../pets/application/pets_providers.dart';
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/events_repository.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
@@ -38,7 +39,8 @@ class EventsFilter {
 final eventsRepositoryProvider = Provider<EventsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
-  return EventsRepository(db, db.eventsDao, db.petsDao, media);
+  final outbox = ref.watch(syncOutboxProvider);
+  return EventsRepository(db, db.eventsDao, db.petsDao, media, outbox: outbox);
 });
 
 final eventsForPetProvider =

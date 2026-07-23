@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/vets_repository.dart';
 import '../domain/vet.dart';
 
 final vetsRepositoryProvider = Provider<VetsRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return VetsRepository(db.vetsDao, db.petsDao);
+  final outbox = ref.watch(syncOutboxProvider);
+  return VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 });
 
 final vetsForPetProvider =

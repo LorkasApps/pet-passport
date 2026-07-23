@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../pets/application/pets_providers.dart';
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/foods_repository.dart';
 import '../domain/food.dart';
 import '../domain/food_photo.dart';
@@ -9,11 +10,13 @@ import '../domain/food_photo.dart';
 final foodsRepositoryProvider = Provider<FoodsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final notif = ref.watch(notificationServiceProvider);
+  final outbox = ref.watch(syncOutboxProvider);
   return FoodsRepository(
     db.foodsDao,
     db.petsDao,
     notifications: notif,
     media: ref.watch(mediaServiceProvider),
+    outbox: outbox,
   );
 });
 

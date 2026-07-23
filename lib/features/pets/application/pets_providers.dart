@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/media/media_service.dart';
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/pets_repository.dart';
 import '../domain/pet.dart';
 import '../domain/pet_passport_document.dart';
@@ -13,7 +14,8 @@ final mediaServiceProvider = Provider<MediaService>((ref) {
 final petsRepositoryProvider = Provider<PetsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
-  return PetsRepository(db.petsDao, media: media);
+  final outbox = ref.watch(syncOutboxProvider);
+  return PetsRepository(db.petsDao, media: media, outbox: outbox);
 });
 
 final activePetsProvider = StreamProvider<List<Pet>>((ref) {

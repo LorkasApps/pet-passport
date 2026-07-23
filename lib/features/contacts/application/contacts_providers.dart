@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/contacts_repository.dart';
 import '../domain/contact.dart';
 
 final contactsRepositoryProvider = Provider<ContactsRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return ContactsRepository(db.contactsDao, db.petsDao);
+  final outbox = ref.watch(syncOutboxProvider);
+  return ContactsRepository(db.contactsDao, db.petsDao, outbox: outbox);
 });
 
 final contactsForPetProvider =

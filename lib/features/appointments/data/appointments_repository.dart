@@ -10,6 +10,7 @@ import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/supabase/current_user.dart';
 import '../../../core/time/recurrence.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/appointment.dart';
 import '../domain/appointment_enums.dart';
 import '../domain/appointment_exception.dart';
@@ -22,6 +23,7 @@ class AppointmentsRepository {
     this._vetsDao,
     this._contactsDao, {
     this.notifications,
+    this.outbox,
     Uuid? uuid,
     this.expansionHorizon = const Duration(days: 60),
     this.maxOccurrencesPerAppointment = 30,
@@ -32,9 +34,26 @@ class AppointmentsRepository {
   final VetsDao _vetsDao;
   final ContactsDao _contactsDao;
   final NotificationService? notifications;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
   final Duration expansionHorizon;
   final int maxOccurrencesPerAppointment;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _appDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'appointments',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   static const _channelId = 'appointments';
   static const _channelName = 'Appointments';
@@ -138,6 +157,7 @@ class AppointmentsRepository {
       createdAt: now,
       updatedAt: now,
       updatedByUserId: Value(currentUserId()),
+      householdId: Value(pet.householdId),
     ));
     for (final offset in reminderOffsetsMinutes) {
       await _appDao.insertReminder(AppointmentRemindersCompanion.insert(
@@ -145,6 +165,7 @@ class AppointmentsRepository {
       ));
     }
     await _rescheduleFor(apptUuid);
+    await _enqueue(apptUuid);
     return apptUuid;
   }
 
@@ -199,11 +220,13 @@ class AppointmentsRepository {
     }
     await notifications?.cancelAllForEntity(entity: 'appt', uuid: uuid);
     await _rescheduleFor(uuid);
+    await _enqueue(uuid);
   }
 
   Future<void> deleteByUuid(String uuid) async {
     await notifications?.cancelAllForEntity(entity: 'appt', uuid: uuid);
     await _appDao.softDeleteByUuid(uuid, DateTime.now());
+    await _enqueue(uuid);
   }
 
   Future<void> rescheduleAllUpcomingReminders() async {

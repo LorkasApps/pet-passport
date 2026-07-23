@@ -7,17 +7,35 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/pet.dart';
 import '../domain/pet_enums.dart';
 import '../domain/pet_passport_document.dart';
 
 class PetsRepository {
-  PetsRepository(this._dao, {this.media, Uuid? uuid})
+  PetsRepository(this._dao, {this.media, this.outbox, Uuid? uuid})
       : _uuid = uuid ?? const Uuid();
 
   final PetsDao _dao;
   final MediaService? media;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _dao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'pets',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   Stream<List<Pet>> watchActivePets() {
     return _dao.watchActivePets().map(
@@ -86,6 +104,7 @@ class PetsRepository {
         householdId: Value(householdId),
       ),
     );
+    await _enqueue(petUuid);
     return petUuid;
   }
 
@@ -131,6 +150,7 @@ class PetsRepository {
       updatedByUserId: Value(currentUserId()),
     );
     await _dao.updatePet(updated);
+    await _enqueue(uuid);
   }
 
   /// Update only the vaccination passport number without touching other
@@ -146,6 +166,7 @@ class PetsRepository {
       updatedAt: DateTime.now(),
       updatedByUserId: Value(currentUserId()),
     ));
+    await _enqueue(petUuid);
   }
 
   Stream<List<PetPassportDocument>> watchPassportDocs(String petUuid) async* {
@@ -220,8 +241,9 @@ class PetsRepository {
     );
   }
 
-  Future<void> softDelete(String uuid) {
-    return _dao.softDeleteByUuid(uuid, DateTime.now());
+  Future<void> softDelete(String uuid) async {
+    await _dao.softDeleteByUuid(uuid, DateTime.now());
+    await _enqueue(uuid);
   }
 
   Stream<PetWeight?> watchLatestWeightForUuid(String petUuid) async* {

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../data/medications_repository.dart';
 import '../domain/medication.dart';
 import '../domain/medication_intake.dart';
@@ -8,11 +9,13 @@ import '../domain/medication_intake.dart';
 final medicationsRepositoryProvider = Provider<MedicationsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final notif = ref.watch(notificationServiceProvider);
+  final outbox = ref.watch(syncOutboxProvider);
   return MedicationsRepository(
     db.medicationsDao,
     db.petsDao,
     db.vetsDao,
     notifications: notif,
+    outbox: outbox,
   );
 });
 

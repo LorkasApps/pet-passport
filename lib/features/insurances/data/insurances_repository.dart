@@ -8,6 +8,7 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/insurance.dart';
 
 class InsurancesRepository {
@@ -15,13 +16,31 @@ class InsurancesRepository {
     this._insurancesDao,
     this._petsDao,
     this._media, {
+    this.outbox,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
   final InsurancesDao _insurancesDao;
   final PetsDao _petsDao;
   final MediaService _media;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _insurancesDao.getByUuid(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'insurances',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   Stream<List<Insurance>> watchForPetUuid(String petUuid) async* {
     final pet = await _petsDao.getByUuid(petUuid);
@@ -78,7 +97,9 @@ class InsurancesRepository {
       createdAt: now,
       updatedAt: now,
       updatedByUserId: Value(currentUserId()),
+      householdId: Value(pet.householdId),
     ));
+    await _enqueue(insUuid);
     return insUuid;
   }
 
@@ -103,6 +124,7 @@ class InsurancesRepository {
       updatedAt: DateTime.now(),
       updatedByUserId: Value(currentUserId()),
     ));
+    await _enqueue(uuid);
   }
 
   Future<void> deleteByUuid(String uuid) async {
@@ -115,6 +137,7 @@ class InsurancesRepository {
       await _media.deleteFile(d.filePath);
     }
     await _insurancesDao.softDeleteByUuid(uuid, DateTime.now());
+    await _enqueue(uuid);
   }
 
   Future<String> attachDocument({
