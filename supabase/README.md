@@ -36,3 +36,4 @@ vor `create policy`) — sicher zum Nach-Ausführen wenn ich was ergänze.
 | # | Migration                        | Beschreibung                                            |
 | - | -------------------------------- | ------------------------------------------------------- |
 | 1 | `0001_multiuser_bootstrap.sql`   | households, household_members, invite_codes, user_profiles, RLS, redeem_invite RPC |
+| 2 | `0002_rls_recursion_fix.sql`     | Fix RLS-Rekursion (`42P17`) via `is_member_of` / `is_owner_of` / `my_household_ids` SECURITY-DEFINER-Helper. Policies delegieren Membership-Check an die Helper. |
