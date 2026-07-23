@@ -10,6 +10,8 @@ import '../../../core/widgets/empty_state.dart';
 import '../../pets/application/current_pet_provider.dart';
 import '../../pets/application/pets_providers.dart';
 import '../../pets/domain/pet.dart';
+import '../../pets/domain/pet_enums.dart';
+import '../../pets/presentation/widgets/age_badge.dart';
 import '../../pets/presentation/widgets/pet_avatar.dart';
 import '../../vets/application/vets_providers.dart';
 import '../../vets/domain/vet.dart';
@@ -34,7 +36,7 @@ class EmergencyScreen extends ConsumerWidget {
               title: l.petsListEmpty,
             );
           }
-          final vetsAsync = ref.watch(vetsForPetProvider(pet.uuid));
+          final vetsAsync = ref.watch(activeVetsForPetProvider(pet.uuid));
           final weightAsync =
               ref.watch(latestWeightForPetProvider(pet.uuid));
           final weight = weightAsync.valueOrNull;
@@ -102,6 +104,7 @@ class _PetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppL10n.of(context);
     return Column(
       children: [
         PetAvatar(pet: pet, radius: 48),
@@ -110,7 +113,54 @@ class _PetHeader extends StatelessWidget {
           pet.name,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
+        const SizedBox(height: 8),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            AgeBadge(pet: pet),
+            _SexBadge(sex: pet.sex, isNeutered: pet.isNeutered, l: l),
+          ],
+        ),
       ],
+    );
+  }
+}
+
+class _SexBadge extends StatelessWidget {
+  const _SexBadge({
+    required this.sex,
+    required this.isNeutered,
+    required this.l,
+  });
+
+  final Sex sex;
+  final bool isNeutered;
+  final AppL10n l;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final base = switch (sex) {
+      Sex.male => l.sexMale,
+      Sex.female => l.sexFemale,
+    };
+    final label = '$base · ${isNeutered ? l.sexNeutered : l.sexIntact}';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: scheme.onSecondaryContainer,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }
