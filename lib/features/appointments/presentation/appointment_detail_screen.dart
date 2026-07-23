@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../core/calendar/ics_builder.dart';
 import '../../../core/time/recurrence.dart';
@@ -250,8 +250,8 @@ class AppointmentDetailScreen extends ConsumerWidget {
     );
     final tmp = await getTemporaryDirectory();
     // Slot the uuid into the filename so multiple exports don't overwrite
-    // each other in the share-sheet cache. Title alone is unsafe (may
-    // contain slashes / colons / language-specific chars).
+    // each other in the OS temp dir. Title alone is unsafe (may contain
+    // slashes / colons / language-specific chars).
     final safeTitle = appt.title
         .replaceAll(RegExp(r'[^A-Za-z0-9._\- ]'), '_')
         .trim()
@@ -261,10 +261,16 @@ class AppointmentDetailScreen extends ConsumerWidget {
         : '${safeTitle}_${appt.uuid.substring(0, 6)}.ics';
     final file = File(p.join(tmp.path, name));
     await file.writeAsString(ics);
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'text/calendar')],
-      subject: l.actionAddToCalendarShareSubject,
-    );
+    // OpenFilex fires ACTION_VIEW (Android) / UIDocumentInteraction
+    // (iOS) — calendar apps register there, whereas share_plus's
+    // ACTION_SEND only lists send-oriented targets (Gmail/Drive/…)
+    // and never surfaces Google Calendar.
+    final result = await OpenFilex.open(file.path, type: 'text/calendar');
+    if (result.type != ResultType.done && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l.launchFailed)),
+      );
+    }
   }
 
   Widget _locationRow(BuildContext context, AppL10n l, String address) {
