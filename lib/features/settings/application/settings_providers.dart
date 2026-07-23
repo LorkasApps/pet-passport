@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,17 +23,48 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
 });
 
 // Onboarding
-final onboardingCompletedProvider = StreamProvider<bool>((ref) {
-  final repo = ref.watch(settingsRepositoryProvider);
-  return repo
-      .watchRaw(SettingsKeys.onboardingCompleted)
-      .map((v) => v == 'true');
-});
+//
+// StateNotifier — not a plain StreamProvider — so that a UI action can
+// bump `state = true` synchronously *before* it navigates. Otherwise the
+// router's redirect fires against a stale value: the write commits, but
+// the DB watch stream propagates on a later microtask, so `context.go`
+// still sees "onboarding not complete" and bounces the user right back
+// to /onboarding. That produced a "Skip / Add do nothing" bug when the
+// DB already held a pet but the onboarding flag had somehow reset.
+class OnboardingController extends StateNotifier<bool> {
+  OnboardingController(this._repo) : super(false) {
+    _load();
+    _sub = _repo
+        .watchRaw(SettingsKeys.onboardingCompleted)
+        .listen((v) => state = v == 'true');
+  }
 
-Future<void> markOnboardingCompleted(WidgetRef ref) async {
-  final repo = ref.read(settingsRepositoryProvider);
-  await repo.setRaw(SettingsKeys.onboardingCompleted, 'true');
+  final SettingsRepository _repo;
+  late final StreamSubscription<String?> _sub;
+
+  Future<void> _load() async {
+    final raw = await _repo.getRaw(SettingsKeys.onboardingCompleted);
+    state = raw == 'true';
+  }
+
+  Future<void> markCompleted() async {
+    // Synchronous state bump: any refreshListenable-driven redirect that
+    // runs on the very next frame now sees `true`.
+    state = true;
+    await _repo.setRaw(SettingsKeys.onboardingCompleted, 'true');
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
 }
+
+final onboardingControllerProvider =
+    StateNotifierProvider<OnboardingController, bool>((ref) {
+  return OnboardingController(ref.watch(settingsRepositoryProvider));
+});
 
 // ThemeMode
 class ThemeModeController extends StateNotifier<ThemeMode> {

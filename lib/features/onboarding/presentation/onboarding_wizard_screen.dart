@@ -25,13 +25,13 @@ class _OnboardingWizardScreenState
   }
 
   Future<void> _finishAndGoToAddPet() async {
-    await markOnboardingCompleted(ref);
+    await ref.read(onboardingControllerProvider.notifier).markCompleted();
     if (!mounted) return;
     context.go('/pets/new');
   }
 
   Future<void> _finishAndSkip() async {
-    await markOnboardingCompleted(ref);
+    await ref.read(onboardingControllerProvider.notifier).markCompleted();
     if (!mounted) return;
     context.go('/pets');
   }

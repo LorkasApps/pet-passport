@@ -54,11 +54,14 @@ final _shellAlltagKey = GlobalKey<NavigatorState>();
 final _shellMoreKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
+  // Backed by a synchronous StateNotifier so a UI-triggered
+  // `markCompleted` bumps `state` in the same microtask as the follow-up
+  // `context.go(...)`, and the redirect logic below sees the new value.
   final onboardingListenable = ValueNotifier<bool>(
-    ref.read(onboardingCompletedProvider).valueOrNull ?? false,
+    ref.read(onboardingControllerProvider),
   );
-  ref.listen<AsyncValue<bool>>(onboardingCompletedProvider, (_, next) {
-    onboardingListenable.value = next.valueOrNull ?? false;
+  ref.listen<bool>(onboardingControllerProvider, (_, next) {
+    onboardingListenable.value = next;
   });
   ref.onDispose(onboardingListenable.dispose);
 
