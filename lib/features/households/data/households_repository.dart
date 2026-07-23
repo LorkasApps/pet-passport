@@ -79,11 +79,14 @@ class HouseholdsRepository {
   /// Idempotent bootstrap: if the caller has zero memberships, create a
   /// default household so subsequent screens have something to bind
   /// pets and events to. Called from the sign-up flow after the display
-  /// name is set.
-  Future<void> ensureDefault(String defaultName) async {
+  /// name is set. Returns the id of the household the user should treat
+  /// as their primary — the freshly created one on first sign-in, or the
+  /// oldest existing one on subsequent sign-ins.
+  Future<String> ensureDefault(String defaultName) async {
     final mine = await listMine();
-    if (mine.isNotEmpty) return;
-    await create(defaultName);
+    if (mine.isNotEmpty) return mine.first.id;
+    final created = await create(defaultName);
+    return created.id;
   }
 
   /// Members of one household including each member's display name.
