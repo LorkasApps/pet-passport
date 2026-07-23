@@ -1,0 +1,50 @@
+name: Supabase keep-alive
+
+# Supabase Free-Tier projects pause after ~7 days of DB inactivity. This
+# workflow hits a tiny REST endpoint every 5 days so the pause timer
+# never expires. RLS keeps the response empty for the anon caller — the
+# query still executes internally and resets the timer.
+
+on:
+  schedule:
+    # Every 5 days at 04:17 UTC. Odd minute is intentional: GitHub cron
+    # jitter means anything ending in :00 lands in the peak-traffic
+    # slot; picking a random minute reduces our chance of getting
+    # deprioritized by their scheduler.
+    - cron: '17 4 */5 * *'
+  # Allow manual trigger from the Actions tab for quick smoke tests.
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verify secrets are present
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" ]; then
+            echo "::error::SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY must be set as repo secrets."
+            exit 1
+          fi
+
+      - name: Ping households endpoint
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          # Trim any trailing slash so we always end up with a clean URL.
+          BASE="${SUPABASE_URL%/}"
+          # We select at most one column, one row — enough to run a real
+          # DB query without pulling data. RLS filters everything for
+          # anon anyway, so the response is []; that's a valid keep-alive.
+          # -f makes curl return non-zero on HTTP errors (>=400).
+          curl -sSf \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            "${BASE}/rest/v1/households?select=id&limit=1"
+          echo
+          echo "Keep-alive ping OK."
