@@ -35,6 +35,7 @@ class HouseholdStamper {
       total += await _stampTable(_db.events, householdId, userId);
       total += await _stampTable(_db.eventTags, householdId, userId);
       total += await _stampTable(_db.petWeights, householdId, userId);
+      total += await _stampTable(_db.petDocuments, householdId, userId);
       return total;
     });
   }

@@ -24,6 +24,14 @@ class PetDocumentsDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<PetDocumentRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(petDocuments)..where((d) => d.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Future<int> insertDoc(PetDocumentsCompanion companion) {
     return into(petDocuments).insert(companion);
   }

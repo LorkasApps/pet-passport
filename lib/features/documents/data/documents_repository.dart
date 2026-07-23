@@ -8,6 +8,7 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/sync_outbox.dart';
 import '../domain/pet_document.dart';
 
 class DocumentsRepository {
@@ -15,13 +16,31 @@ class DocumentsRepository {
     this._docsDao,
     this._petsDao,
     this._media, {
+    this.outbox,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
   final PetDocumentsDao _docsDao;
   final PetsDao _petsDao;
   final MediaService _media;
+  final SyncOutbox? outbox;
   final Uuid _uuid;
+
+  /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the row has `householdId == null`
+  /// (cloud opt-out — plan: null = local-only).
+  Future<void> _enqueue(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _docsDao.getByUuidIncludingDeleted(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'pet_documents',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
 
   Stream<List<PetDocument>> watchForPetUuid(String petUuid) async* {
     final pet = await _petsDao.getByUuid(petUuid);
@@ -74,6 +93,7 @@ class DocumentsRepository {
       householdId: Value(pet.householdId),
       updatedByUserId: Value(currentUserId()),
     ));
+    await _enqueue(docUuid);
     return docUuid;
   }
 
@@ -92,6 +112,7 @@ class DocumentsRepository {
       updatedAt: DateTime.now(),
       updatedByUserId: Value(currentUserId()),
     ));
+    await _enqueue(uuid);
   }
 
   Future<void> remove(String docUuid) async {
@@ -103,6 +124,7 @@ class DocumentsRepository {
     // "row soft-deleted, file already gone" edge cases during a slow
     // pull on the other device.
     await _docsDao.softDeleteByUuid(docUuid, DateTime.now());
+    await _enqueue(docUuid);
   }
 
   PetDocument _toDomain(PetDocumentRow row, String petUuid) {
