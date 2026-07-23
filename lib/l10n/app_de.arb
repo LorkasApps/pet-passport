@@ -232,6 +232,12 @@
   "signInWaitingBody": "Wir haben einen Link an {email} geschickt. Öffne die Mail auf diesem Gerät und tippe auf den Link — die App wird sich automatisch anmelden.",
   "signInWaitingBack": "Andere E-Mail",
 
+  "displayNameTitle": "Anzeigename",
+  "displayNameHeadline": "Wie sollst du in der App heißen?",
+  "displayNameBody": "Andere Haushalts-Mitglieder sehen diesen Namen, nicht deine E-Mail-Adresse. Kannst du später ändern.",
+  "displayNameLabel": "Anzeigename",
+  "displayNameTooShort": "Mindestens 2 Zeichen",
+
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON-Backup",
   "exportJsonHelp": "Erstellt eine JSON-Datei mit allen Tieren, Tierärzten, Versicherungen und Impfungen. Über Mail, Cloud oder eine andere App teilen.",

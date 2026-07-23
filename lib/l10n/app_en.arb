@@ -276,6 +276,12 @@
   },
   "signInWaitingBack": "Different email",
 
+  "displayNameTitle": "Display name",
+  "displayNameHeadline": "How should you appear in the app?",
+  "displayNameBody": "Other household members will see this name, not your email. You can change it later.",
+  "displayNameLabel": "Display name",
+  "displayNameTooShort": "At least 2 characters",
+
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON backup",
   "exportJsonHelp": "Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.",

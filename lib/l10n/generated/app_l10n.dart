@@ -1309,6 +1309,36 @@ abstract class AppL10n {
   /// **'Different email'**
   String get signInWaitingBack;
 
+  /// No description provided for @displayNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get displayNameTitle;
+
+  /// No description provided for @displayNameHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'How should you appear in the app?'**
+  String get displayNameHeadline;
+
+  /// No description provided for @displayNameBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Other household members will see this name, not your email. You can change it later.'**
+  String get displayNameBody;
+
+  /// No description provided for @displayNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get displayNameLabel;
+
+  /// No description provided for @displayNameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 2 characters'**
+  String get displayNameTooShort;
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

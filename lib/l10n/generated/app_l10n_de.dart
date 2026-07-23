@@ -691,6 +691,22 @@ class AppL10nDe extends AppL10n {
   String get signInWaitingBack => 'Andere E-Mail';
 
   @override
+  String get displayNameTitle => 'Anzeigename';
+
+  @override
+  String get displayNameHeadline => 'Wie sollst du in der App heißen?';
+
+  @override
+  String get displayNameBody =>
+      'Andere Haushalts-Mitglieder sehen diesen Namen, nicht deine E-Mail-Adresse. Kannst du später ändern.';
+
+  @override
+  String get displayNameLabel => 'Anzeigename';
+
+  @override
+  String get displayNameTooShort => 'Mindestens 2 Zeichen';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

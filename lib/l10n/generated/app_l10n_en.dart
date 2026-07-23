@@ -688,6 +688,22 @@ class AppL10nEn extends AppL10n {
   String get signInWaitingBack => 'Different email';
 
   @override
+  String get displayNameTitle => 'Display name';
+
+  @override
+  String get displayNameHeadline => 'How should you appear in the app?';
+
+  @override
+  String get displayNameBody =>
+      'Other household members will see this name, not your email. You can change it later.';
+
+  @override
+  String get displayNameLabel => 'Display name';
+
+  @override
+  String get displayNameTooShort => 'At least 2 characters';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

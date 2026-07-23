@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../features/auth/application/profile_providers.dart';
 import '../features/auth/presentation/auth_callback_screen.dart';
+import '../features/auth/presentation/display_name_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/appointments/presentation/appointment_detail_screen.dart';
 import '../features/appointments/presentation/appointment_edit_screen.dart';
@@ -67,10 +69,25 @@ final routerProvider = Provider<GoRouter>((ref) {
   });
   ref.onDispose(onboardingListenable.dispose);
 
+  // Second listenable for the display-name gate. Fires when a user
+  // signs in without a profile row (first-cloud-login) or when the row
+  // finally appears (after saveDisplayName). Combined with the
+  // onboarding listenable so a change on either kicks the redirect.
+  final needsDisplayNameListenable =
+      ValueNotifier<bool>(ref.read(needsDisplayNameProvider));
+  ref.listen<bool>(needsDisplayNameProvider, (_, next) {
+    needsDisplayNameListenable.value = next;
+  });
+  ref.onDispose(needsDisplayNameListenable.dispose);
+
+  final refresh = Listenable.merge(
+    <Listenable>[onboardingListenable, needsDisplayNameListenable],
+  );
+
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: '/home',
-    refreshListenable: onboardingListenable,
+    refreshListenable: refresh,
     redirect: (context, state) {
       final loc = state.matchedLocation;
       final raw = state.uri.toString();
@@ -90,6 +107,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         // course inside the screen — skip the onboarding gate below so
         // an un-onboarded new install doesn't bounce out of the flow.
         return null;
+      }
+
+      // Signed in but no profile row yet → force display-name screen.
+      // Sign-in / sign-out surfaces are exempt so the user can bail out
+      // or complete an interrupted auth flow.
+      if (needsDisplayNameListenable.value &&
+          loc != '/profile/setup' &&
+          !loc.startsWith('/auth/')) {
+        return '/profile/setup';
       }
 
       final onboardingCompleted = onboardingListenable.value;
@@ -116,6 +142,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/callback',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const AuthCallbackScreen(),
+      ),
+      GoRoute(
+        path: '/profile/setup',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const DisplayNameScreen(),
       ),
       GoRoute(
         path: '/pets/new',
