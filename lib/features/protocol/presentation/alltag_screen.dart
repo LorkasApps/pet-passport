@@ -88,6 +88,7 @@ class _AlltagScreenState extends ConsumerState<AlltagScreen> {
             ],
           ),
           floatingActionButton: FloatingActionButton(
+            heroTag: 'alltag-fab',
             tooltip: l.alltagAddEventFabTooltip,
             onPressed: () => _pickTypeAndOpenEdit(context, pet.uuid),
             child: const Icon(Icons.add),

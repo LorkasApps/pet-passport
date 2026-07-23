@@ -203,9 +203,10 @@ class _NewFab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppL10n.of(context);
     return PopupMenuButton<String>(
-      icon: const FloatingActionButton(
+      icon: FloatingActionButton(
+        heroTag: 'termine-fab',
         onPressed: null,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       offset: const Offset(0, -120),
       onSelected: (v) {
