@@ -5,7 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../../core/time/recurrence.dart';
+import '../../../core/util/maps_launcher.dart';
+import '../../contacts/application/contacts_providers.dart';
+import '../../contacts/presentation/contacts_list_screen.dart'
+    show contactRoleLabel;
+import '../../vets/application/vets_providers.dart';
 import '../application/appointments_providers.dart';
+import '../domain/appointment_enums.dart';
 
 class AppointmentDetailScreen extends ConsumerWidget {
   const AppointmentDetailScreen({
@@ -82,6 +88,23 @@ class AppointmentDetailScreen extends ConsumerWidget {
             limit: 5,
             exceptions: a.exceptions,
           ).toList();
+
+          // Vet appointments derive their location from the linked vet.
+          // Everything else uses the free-text location column.
+          final vetAsync = a.vetUuid == null
+              ? null
+              : ref.watch(vetByUuidProvider(
+                  (vetUuid: a.vetUuid!, petUuid: petUuid)));
+          final vet = vetAsync?.valueOrNull;
+          final contactAsync = a.contactUuid == null
+              ? null
+              : ref.watch(contactByUuidProvider(
+                  (contactUuid: a.contactUuid!, petUuid: petUuid)));
+          final contact = contactAsync?.valueOrNull;
+          final effectiveLocation = a.type == AppointmentType.vet
+              ? vet?.address
+              : a.location;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -91,8 +114,24 @@ class AppointmentDetailScreen extends ConsumerWidget {
               _kv(context, l.appointmentStartsAtLabel, fmt.format(a.startsAt)),
               _kv(context, l.appointmentDurationLabel,
                   l.durationMinutesValue(a.durationMinutes)),
-              if (a.location != null && a.location!.isNotEmpty)
-                _kv(context, l.appointmentLocationLabel, a.location!),
+              if (vet != null)
+                _link(
+                  context: context,
+                  label: l.appointmentVetLabel,
+                  value: vet.name,
+                  onTap: () => context.push('/pets/$petUuid/vets/${vet.uuid}'),
+                ),
+              if (contact != null)
+                _link(
+                  context: context,
+                  label: l.appointmentContactLabel,
+                  value: '${contact.name} · '
+                      '${contactRoleLabel(l, contact.role)}',
+                  onTap: () => context
+                      .push('/pets/$petUuid/contacts/${contact.uuid}'),
+                ),
+              if (effectiveLocation != null && effectiveLocation.isNotEmpty)
+                _locationRow(context, l, effectiveLocation),
               if (a.notes != null && a.notes!.isNotEmpty)
                 _kv(context, l.notesLabel, a.notes!),
               const SizedBox(height: 16),
@@ -131,6 +170,64 @@ class AppointmentDetailScreen extends ConsumerWidget {
                 )),
           ),
           Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  Widget _link({
+    required BuildContext context,
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(label,
+                style: TextStyle(color: scheme.onSurfaceVariant)),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: onTap,
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: scheme.primary,
+                  decoration: TextDecoration.underline,
+                  decorationColor: scheme.primary.withValues(alpha: 0.4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _locationRow(BuildContext context, AppL10n l, String address) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(l.appointmentLocationLabel,
+                style: TextStyle(color: scheme.onSurfaceVariant)),
+          ),
+          Expanded(child: Text(address)),
+          IconButton(
+            icon: const Icon(Icons.map_outlined),
+            tooltip: l.actionOpenInMaps,
+            onPressed: () => openInMaps(context, address),
+          ),
         ],
       ),
     );

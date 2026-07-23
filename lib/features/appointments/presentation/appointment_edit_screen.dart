@@ -7,6 +7,10 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../../../core/time/recurrence.dart';
 import '../../../core/widgets/recurrence_editor.dart';
 import '../../../core/widgets/reminder_offset_chips.dart';
+import '../../contacts/application/contacts_providers.dart';
+import '../../contacts/domain/contact.dart';
+import '../../contacts/presentation/contacts_list_screen.dart'
+    show contactRoleLabel;
 import '../../vets/application/vets_providers.dart';
 import '../../vets/domain/vet.dart';
 import '../application/appointments_providers.dart';
@@ -41,10 +45,13 @@ class _AppointmentEditScreenState
   AppointmentType _type = AppointmentType.vet;
   DateTime _startsAt = DateTime.now().add(const Duration(hours: 1));
   String? _vetUuid;
+  String? _contactUuid;
   RecurrenceSpec _spec = const RecurrenceSpec.none();
   List<int> _reminderOffsets = const [60];
   bool _prefilled = false;
   bool _saving = false;
+
+  bool get _isVetType => _type == AppointmentType.vet;
 
   @override
   void dispose() {
@@ -65,6 +72,7 @@ class _AppointmentEditScreenState
     _durationCtrl.text = a.durationMinutes.toString();
     _startsAt = a.startsAt;
     _vetUuid = a.vetUuid;
+    _contactUuid = a.contactUuid;
     _spec = RecurrenceSpec(
       freq: a.recurrenceFreq,
       interval: a.recurrenceInterval,
@@ -103,6 +111,13 @@ class _AppointmentEditScreenState
     try {
       final repo = ref.read(appointmentsRepositoryProvider);
       final duration = int.tryParse(_durationCtrl.text.trim()) ?? 60;
+      // Enforce mutually exclusive vet vs. contact based on the current
+      // appointment type. Vet appointments never carry a manual location —
+      // the detail screen derives it from the linked vet's address.
+      final effectiveVetUuid = _isVetType ? _vetUuid : null;
+      final effectiveContactUuid = _isVetType ? null : _contactUuid;
+      final effectiveLocation =
+          _isVetType ? null : _emptyToNull(_locationCtrl.text);
       if (widget.isEdit) {
         await repo.updateAppointment(
           uuid: widget.appointmentUuid!,
@@ -110,8 +125,9 @@ class _AppointmentEditScreenState
           title: _titleCtrl.text.trim(),
           startsAt: _startsAt,
           durationMinutes: duration,
-          vetUuid: _vetUuid,
-          location: _emptyToNull(_locationCtrl.text),
+          vetUuid: effectiveVetUuid,
+          contactUuid: effectiveContactUuid,
+          location: effectiveLocation,
           notes: _emptyToNull(_notesCtrl.text),
           recurrenceFreq: _spec.freq,
           recurrenceInterval: _spec.interval,
@@ -126,8 +142,9 @@ class _AppointmentEditScreenState
           title: _titleCtrl.text.trim(),
           startsAt: _startsAt,
           durationMinutes: duration,
-          vetUuid: _vetUuid,
-          location: _emptyToNull(_locationCtrl.text),
+          vetUuid: effectiveVetUuid,
+          contactUuid: effectiveContactUuid,
+          location: effectiveLocation,
           notes: _emptyToNull(_notesCtrl.text),
           recurrenceFreq: _spec.freq,
           recurrenceInterval: _spec.interval,
@@ -153,6 +170,16 @@ class _AppointmentEditScreenState
         : ref
             .watch(vetByUuidProvider((
               vetUuid: _vetUuid!,
+              petUuid: widget.petUuid,
+            )))
+            .valueOrNull;
+    final contactsAsync =
+        ref.watch(activeContactsForPetProvider(widget.petUuid));
+    final selectedArchivedContact = _contactUuid == null
+        ? null
+        : ref
+            .watch(contactByUuidProvider((
+              contactUuid: _contactUuid!,
               petUuid: widget.petUuid,
             )))
             .valueOrNull;
@@ -213,36 +240,70 @@ class _AppointmentEditScreenState
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 12),
-            vetsAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (vets) {
-                final merged = <Vet>[
-                  ...vets,
-                  if (selectedArchivedVet != null &&
-                      !vets.any((v) => v.uuid == selectedArchivedVet.uuid))
-                    selectedArchivedVet,
-                ];
-                if (merged.isEmpty) return const SizedBox.shrink();
-                return DropdownButtonFormField<String?>(
-                  initialValue: _vetUuid,
-                  decoration: InputDecoration(labelText: l.appointmentVetLabel),
-                  items: [
-                    DropdownMenuItem(
-                        value: null, child: Text(l.optionNone)),
-                    for (final v in merged)
-                      DropdownMenuItem(value: v.uuid, child: Text(v.name)),
-                  ],
-                  onChanged: (v) => setState(() => _vetUuid = v),
-                );
-              },
-            ),
+            if (_isVetType)
+              vetsAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (vets) {
+                  final merged = <Vet>[
+                    ...vets,
+                    if (selectedArchivedVet != null &&
+                        !vets.any((v) => v.uuid == selectedArchivedVet.uuid))
+                      selectedArchivedVet,
+                  ];
+                  if (merged.isEmpty) return const SizedBox.shrink();
+                  return DropdownButtonFormField<String?>(
+                    initialValue: _vetUuid,
+                    decoration:
+                        InputDecoration(labelText: l.appointmentVetLabel),
+                    items: [
+                      DropdownMenuItem(value: null, child: Text(l.optionNone)),
+                      for (final v in merged)
+                        DropdownMenuItem(value: v.uuid, child: Text(v.name)),
+                    ],
+                    onChanged: (v) => setState(() => _vetUuid = v),
+                  );
+                },
+              )
+            else
+              contactsAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (contacts) {
+                  final merged = <Contact>[
+                    ...contacts,
+                    if (selectedArchivedContact != null &&
+                        !contacts.any(
+                            (c) => c.uuid == selectedArchivedContact.uuid))
+                      selectedArchivedContact,
+                  ];
+                  if (merged.isEmpty) return const SizedBox.shrink();
+                  return DropdownButtonFormField<String?>(
+                    initialValue: _contactUuid,
+                    decoration: InputDecoration(
+                        labelText: l.appointmentContactLabel),
+                    items: [
+                      DropdownMenuItem(value: null, child: Text(l.optionNone)),
+                      for (final c in merged)
+                        DropdownMenuItem(
+                          value: c.uuid,
+                          child: Text(
+                              '${c.name} · ${contactRoleLabel(l, c.role)}'),
+                        ),
+                    ],
+                    onChanged: (v) => setState(() => _contactUuid = v),
+                  );
+                },
+              ),
             const SizedBox(height: 12),
-            TextFormField(
-              controller: _locationCtrl,
-              decoration:
-                  InputDecoration(labelText: l.appointmentLocationLabel),
-            ),
+            // Location field only on non-vet appointments. Vet appointments
+            // reuse the linked vet's address so we do not duplicate the data.
+            if (!_isVetType)
+              TextFormField(
+                controller: _locationCtrl,
+                decoration:
+                    InputDecoration(labelText: l.appointmentLocationLabel),
+              ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _notesCtrl,

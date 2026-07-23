@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/appointments_dao.dart';
+import '../../../core/db/daos/contacts_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/daos/vets_dao.dart';
 import '../../../core/db/database.dart';
@@ -17,7 +18,8 @@ class AppointmentsRepository {
   AppointmentsRepository(
     this._appDao,
     this._petsDao,
-    this._vetsDao, {
+    this._vetsDao,
+    this._contactsDao, {
     this.notifications,
     Uuid? uuid,
     this.expansionHorizon = const Duration(days: 60),
@@ -27,6 +29,7 @@ class AppointmentsRepository {
   final AppointmentsDao _appDao;
   final PetsDao _petsDao;
   final VetsDao _vetsDao;
+  final ContactsDao _contactsDao;
   final NotificationService? notifications;
   final Uuid _uuid;
   final Duration expansionHorizon;
@@ -97,6 +100,7 @@ class AppointmentsRepository {
     required DateTime startsAt,
     int durationMinutes = 60,
     String? vetUuid,
+    String? contactUuid,
     String? location,
     String? notes,
     RecurrenceFreq recurrenceFreq = RecurrenceFreq.none,
@@ -110,12 +114,16 @@ class AppointmentsRepository {
     final vetId = vetUuid == null
         ? null
         : (await _vetsDao.getByUuid(vetUuid))?.id;
+    final contactId = contactUuid == null
+        ? null
+        : (await _contactsDao.getByUuid(contactUuid))?.id;
     final now = DateTime.now();
     final apptUuid = _uuid.v4();
     final id = await _appDao.insertAppointment(AppointmentsCompanion.insert(
       uuid: apptUuid,
       petId: pet.id,
       vetId: Value(vetId),
+      contactId: Value(contactId),
       type: type,
       title: title,
       startsAt: startsAt,
@@ -145,6 +153,7 @@ class AppointmentsRepository {
     required DateTime startsAt,
     int durationMinutes = 60,
     String? vetUuid,
+    String? contactUuid,
     String? location,
     String? notes,
     RecurrenceFreq recurrenceFreq = RecurrenceFreq.none,
@@ -160,12 +169,16 @@ class AppointmentsRepository {
     final vetId = vetUuid == null
         ? null
         : (await _vetsDao.getByUuid(vetUuid))?.id;
+    final contactId = contactUuid == null
+        ? null
+        : (await _contactsDao.getByUuid(contactUuid))?.id;
     await _appDao.updateAppointment(existing.copyWith(
       type: type,
       title: title,
       startsAt: startsAt,
       durationMinutes: durationMinutes,
       vetId: Value(vetId),
+      contactId: Value(contactId),
       location: Value(location),
       notes: Value(notes),
       recurrenceFreq: recurrenceFreq,
@@ -275,6 +288,12 @@ class AppointmentsRepository {
       final vet = await _vetsDao.getById(vId);
       vetUuid = vet?.uuid;
     }
+    String? contactUuid;
+    final cId = row.contactId;
+    if (cId != null) {
+      final contact = await _contactsDao.getById(cId);
+      contactUuid = contact?.uuid;
+    }
     final reminderRows = await _appDao.getRemindersFor(row.id);
     final exceptionRows = await _appDao.getExceptionsFor(row.id);
     return Appointment(
@@ -285,6 +304,7 @@ class AppointmentsRepository {
       startsAt: row.startsAt,
       durationMinutes: row.durationMinutes,
       vetUuid: vetUuid,
+      contactUuid: contactUuid,
       location: row.location,
       notes: row.notes,
       recurrenceFreq: row.recurrenceFreq,

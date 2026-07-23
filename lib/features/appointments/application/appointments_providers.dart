@@ -14,6 +14,7 @@ final appointmentsRepositoryProvider = Provider<AppointmentsRepository>((ref) {
     db.appointmentsDao,
     db.petsDao,
     db.vetsDao,
+    db.contactsDao,
     notifications: notif,
   );
 });

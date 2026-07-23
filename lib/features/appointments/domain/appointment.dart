@@ -13,6 +13,7 @@ class Appointment {
     required this.startsAt,
     required this.durationMinutes,
     this.vetUuid,
+    this.contactUuid,
     this.location,
     this.notes,
     this.recurrenceFreq = RecurrenceFreq.none,
@@ -32,6 +33,7 @@ class Appointment {
   final DateTime startsAt;
   final int durationMinutes;
   final String? vetUuid;
+  final String? contactUuid;
   final String? location;
   final String? notes;
   final RecurrenceFreq recurrenceFreq;

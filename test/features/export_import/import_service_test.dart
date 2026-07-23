@@ -48,10 +48,7 @@ void main() {
         sourceDb.petsDao,
         MockMediaService(),
       );
-      final sourceAppointments = AppointmentsRepository(
-        sourceDb.appointmentsDao,
-        sourceDb.petsDao,
-        sourceDb.vetsDao,
+      final sourceAppointments = AppointmentsRepository(sourceDb.appointmentsDao, sourceDb.petsDao, sourceDb.vetsDao, sourceDb.contactsDao,
       );
       final sourceMedications = MedicationsRepository(
         sourceDb.medicationsDao,
@@ -158,10 +155,7 @@ void main() {
       expect(vacs.single.uuid, vacUuid);
       expect(vacs.single.vetUuid, vetUuid);
 
-      final targetAppointments = AppointmentsRepository(
-        targetDb.appointmentsDao,
-        targetDb.petsDao,
-        targetDb.vetsDao,
+      final targetAppointments = AppointmentsRepository(targetDb.appointmentsDao, targetDb.petsDao, targetDb.vetsDao, targetDb.contactsDao,
       );
       final appts = await targetAppointments.watchForPetUuid(petUuid).first;
       expect(appts, hasLength(1));
@@ -237,8 +231,8 @@ void main() {
             sourceDb.vaccinationsDao, sourceDb.petsDao, sourceDb.vetsDao),
         EventsRepository(
             sourceDb, sourceDb.eventsDao, sourceDb.petsDao, MockMediaService()),
-        AppointmentsRepository(
-            sourceDb.appointmentsDao, sourceDb.petsDao, sourceDb.vetsDao),
+        AppointmentsRepository(sourceDb.appointmentsDao, sourceDb.petsDao,
+            sourceDb.vetsDao, sourceDb.contactsDao),
         MedicationsRepository(
             sourceDb.medicationsDao, sourceDb.petsDao, sourceDb.vetsDao),
         sourceFoods,

@@ -43,10 +43,7 @@ void main() {
         db.petsDao,
         mediaService,
       );
-      final appointments = AppointmentsRepository(
-        db.appointmentsDao,
-        db.petsDao,
-        db.vetsDao,
+      final appointments = AppointmentsRepository(db.appointmentsDao, db.petsDao, db.vetsDao, db.contactsDao,
       );
       final medications = MedicationsRepository(
         db.medicationsDao,

@@ -4,13 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../../core/util/maps_launcher.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../medications/application/medications_providers.dart';
 import '../../medications/domain/medication.dart';
 import '../../pets/application/current_pet_provider.dart';
 import '../../vaccinations/application/vaccinations_providers.dart';
 import '../../vaccinations/domain/vaccination.dart';
+import '../../vets/application/vets_providers.dart';
 import '../application/appointments_providers.dart';
+import '../domain/appointment_enums.dart';
 
 class TermineScreen extends ConsumerWidget {
   const TermineScreen({super.key});
@@ -127,21 +130,43 @@ class _Section extends StatelessWidget {
   }
 }
 
-class _AppointmentTile extends StatelessWidget {
+class _AppointmentTile extends ConsumerWidget {
   const _AppointmentTile({required this.item, required this.petUuid});
   final UpcomingAppointment item;
   final String petUuid;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppL10n.of(context);
     final locale = Localizations.localeOf(context).toString();
     final fmt = DateFormat.yMd(locale).add_Hm();
+    // Vet appointments derive their location from the linked vet's
+    // address; other types use the free-text field. The tile only offers
+    // the maps shortcut when there is actually something to route to.
+    final a = item.appointment;
+    final vetAddress = a.type == AppointmentType.vet && a.vetUuid != null
+        ? ref
+            .watch(vetByUuidProvider(
+              (vetUuid: a.vetUuid!, petUuid: petUuid),
+            ))
+            .valueOrNull
+            ?.address
+        : null;
+    final effectiveLocation = a.type == AppointmentType.vet
+        ? vetAddress
+        : a.location;
     return ListTile(
       leading: const CircleAvatar(child: Icon(Icons.event_outlined)),
-      title: Text(item.appointment.title),
+      title: Text(a.title),
       subtitle: Text(fmt.format(item.nextOccurrence)),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.push(
-          '/pets/$petUuid/appointments/${item.appointment.uuid}'),
+      trailing: effectiveLocation != null && effectiveLocation.isNotEmpty
+          ? IconButton(
+              icon: const Icon(Icons.map_outlined),
+              tooltip: l.actionOpenInMaps,
+              onPressed: () => openInMaps(context, effectiveLocation),
+            )
+          : const Icon(Icons.chevron_right),
+      onTap: () =>
+          context.push('/pets/$petUuid/appointments/${a.uuid}'),
     );
   }
 }
