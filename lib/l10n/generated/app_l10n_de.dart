@@ -359,6 +359,37 @@ class AppL10nDe extends AppL10n {
   String get moreContacts => 'Kontakte';
 
   @override
+  String get moreDocuments => 'Dokumente';
+
+  @override
+  String get documentsListTitle => 'Dokumente';
+
+  @override
+  String get documentsEmptyTitle => 'Noch keine Dokumente';
+
+  @override
+  String get documentsEmptyMessage =>
+      'Befunde, wichtige Briefe und andere PDFs oder Fotos an einem Ort.';
+
+  @override
+  String get documentsEmptyAction => 'Dokument hinzufügen';
+
+  @override
+  String get documentsAddAction => 'Datei wählen';
+
+  @override
+  String get documentEditTitle => 'Titel & Notiz';
+
+  @override
+  String get documentFieldTitle => 'Titel (optional)';
+
+  @override
+  String get documentFieldNotes => 'Notiz (optional)';
+
+  @override
+  String get documentFieldOriginalFilename => 'Ursprünglicher Dateiname';
+
+  @override
   String get actionOpenInMaps => 'In Karten öffnen';
 
   @override

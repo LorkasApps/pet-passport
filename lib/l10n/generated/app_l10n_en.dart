@@ -357,6 +357,37 @@ class AppL10nEn extends AppL10n {
   String get moreContacts => 'Contacts';
 
   @override
+  String get moreDocuments => 'Documents';
+
+  @override
+  String get documentsListTitle => 'Documents';
+
+  @override
+  String get documentsEmptyTitle => 'No documents yet';
+
+  @override
+  String get documentsEmptyMessage =>
+      'Findings, important letters and other PDFs or photos in one place.';
+
+  @override
+  String get documentsEmptyAction => 'Add document';
+
+  @override
+  String get documentsAddAction => 'Pick file';
+
+  @override
+  String get documentEditTitle => 'Title & note';
+
+  @override
+  String get documentFieldTitle => 'Title (optional)';
+
+  @override
+  String get documentFieldNotes => 'Note (optional)';
+
+  @override
+  String get documentFieldOriginalFilename => 'Original filename';
+
+  @override
   String get actionOpenInMaps => 'Open in maps';
 
   @override

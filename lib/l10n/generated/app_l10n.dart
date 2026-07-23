@@ -751,6 +751,66 @@ abstract class AppL10n {
   /// **'Contacts'**
   String get moreContacts;
 
+  /// No description provided for @moreDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get moreDocuments;
+
+  /// No description provided for @documentsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsListTitle;
+
+  /// No description provided for @documentsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents yet'**
+  String get documentsEmptyTitle;
+
+  /// No description provided for @documentsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Findings, important letters and other PDFs or photos in one place.'**
+  String get documentsEmptyMessage;
+
+  /// No description provided for @documentsEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add document'**
+  String get documentsEmptyAction;
+
+  /// No description provided for @documentsAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick file'**
+  String get documentsAddAction;
+
+  /// No description provided for @documentEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title & note'**
+  String get documentEditTitle;
+
+  /// No description provided for @documentFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (optional)'**
+  String get documentFieldTitle;
+
+  /// No description provided for @documentFieldNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get documentFieldNotes;
+
+  /// No description provided for @documentFieldOriginalFilename.
+  ///
+  /// In en, this message translates to:
+  /// **'Original filename'**
+  String get documentFieldOriginalFilename;
+
   /// No description provided for @actionOpenInMaps.
   ///
   /// In en, this message translates to:

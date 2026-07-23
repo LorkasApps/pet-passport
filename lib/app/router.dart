@@ -42,6 +42,7 @@ import '../features/vaccinations/presentation/vaccinations_list_screen.dart';
 import '../features/contacts/presentation/contact_detail_screen.dart';
 import '../features/contacts/presentation/contact_edit_screen.dart';
 import '../features/contacts/presentation/contacts_list_screen.dart';
+import '../features/documents/presentation/documents_list_screen.dart';
 import '../features/vets/presentation/vet_detail_screen.dart';
 import '../features/vets/presentation/vet_edit_screen.dart';
 import '../features/vets/presentation/vets_list_screen.dart';
@@ -152,6 +153,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           petUuid: s.pathParameters['petId']!,
           contactUuid: s.pathParameters['contactId'],
         ),
+      ),
+      GoRoute(
+        path: '/documents',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const DocumentsListScreen(),
       ),
       GoRoute(
         path: '/insurances',

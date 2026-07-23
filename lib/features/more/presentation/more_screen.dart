@@ -27,6 +27,11 @@ class MoreScreen extends ConsumerWidget {
           onTap: () => context.push('/passport'),
         ),
         ListTile(
+          leading: const Icon(Icons.folder_outlined),
+          title: Text(l.moreDocuments),
+          onTap: () => context.push('/documents'),
+        ),
+        ListTile(
           leading: const Icon(Icons.vaccines_outlined),
           title: Text(l.vaccinationsListTitle),
           onTap: () => context.push('/vaccinations'),
