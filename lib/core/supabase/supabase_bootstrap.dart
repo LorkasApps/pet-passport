@@ -19,7 +19,9 @@ Future<void> initSupabaseIfConfigured() async {
   if (!SupabaseConfig.isConfigured) return;
   await Supabase.initialize(
     url: SupabaseConfig.url,
-    anonKey: SupabaseConfig.publishableKey,
+    // `publishableKey` replaced `anonKey` in supabase_flutter's post-2024
+    // key nomenclature — same value, renamed param.
+    publishableKey: SupabaseConfig.publishableKey,
     authOptions: const FlutterAuthClientOptions(
       // PKCE is the recommended flow for public mobile clients — no
       // client secret involved, guards the token exchange against
