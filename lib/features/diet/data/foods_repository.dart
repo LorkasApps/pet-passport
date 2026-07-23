@@ -9,6 +9,7 @@ import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../../../core/time/time_of_day_json.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
@@ -105,6 +106,7 @@ class FoodsRepository {
       notes: Value(notes),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     await _rescheduleFor(foodUuid);
     return foodUuid;
@@ -139,6 +141,7 @@ class FoodsRepository {
       remindersEnabled: remindersEnabled,
       notes: Value(notes),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
     await notifications?.cancelAllForEntity(entity: 'feed', uuid: uuid);
     await _rescheduleFor(uuid);

@@ -8,6 +8,7 @@ import '../../../core/db/daos/events_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
 import '../domain/event_payload.dart';
@@ -87,6 +88,7 @@ class EventsRepository {
         payloadJson: Value(_encodePayload(payload)),
         createdAt: now,
         updatedAt: now,
+        updatedByUserId: Value(currentUserId()),
       ));
       if (type == EventType.weight && payload is WeightPayload) {
         await _petsDao.insertWeight(PetWeightsCompanion.insert(
@@ -119,6 +121,7 @@ class EventsRepository {
         note: Value(note),
         payloadJson: Value(_encodePayload(payload)),
         updatedAt: DateTime.now(),
+        updatedByUserId: Value(currentUserId()),
       ));
       // Sync pet_weights row via source_event_uuid. If the event type
       // changed away from weight, drop the linked pet_weights row.
@@ -133,6 +136,7 @@ class EventsRepository {
             weightKg: payload.weightKg,
             note: Value(note),
             sourceEventUuid: Value(uuid),
+            updatedByUserId: Value(currentUserId()),
           ));
         } else {
           await (_db.update(_db.petWeights)
@@ -141,6 +145,7 @@ class EventsRepository {
             measuredAt: Value(occurredAt),
             weightKg: Value(payload.weightKg),
             note: Value(note),
+            updatedByUserId: Value(currentUserId()),
           ));
         }
       } else if (existingWeight != null) {
@@ -234,6 +239,7 @@ class EventsRepository {
       label: trimmed,
       color: Value(color),
       createdAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
     return tagUuid;
   }

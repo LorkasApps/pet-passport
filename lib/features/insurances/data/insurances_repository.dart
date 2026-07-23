@@ -7,6 +7,7 @@ import '../../../core/db/daos/insurances_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/insurance.dart';
 
 class InsurancesRepository {
@@ -76,6 +77,7 @@ class InsurancesRepository {
       notes: Value(notes),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     return insUuid;
   }
@@ -99,6 +101,7 @@ class InsurancesRepository {
       contractEnd: Value(contractEnd),
       notes: Value(notes),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 

@@ -8,6 +8,7 @@ import '../../../core/db/daos/vets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../../../core/time/recurrence.dart';
 import '../domain/appointment.dart';
 import '../domain/appointment_enums.dart';
@@ -136,6 +137,7 @@ class AppointmentsRepository {
       recurrenceUntil: Value(recurrenceUntil),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     for (final offset in reminderOffsetsMinutes) {
       await _appDao.insertReminder(AppointmentRemindersCompanion.insert(
@@ -186,6 +188,7 @@ class AppointmentsRepository {
       recurrenceWeekdays: recurrenceWeekdays,
       recurrenceUntil: Value(recurrenceUntil),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
     // Replace reminder rows wholesale.
     await _appDao.deleteRemindersFor(existing.id);

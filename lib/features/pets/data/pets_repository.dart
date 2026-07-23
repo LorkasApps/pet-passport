@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/pet.dart';
 import '../domain/pet_enums.dart';
 import '../domain/pet_passport_document.dart';
@@ -80,6 +81,7 @@ class PetsRepository {
         notes: Value(notes),
         createdAt: now,
         updatedAt: now,
+        updatedByUserId: Value(currentUserId()),
       ),
     );
     return petUuid;
@@ -124,6 +126,7 @@ class PetsRepository {
       allergies: Value(allergies),
       notes: Value(notes),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     );
     await _dao.updatePet(updated);
   }
@@ -139,6 +142,7 @@ class PetsRepository {
     await _dao.updatePet(row.copyWith(
       vaccinationPassportNumber: Value(number),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 

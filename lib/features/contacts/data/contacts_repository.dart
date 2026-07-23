@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/db/daos/contacts_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/contact.dart';
 import '../domain/contact_enums.dart';
 
@@ -81,6 +82,7 @@ class ContactsRepository {
       isActive: Value(isActive),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     return contactUuid;
   }
@@ -110,6 +112,7 @@ class ContactsRepository {
       notes: Value(notes),
       isActive: isActive,
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 
@@ -119,6 +122,7 @@ class ContactsRepository {
     await _contactsDao.updateContact(existing.copyWith(
       isActive: isActive,
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 

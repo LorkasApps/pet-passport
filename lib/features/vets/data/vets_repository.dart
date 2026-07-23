@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/daos/vets_dao.dart';
 import '../../../core/db/database.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/vet.dart';
 
 class VetsRepository {
@@ -78,6 +79,7 @@ class VetsRepository {
       isActive: Value(isActive),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     return vetUuid;
   }
@@ -105,6 +107,7 @@ class VetsRepository {
       notes: Value(notes),
       isActive: isActive,
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 
@@ -114,6 +117,7 @@ class VetsRepository {
     await _vetsDao.updateVet(existing.copyWith(
       isActive: isActive,
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 

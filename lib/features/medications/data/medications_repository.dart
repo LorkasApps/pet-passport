@@ -7,6 +7,7 @@ import '../../../core/db/daos/vets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../../../core/time/recurrence.dart';
 import '../../../core/time/time_of_day_json.dart';
 import '../../appointments/domain/appointment_enums.dart';
@@ -122,6 +123,7 @@ class MedicationsRepository {
       withFood: Value(withFood),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     for (final offset in reminderOffsetsMinutes) {
       await _medDao.insertReminder(MedicationRemindersCompanion.insert(
@@ -171,6 +173,7 @@ class MedicationsRepository {
       prescribedByVetId: Value(vetId),
       withFood: withFood,
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
     await _medDao.deleteRemindersFor(existing.id);
     for (final offset in reminderOffsetsMinutes) {
@@ -220,6 +223,7 @@ class MedicationsRepository {
       takenAt: takenAt ?? DateTime.now(),
       skipped: Value(skipped),
       note: Value(note),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 

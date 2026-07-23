@@ -9,6 +9,7 @@ import '../../../core/db/daos/vets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/vaccination.dart';
 
 class VaccinationsRepository {
@@ -100,6 +101,7 @@ class VaccinationsRepository {
       notes: Value(notes),
       createdAt: now,
       updatedAt: now,
+      updatedByUserId: Value(currentUserId()),
     ));
     await _rescheduleReminder(
       uuid: vacUuid,
@@ -132,6 +134,7 @@ class VaccinationsRepository {
       batchNumber: Value(batchNumber),
       notes: Value(notes),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
     final pet = await _petsDao.getById(existing.petId);
     await _rescheduleReminder(
