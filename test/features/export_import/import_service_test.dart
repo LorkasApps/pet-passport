@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:pet_passport/core/db/database.dart';
 import 'package:pet_passport/core/media/media_service.dart';
 import 'package:pet_passport/features/appointments/data/appointments_repository.dart';
 import 'package:pet_passport/features/appointments/domain/appointment_enums.dart';
@@ -189,6 +191,73 @@ void main() {
       expect(foods.single.brand, 'Josera');
       expect(foods.single.timesOfDay, ['07:00', '19:00']);
       expect(foods.single.remindersEnabled, isTrue);
+    });
+
+    test('food photos survive export → import round-trip', () async {
+      // Photos rely on file paths from the source device. Round-trip only
+      // needs to preserve the DB row metadata — the on-disk bytes are the
+      // user's responsibility (see media sweep). We inject a photo row
+      // directly to avoid depending on a real filesystem.
+      final sourceDb = newInMemoryDatabase();
+      final sourcePets = PetsRepository(sourceDb.petsDao);
+      final sourceFoods =
+          FoodsRepository(sourceDb.foodsDao, sourceDb.petsDao);
+
+      final petUuid = await sourcePets.createPet(
+        name: 'Balu',
+        species: Species.dog,
+        sex: Sex.male,
+      );
+      final foodUuid = await sourceFoods.createFood(
+        petUuid: petUuid,
+        brand: 'Josera',
+        name: 'Adult',
+        foodType: FoodType.dry,
+        startsAt: DateTime(2026, 6, 1),
+      );
+      // Attach a photo row without touching the filesystem.
+      final foodId = (await sourceDb.foodsDao.getByUuid(foodUuid))!.id;
+      const photoUuid = 'photo-uuid-1';
+      await sourceDb.foodsDao.insertPhoto(FoodPhotosCompanion.insert(
+        uuid: photoUuid,
+        foodId: foodId,
+        filePath: 'foods/$foodUuid/$photoUuid.jpg',
+        mimeType: 'image/jpeg',
+        originalFilename: const Value('bag.jpg'),
+        sizeBytes: const Value(12345),
+        createdAt: DateTime(2026, 6, 2, 12),
+      ));
+
+      final exportService = ExportService(
+        sourcePets,
+        VetsRepository(sourceDb.vetsDao, sourceDb.petsDao),
+        InsurancesRepository(
+            sourceDb.insurancesDao, sourceDb.petsDao, MockMediaService()),
+        VaccinationsRepository(
+            sourceDb.vaccinationsDao, sourceDb.petsDao, sourceDb.vetsDao),
+        EventsRepository(
+            sourceDb, sourceDb.eventsDao, sourceDb.petsDao, MockMediaService()),
+        AppointmentsRepository(
+            sourceDb.appointmentsDao, sourceDb.petsDao, sourceDb.vetsDao),
+        MedicationsRepository(
+            sourceDb.medicationsDao, sourceDb.petsDao, sourceDb.vetsDao),
+        sourceFoods,
+      );
+      final jsonString = jsonEncode(await exportService.buildSnapshot());
+
+      final targetDb = newInMemoryDatabase();
+      final summary =
+          await ImportService(targetDb).importFromJsonString(jsonString);
+      expect(summary.errors, isEmpty);
+      expect(summary.foodsInserted, 1);
+
+      final targetFoods = FoodsRepository(targetDb.foodsDao, targetDb.petsDao);
+      final photos = await targetFoods.watchPhotos(foodUuid).first;
+      expect(photos, hasLength(1));
+      expect(photos.single.uuid, photoUuid);
+      expect(photos.single.filePath, 'foods/$foodUuid/$photoUuid.jpg');
+      expect(photos.single.originalFilename, 'bag.jpg');
+      expect(photos.single.sizeBytes, 12345);
     });
   });
 }

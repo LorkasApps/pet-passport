@@ -1,20 +1,25 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/foods_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
+import '../../../core/media/media_service.dart';
 import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/time/time_of_day_json.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
+import '../domain/food_photo.dart';
 
 class FoodsRepository {
   FoodsRepository(
     this._foodsDao,
     this._petsDao, {
     this.notifications,
+    this.media,
     Uuid? uuid,
     this.expansionHorizon = const Duration(days: 30),
     this.maxOccurrencesPerFood = 90,
@@ -23,6 +28,7 @@ class FoodsRepository {
   final FoodsDao _foodsDao;
   final PetsDao _petsDao;
   final NotificationService? notifications;
+  final MediaService? media;
   final Uuid _uuid;
   final Duration expansionHorizon;
   final int maxOccurrencesPerFood;
@@ -140,7 +146,78 @@ class FoodsRepository {
 
   Future<void> deleteByUuid(String uuid) async {
     await notifications?.cancelAllForEntity(entity: 'feed', uuid: uuid);
+    // Best-effort: wipe on-disk photos before dropping the row so nothing
+    // is orphaned if the media sweep never runs.
+    final row = await _foodsDao.getByUuid(uuid);
+    if (row != null && media != null) {
+      final photoRows = await _foodsDao.watchPhotosForFood(row.id).first;
+      for (final p in photoRows) {
+        await media!.deleteFile(p.filePath);
+      }
+    }
     await _foodsDao.deleteByUuid(uuid);
+  }
+
+  // --- photos ---
+
+  Stream<List<FoodPhoto>> watchPhotos(String foodUuid) async* {
+    final row = await _foodsDao.getByUuid(foodUuid);
+    if (row == null) {
+      yield const [];
+      return;
+    }
+    yield* _foodsDao.watchPhotosForFood(row.id).map(
+          (rows) => rows.map(_toDomainPhoto).toList(growable: false),
+        );
+  }
+
+  Future<String> attachPhoto({
+    required String foodUuid,
+    required File source,
+    required String mimeType,
+    String? originalFilename,
+    int? sizeBytes,
+  }) async {
+    final m = media;
+    if (m == null) {
+      throw StateError('MediaService required to attach food photos.');
+    }
+    final row = await _foodsDao.getByUuid(foodUuid);
+    if (row == null) throw StateError('Food with uuid=$foodUuid not found');
+    final photoUuid = _uuid.v4();
+    final relative = await m.saveFoodPhoto(
+      foodUuid: foodUuid,
+      photoUuid: photoUuid,
+      source: source,
+    );
+    await _foodsDao.insertPhoto(FoodPhotosCompanion.insert(
+      uuid: photoUuid,
+      foodId: row.id,
+      filePath: relative,
+      mimeType: mimeType,
+      originalFilename: Value(originalFilename),
+      sizeBytes: Value(sizeBytes),
+      createdAt: DateTime.now(),
+    ));
+    return photoUuid;
+  }
+
+  Future<void> removePhoto(String photoUuid) async {
+    final row = await _foodsDao.getPhotoByUuid(photoUuid);
+    if (row == null) return;
+    await media?.deleteFile(row.filePath);
+    await _foodsDao.deletePhotoByUuid(photoUuid);
+  }
+
+  FoodPhoto _toDomainPhoto(FoodPhotoRow row) {
+    return FoodPhoto(
+      uuid: row.uuid,
+      filePath: row.filePath,
+      mimeType: row.mimeType,
+      originalFilename: row.originalFilename,
+      sizeBytes: row.sizeBytes,
+      createdAt: row.createdAt,
+    );
   }
 
   Future<void> rescheduleAllUpcomingReminders() async {

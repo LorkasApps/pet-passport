@@ -1,11 +1,12 @@
 import 'package:drift/drift.dart';
 
 import '../database.dart';
+import '../tables/food_photos_table.dart';
 import '../tables/foods_table.dart';
 
 part 'foods_dao.g.dart';
 
-@DriftAccessor(tables: [Foods])
+@DriftAccessor(tables: [Foods, FoodPhotos])
 class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
   FoodsDao(super.db);
 
@@ -55,5 +56,31 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
           ..where((f) =>
               f.isActive.equals(true) & f.remindersEnabled.equals(true)))
         .get();
+  }
+
+  // --- photos ---
+
+  Stream<List<FoodPhotoRow>> watchPhotosForFood(int foodId) {
+    return (select(foodPhotos)
+          ..where((p) => p.foodId.equals(foodId))
+          ..orderBy([(p) => OrderingTerm.asc(p.createdAt)]))
+        .watch();
+  }
+
+  Future<FoodPhotoRow?> getPhotoByUuid(String uuid) {
+    return (select(foodPhotos)..where((p) => p.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
+  Future<int> insertPhoto(FoodPhotosCompanion companion) {
+    return into(foodPhotos).insert(companion);
+  }
+
+  Future<int> deletePhotoByUuid(String uuid) {
+    return (delete(foodPhotos)..where((p) => p.uuid.equals(uuid))).go();
+  }
+
+  Future<int> deletePhotosForFood(int foodId) {
+    return (delete(foodPhotos)..where((p) => p.foodId.equals(foodId))).go();
   }
 }

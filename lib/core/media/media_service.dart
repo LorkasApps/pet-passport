@@ -102,6 +102,20 @@ class MediaService {
     );
   }
 
+  /// Copies [source] to `<media>/foods/<foodUuid>/<photoUuid><ext>` and
+  /// returns the relative path.
+  Future<String> saveFoodPhoto({
+    required String foodUuid,
+    required String photoUuid,
+    required File source,
+  }) async {
+    return _copyDocument(
+      source: source,
+      relativeDir: p.join('foods', foodUuid),
+      docUuid: photoUuid,
+    );
+  }
+
   /// Copies [source] to `<media>/pets/<petUuid>/passport/<docUuid><ext>` and
   /// returns the relative path. Passport docs live under the pet folder so
   /// the startup sweep prunes them together with a deleted pet.
@@ -141,6 +155,10 @@ class MediaService {
     await _sweepDir(
       p.join(root.path, 'events'),
       (uuid) async => (await db.eventsDao.getByUuid(uuid)) != null,
+    );
+    await _sweepDir(
+      p.join(root.path, 'foods'),
+      (uuid) async => (await db.foodsDao.getByUuid(uuid)) != null,
     );
   }
 

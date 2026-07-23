@@ -406,8 +406,9 @@ def build_snapshot() -> dict:
     medications = [med_active, med_finished]
 
     # --- foods: 1 active + 1 old (for history section) ---
+    food_current_uuid = new_uuid()
     food_current = {
-        "uuid": new_uuid(),
+        "uuid": food_current_uuid,
         "brand": "Josera",
         "name": "Adult Sensitive",
         "food_type": "dry",
@@ -419,6 +420,16 @@ def build_snapshot() -> dict:
         "ends_at": None,
         "reminders_enabled": True,
         "notes": "Verträgt er super, keine Magenprobleme mehr.",
+        "photos": [
+            {
+                "uuid": new_uuid(),
+                "file_path": f"foods/{food_current_uuid}/bag.jpg",
+                "mime_type": "image/jpeg",
+                "original_filename": "josera_bag.jpg",
+                "size_bytes": 184320,
+                "created_at": iso(now - timedelta(days=90)),
+            },
+        ],
         "created_at": iso(now - timedelta(days=90)),
         "updated_at": iso(now - timedelta(days=1)),
     }
@@ -435,6 +446,7 @@ def build_snapshot() -> dict:
         "ends_at": iso(now - timedelta(days=91)),
         "reminders_enabled": False,
         "notes": "Zu proteinreich — auf Sensitive umgestellt.",
+        "photos": [],
         "created_at": iso(now - timedelta(days=400)),
         "updated_at": iso(now - timedelta(days=91)),
     }

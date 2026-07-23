@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../pets/application/pets_providers.dart';
 import '../../settings/application/settings_providers.dart';
 import '../data/foods_repository.dart';
 import '../domain/food.dart';
+import '../domain/food_photo.dart';
 
 final foodsRepositoryProvider = Provider<FoodsRepository>((ref) {
   final db = ref.watch(databaseProvider);
@@ -11,6 +13,7 @@ final foodsRepositoryProvider = Provider<FoodsRepository>((ref) {
     db.foodsDao,
     db.petsDao,
     notifications: notif,
+    media: ref.watch(mediaServiceProvider),
   );
 });
 
@@ -30,4 +33,9 @@ final foodByUuidProvider =
   return ref
       .watch(foodsRepositoryProvider)
       .watchByUuid(args.foodUuid, args.petUuid);
+});
+
+final foodPhotosProvider =
+    StreamProvider.family<List<FoodPhoto>, String>((ref, foodUuid) {
+  return ref.watch(foodsRepositoryProvider).watchPhotos(foodUuid);
 });

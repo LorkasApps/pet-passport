@@ -1,12 +1,18 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../pets/application/pets_providers.dart';
 import '../application/foods_providers.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
+import '../domain/food_photo.dart';
 
 class FoodEditScreen extends ConsumerStatefulWidget {
   const FoodEditScreen({
@@ -38,6 +44,10 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
   DateTime? _endsAt;
   bool _isActive = true;
   bool _remindersEnabled = false;
+  // Files picked before the food has a uuid — flushed in _save() after
+  // createFood() returns. Only used on new entries; edit mode attaches
+  // straight through the repository.
+  final List<_PendingPhoto> _pendingPhotos = [];
   bool _prefilled = false;
   bool _saving = false;
 
@@ -115,9 +125,11 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
               _portionCtrl.text.trim().replaceAll(',', '.')) ??
           0;
       final freqPerDay = int.tryParse(_freqPerDayCtrl.text.trim()) ?? 1;
+      String foodUuid;
       if (widget.isEdit) {
+        foodUuid = widget.foodUuid!;
         await repo.updateFood(
-          uuid: widget.foodUuid!,
+          uuid: foodUuid,
           brand: _brandCtrl.text.trim(),
           name: _nameCtrl.text.trim(),
           foodType: _foodType,
@@ -131,7 +143,7 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
           notes: _emptyToNull(_notesCtrl.text),
         );
       } else {
-        await repo.createFood(
+        foodUuid = await repo.createFood(
           petUuid: widget.petUuid,
           brand: _brandCtrl.text.trim(),
           name: _nameCtrl.text.trim(),
@@ -145,6 +157,15 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
           remindersEnabled: _remindersEnabled,
           notes: _emptyToNull(_notesCtrl.text),
         );
+        for (final p in _pendingPhotos) {
+          await repo.attachPhoto(
+            foodUuid: foodUuid,
+            source: p.file,
+            mimeType: p.mimeType,
+            originalFilename: p.displayName,
+            sizeBytes: p.sizeBytes,
+          );
+        }
       }
       if (mounted) context.pop();
     } finally {
@@ -176,6 +197,59 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
         .read(foodsRepositoryProvider)
         .deleteByUuid(widget.foodUuid!);
     if (mounted) context.pop();
+  }
+
+  Future<void> _attachPhoto() async {
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+    );
+    if (picked == null || picked.files.isEmpty) return;
+    final file = picked.files.single;
+    final path = file.path;
+    if (path == null) return;
+    final mime = _mimeFor(file.extension);
+    if (widget.isEdit) {
+      await ref.read(foodsRepositoryProvider).attachPhoto(
+            foodUuid: widget.foodUuid!,
+            source: File(path),
+            mimeType: mime,
+            originalFilename: file.name,
+            sizeBytes: file.size,
+          );
+    } else {
+      setState(() => _pendingPhotos.add(_PendingPhoto(
+            file: File(path),
+            displayName: file.name,
+            mimeType: mime,
+            sizeBytes: file.size,
+          )));
+    }
+  }
+
+  Future<void> _openPhoto(String relativePath) async {
+    final absolute = await ref.read(mediaServiceProvider).resolve(relativePath);
+    final result = await OpenFilex.open(absolute);
+    if (result.type != ResultType.done && mounted) {
+      final l = AppL10n.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l.launchFailed)),
+      );
+    }
+  }
+
+  String _mimeFor(String? ext) {
+    switch (ext?.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   @override
@@ -321,6 +395,22 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
               decoration: InputDecoration(labelText: l.notesLabel),
               maxLines: 3,
             ),
+            const SizedBox(height: 24),
+            _PhotoSection(
+              savedPhotos: widget.isEdit
+                  ? (ref
+                          .watch(foodPhotosProvider(widget.foodUuid!))
+                          .valueOrNull ??
+                      const [])
+                  : const [],
+              pending: _pendingPhotos,
+              onAdd: _attachPhoto,
+              onOpenSaved: _openPhoto,
+              onRemoveSaved: (uuid) =>
+                  ref.read(foodsRepositoryProvider).removePhoto(uuid),
+              onRemovePending: (i) =>
+                  setState(() => _pendingPhotos.removeAt(i)),
+            ),
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: _saving ? null : _save,
@@ -330,6 +420,97 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PendingPhoto {
+  const _PendingPhoto({
+    required this.file,
+    required this.displayName,
+    required this.mimeType,
+    required this.sizeBytes,
+  });
+
+  final File file;
+  final String displayName;
+  final String mimeType;
+  final int sizeBytes;
+}
+
+class _PhotoSection extends StatelessWidget {
+  const _PhotoSection({
+    required this.savedPhotos,
+    required this.pending,
+    required this.onAdd,
+    required this.onOpenSaved,
+    required this.onRemoveSaved,
+    required this.onRemovePending,
+  });
+
+  final List<FoodPhoto> savedPhotos;
+  final List<_PendingPhoto> pending;
+  final VoidCallback onAdd;
+  final ValueChanged<String> onOpenSaved;
+  final ValueChanged<String> onRemoveSaved;
+  final ValueChanged<int> onRemovePending;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppL10n.of(context);
+    final chips = <Widget>[
+      for (final p in savedPhotos)
+        InputChip(
+          avatar: const Icon(Icons.image_outlined, size: 18),
+          label: Text(
+            p.originalFilename ?? p.uuid.substring(0, 6),
+            style: const TextStyle(fontSize: 12),
+          ),
+          onPressed: () => onOpenSaved(p.filePath),
+          onDeleted: () => onRemoveSaved(p.uuid),
+        ),
+      for (var i = 0; i < pending.length; i++)
+        Chip(
+          avatar: const Icon(Icons.hourglass_top_outlined, size: 18),
+          label: Text(
+            pending[i].displayName,
+            style: const TextStyle(fontSize: 12),
+          ),
+          onDeleted: () => onRemovePending(i),
+        ),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l.eventPhotosHeader,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              label: Text(l.eventPhotoAdd),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (chips.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              '—',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else
+          Wrap(spacing: 8, runSpacing: 8, children: chips),
+      ],
     );
   }
 }

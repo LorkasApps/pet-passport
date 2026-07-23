@@ -23,6 +23,7 @@ import 'tables/event_photos_table.dart';
 import 'tables/event_tag_links_table.dart';
 import 'tables/event_tags_table.dart';
 import 'tables/events_table.dart';
+import 'tables/food_photos_table.dart';
 import 'tables/foods_table.dart';
 import 'tables/insurance_documents_table.dart';
 import 'tables/insurances_table.dart';
@@ -59,6 +60,7 @@ part 'database.g.dart';
     MedicationReminders,
     MedicationIntakes,
     Foods,
+    FoodPhotos,
     PetPassportDocuments,
   ],
   daos: [
@@ -79,7 +81,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -138,6 +140,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 11 && to >= 11) {
             await m.addColumn(vets, vets.isActive);
+          }
+          if (from < 12 && to >= 12) {
+            await m.createTable(foodPhotos);
           }
         },
         beforeOpen: (details) async {

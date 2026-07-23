@@ -1022,8 +1022,9 @@ class ImportService {
           ..where((f) => f.uuid.equals(uuid)))
         .getSingleOrNull();
     final now = DateTime.now();
+    final int foodId;
     if (existing == null) {
-      final id = await _db.into(_db.foods).insert(FoodsCompanion.insert(
+      foodId = await _db.into(_db.foods).insert(FoodsCompanion.insert(
             uuid: uuid,
             petId: petId,
             brand: Value((raw['brand'] as String?) ?? ''),
@@ -1044,27 +1045,54 @@ class ImportService {
             updatedAt: now,
           ));
       onInsert();
-      return id;
+    } else {
+      await (_db.update(_db.foods)..where((f) => f.uuid.equals(uuid)))
+          .write(FoodsCompanion(
+        petId: Value(petId),
+        brand: Value((raw['brand'] as String?) ?? ''),
+        name: Value(name),
+        foodType: Value(foodType),
+        portionGrams:
+            Value((raw['portion_grams'] as num?)?.toDouble() ?? 0),
+        frequencyPerDay:
+            Value((raw['frequency_per_day'] as num?)?.toInt() ?? 1),
+        timesOfDayJson: Value(timesJson),
+        isActive: Value(raw['is_active'] as bool? ?? true),
+        startsAt: Value(startsAt),
+        endsAt: Value(_parseDt(raw['ends_at'])),
+        remindersEnabled: Value(raw['reminders_enabled'] as bool? ?? false),
+        notes: Value(raw['notes'] as String?),
+        updatedAt: Value(now),
+      ));
+      foodId = existing.id;
+      onUpdate();
     }
-    await (_db.update(_db.foods)..where((f) => f.uuid.equals(uuid)))
-        .write(FoodsCompanion(
-      petId: Value(petId),
-      brand: Value((raw['brand'] as String?) ?? ''),
-      name: Value(name),
-      foodType: Value(foodType),
-      portionGrams:
-          Value((raw['portion_grams'] as num?)?.toDouble() ?? 0),
-      frequencyPerDay:
-          Value((raw['frequency_per_day'] as num?)?.toInt() ?? 1),
-      timesOfDayJson: Value(timesJson),
-      isActive: Value(raw['is_active'] as bool? ?? true),
-      startsAt: Value(startsAt),
-      endsAt: Value(_parseDt(raw['ends_at'])),
-      remindersEnabled: Value(raw['reminders_enabled'] as bool? ?? false),
-      notes: Value(raw['notes'] as String?),
-      updatedAt: Value(now),
-    ));
-    onUpdate();
-    return existing.id;
+    // Rebuild photo rows for this food (same wholesale strategy as
+    // vaccination / insurance documents).
+    await (_db.delete(_db.foodPhotos)
+          ..where((p) => p.foodId.equals(foodId)))
+        .go();
+    final rawPhotos = raw['photos'];
+    if (rawPhotos is List) {
+      for (final rp in rawPhotos) {
+        if (rp is! Map<String, dynamic>) continue;
+        final photoUuid = rp['uuid'] as String?;
+        final filePath = rp['file_path'] as String?;
+        final mimeType = rp['mime_type'] as String?;
+        if (photoUuid == null || filePath == null || mimeType == null) {
+          continue;
+        }
+        await _db.into(_db.foodPhotos).insert(FoodPhotosCompanion.insert(
+              uuid: photoUuid,
+              foodId: foodId,
+              filePath: filePath,
+              mimeType: mimeType,
+              originalFilename: Value(rp['original_filename'] as String?),
+              sizeBytes: Value((rp['size_bytes'] as num?)?.toInt()),
+              createdAt: _parseDt(rp['created_at']) ?? now,
+            ));
+      }
+    }
+    return foodId;
   }
 }

@@ -8,6 +8,7 @@ import '../../appointments/data/appointments_repository.dart';
 import '../../appointments/domain/appointment.dart';
 import '../../diet/data/foods_repository.dart';
 import '../../diet/domain/food.dart';
+import '../../diet/domain/food_photo.dart';
 import '../../insurances/data/insurances_repository.dart';
 import '../../insurances/domain/insurance.dart';
 import '../../medications/data/medications_repository.dart';
@@ -73,6 +74,10 @@ class ExportService {
         intakesByMedUuid[m.uuid] =
             await _medications.watchIntakes(m.uuid).first;
       }
+      final photosByFoodUuid = <String, List<FoodPhoto>>{};
+      for (final f in foods) {
+        photosByFoodUuid[f.uuid] = await _foods.watchPhotos(f.uuid).first;
+      }
       result.add(_petToJson(
         pet,
         vets,
@@ -83,6 +88,7 @@ class ExportService {
         medications,
         foods,
         intakesByMedUuid,
+        photosByFoodUuid,
       ));
     }
     final tags = await _events.watchAllTags().first;
@@ -126,6 +132,7 @@ class ExportService {
     List<Medication> medications,
     List<Food> foods,
     Map<String, List<MedicationIntake>> intakesByMedUuid,
+    Map<String, List<FoodPhoto>> photosByFoodUuid,
   ) {
     return {
       'uuid': pet.uuid,
@@ -316,6 +323,17 @@ class ExportService {
             'ends_at': _dt(f.endsAt),
             'reminders_enabled': f.remindersEnabled,
             'notes': f.notes,
+            'photos': [
+              for (final p in photosByFoodUuid[f.uuid] ?? const <FoodPhoto>[])
+                {
+                  'uuid': p.uuid,
+                  'file_path': p.filePath,
+                  'mime_type': p.mimeType,
+                  'original_filename': p.originalFilename,
+                  'size_bytes': p.sizeBytes,
+                  'created_at': _dt(p.createdAt),
+                },
+            ],
             'created_at': _dt(f.createdAt),
             'updated_at': _dt(f.updatedAt),
           },
