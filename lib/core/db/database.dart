@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../features/appointments/domain/appointment_enums.dart';
+import '../../features/contacts/domain/contact_enums.dart';
 import '../../features/diet/domain/food_enums.dart';
 import '../../features/medications/domain/medication_enums.dart';
 import '../../features/pets/domain/pet_enums.dart';
