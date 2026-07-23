@@ -335,6 +335,27 @@
     "placeholders": { "seconds": { "type": "int" } }
   },
 
+  "joinScreenTitle": "Join household",
+  "joinHeadline": "Redeem invite code",
+  "joinBody": "Scan the QR or paste the code the owner generated for you.",
+  "joinCodeLabel": "Invite code",
+  "joinScanAction": "Scan QR",
+  "joinScanTitle": "Scan QR code",
+  "joinAction": "Join",
+  "joinNeedSignInHeadline": "Sign in first",
+  "joinNeedSignInBody": "To join a household you need to sign in with email first. You can redeem the same code afterwards.",
+  "joinSuccessTitle": "Joined",
+  "joinSuccessBody": "You are now a member of \"{name}\" with {count} members.",
+  "@joinSuccessBody": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "joinErrorInvalid": "Code is invalid or no longer active.",
+  "joinErrorExpired": "Code has expired. Ask the owner for a new one.",
+  "joinErrorUsed": "Code has already been used.",
+
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON backup",
   "exportJsonHelp": "Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.",

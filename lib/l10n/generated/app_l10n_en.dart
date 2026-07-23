@@ -813,6 +813,53 @@ class AppL10nEn extends AppL10n {
   }
 
   @override
+  String get joinScreenTitle => 'Join household';
+
+  @override
+  String get joinHeadline => 'Redeem invite code';
+
+  @override
+  String get joinBody =>
+      'Scan the QR or paste the code the owner generated for you.';
+
+  @override
+  String get joinCodeLabel => 'Invite code';
+
+  @override
+  String get joinScanAction => 'Scan QR';
+
+  @override
+  String get joinScanTitle => 'Scan QR code';
+
+  @override
+  String get joinAction => 'Join';
+
+  @override
+  String get joinNeedSignInHeadline => 'Sign in first';
+
+  @override
+  String get joinNeedSignInBody =>
+      'To join a household you need to sign in with email first. You can redeem the same code afterwards.';
+
+  @override
+  String get joinSuccessTitle => 'Joined';
+
+  @override
+  String joinSuccessBody(String name, int count) {
+    return 'You are now a member of \"$name\" with $count members.';
+  }
+
+  @override
+  String get joinErrorInvalid => 'Code is invalid or no longer active.';
+
+  @override
+  String get joinErrorExpired =>
+      'Code has expired. Ask the owner for a new one.';
+
+  @override
+  String get joinErrorUsed => 'Code has already been used.';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

@@ -208,6 +208,11 @@ class _HouseholdsSection extends ConsumerWidget {
           title: Text(l.householdsCreate),
           onTap: () => _promptCreate(context, ref, l),
         ),
+        ListTile(
+          leading: const Icon(Icons.login),
+          title: Text(l.joinAction),
+          onTap: () => context.push('/join'),
+        ),
       ],
     );
   }

@@ -9,6 +9,8 @@ import '../features/auth/presentation/display_name_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/households/presentation/household_detail_screen.dart';
 import '../features/households/presentation/invite_screen.dart';
+import '../features/households/presentation/join_household_screen.dart';
+import '../features/households/presentation/qr_scan_screen.dart';
 import '../features/appointments/presentation/appointment_detail_screen.dart';
 import '../features/appointments/presentation/appointment_edit_screen.dart';
 import '../features/appointments/presentation/appointments_list_screen.dart';
@@ -111,6 +113,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
+      // Invite deep link: petpassport://invite/<token>. Same normalise
+      // trick as above — pluck the token out of the URI and hand it to
+      // the join screen as a query param.
+      if (raw.contains('://invite/') || raw.contains('/invite/')) {
+        final uri = state.uri;
+        String? token;
+        if (uri.host == 'invite' && uri.pathSegments.isNotEmpty) {
+          token = uri.pathSegments.first;
+        } else {
+          final idx = uri.pathSegments.indexOf('invite');
+          if (idx >= 0 && idx + 1 < uri.pathSegments.length) {
+            token = uri.pathSegments[idx + 1];
+          }
+        }
+        if (token != null && token.isNotEmpty && loc != '/join') {
+          return '/join?token=$token';
+        }
+      }
+      if (loc == '/join' || loc == '/join/scan') {
+        return null;
+      }
+
       // Signed in but no profile row yet → force display-name screen.
       // Sign-in / sign-out surfaces are exempt so the user can bail out
       // or complete an interrupted auth flow.
@@ -163,6 +187,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, s) => InviteScreen(
           householdId: s.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        path: '/join',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => JoinHouseholdScreen(
+          initialToken: s.uri.queryParameters['token'],
+        ),
+      ),
+      GoRoute(
+        path: '/join/scan',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const QrScanScreen(),
       ),
       GoRoute(
         path: '/pets/new',

@@ -816,6 +816,53 @@ class AppL10nDe extends AppL10n {
   }
 
   @override
+  String get joinScreenTitle => 'Haushalt beitreten';
+
+  @override
+  String get joinHeadline => 'Einladungscode einlösen';
+
+  @override
+  String get joinBody =>
+      'QR scannen oder Code manuell eingeben. Owner hat den Code für dich erzeugt.';
+
+  @override
+  String get joinCodeLabel => 'Einladungscode';
+
+  @override
+  String get joinScanAction => 'QR scannen';
+
+  @override
+  String get joinScanTitle => 'QR-Code scannen';
+
+  @override
+  String get joinAction => 'Beitreten';
+
+  @override
+  String get joinNeedSignInHeadline => 'Erst anmelden';
+
+  @override
+  String get joinNeedSignInBody =>
+      'Zum Beitreten musst du dich vorher mit E-Mail anmelden. Danach kannst du den gleichen Code erneut einlösen.';
+
+  @override
+  String get joinSuccessTitle => 'Beigetreten';
+
+  @override
+  String joinSuccessBody(String name, int count) {
+    return 'Du bist jetzt Mitglied im Haushalt „$name“ mit $count Mitgliedern.';
+  }
+
+  @override
+  String get joinErrorInvalid => 'Code ungültig oder nicht mehr aktiv.';
+
+  @override
+  String get joinErrorExpired =>
+      'Code ist abgelaufen. Frag den Owner nach einem neuen.';
+
+  @override
+  String get joinErrorUsed => 'Code wurde bereits verwendet.';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

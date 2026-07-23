@@ -42,8 +42,11 @@ dependencies:
   timezone: ^0.9.4
   permission_handler: ^11.3.1
 
-  # Emergency QR card
+  # Emergency QR card + household-invite QR
   qr_flutter: ^4.1.0
+
+  # In-app QR scanner (household-invite redemption)
+  mobile_scanner: ^5.2.3
 
   # Share generated backup files (JSON export)
   share_plus: ^10.0.2

@@ -63,4 +63,39 @@ class InviteRepository {
   Future<void> revoke(String inviteId) async {
     await _client.from('invite_codes').delete().eq('id', inviteId);
   }
+
+  /// Consume a token via the SECURITY DEFINER RPC on the DB side. Adds
+  /// the current user as member, flips `used_at`, returns a summary of
+  /// the household we just joined. Throws whatever Postgres error the
+  /// RPC surfaced (invalid / expired / already used — see
+  /// 0001_multiuser_bootstrap.sql for the concrete error strings).
+  Future<InviteRedemptionResult> redeem(String rawToken) async {
+    // Accept 'X4KM-9RTW' with or without the visual hyphen and any
+    // stray whitespace / case the user may have pasted or spoken.
+    final token = rawToken.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
+    final rows =
+        await _client.rpc('redeem_invite', params: {'p_token': token}) as List;
+    if (rows.isEmpty) {
+      // Shouldn't happen — the RPC always returns a row on success.
+      throw StateError('redeem_invite returned no row');
+    }
+    final first = rows.first as Map<String, dynamic>;
+    return InviteRedemptionResult(
+      householdId: first['household_id'] as String,
+      householdName: first['household_name'] as String,
+      memberCount: (first['member_count'] as num).toInt(),
+    );
+  }
+}
+
+class InviteRedemptionResult {
+  const InviteRedemptionResult({
+    required this.householdId,
+    required this.householdName,
+    required this.memberCount,
+  });
+
+  final String householdId;
+  final String householdName;
+  final int memberCount;
 }

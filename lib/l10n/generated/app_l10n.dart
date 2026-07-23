@@ -1519,6 +1519,90 @@ abstract class AppL10n {
   /// **'Expires in {seconds} s'**
   String inviteExpiresInSeconds(int seconds);
 
+  /// No description provided for @joinScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join household'**
+  String get joinScreenTitle;
+
+  /// No description provided for @joinHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem invite code'**
+  String get joinHeadline;
+
+  /// No description provided for @joinBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the QR or paste the code the owner generated for you.'**
+  String get joinBody;
+
+  /// No description provided for @joinCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get joinCodeLabel;
+
+  /// No description provided for @joinScanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR'**
+  String get joinScanAction;
+
+  /// No description provided for @joinScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR code'**
+  String get joinScanTitle;
+
+  /// No description provided for @joinAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinAction;
+
+  /// No description provided for @joinNeedSignInHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in first'**
+  String get joinNeedSignInHeadline;
+
+  /// No description provided for @joinNeedSignInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To join a household you need to sign in with email first. You can redeem the same code afterwards.'**
+  String get joinNeedSignInBody;
+
+  /// No description provided for @joinSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get joinSuccessTitle;
+
+  /// No description provided for @joinSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now a member of \"{name}\" with {count} members.'**
+  String joinSuccessBody(String name, int count);
+
+  /// No description provided for @joinErrorInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Code is invalid or no longer active.'**
+  String get joinErrorInvalid;
+
+  /// No description provided for @joinErrorExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Code has expired. Ask the owner for a new one.'**
+  String get joinErrorExpired;
+
+  /// No description provided for @joinErrorUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Code has already been used.'**
+  String get joinErrorUsed;
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:
