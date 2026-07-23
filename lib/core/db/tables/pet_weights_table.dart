@@ -11,4 +11,7 @@ class PetWeights extends Table {
   RealColumn get weightKg => real()();
   TextColumn get note => text().nullable()();
   TextColumn get sourceEventUuid => text().nullable()();
+  TextColumn get householdId => text().nullable()();
+  TextColumn get updatedByUserId => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 }

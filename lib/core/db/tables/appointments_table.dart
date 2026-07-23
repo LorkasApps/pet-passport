@@ -33,4 +33,7 @@ class Appointments extends Table {
   DateTimeColumn get recurrenceUntil => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get householdId => text().nullable()();
+  TextColumn get updatedByUserId => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 }

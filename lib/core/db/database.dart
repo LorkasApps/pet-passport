@@ -90,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -171,6 +171,46 @@ class AppDatabase extends _$AppDatabase {
                 vaccinationDocuments, vaccinationDocuments.title);
             await m.addColumn(
                 petPassportDocuments, petPassportDocuments.title);
+          }
+          if (from < 16 && to >= 16) {
+            // M2 sync foundation: household_id, updated_by_user_id, deleted_at
+            // as nullable columns on every top-level entity. Pre-cloud users
+            // simply carry nulls; a first-login hook stamps existing rows.
+            await m.addColumn(pets, pets.householdId);
+            await m.addColumn(pets, pets.updatedByUserId);
+            await m.addColumn(vets, vets.householdId);
+            await m.addColumn(vets, vets.updatedByUserId);
+            await m.addColumn(vets, vets.deletedAt);
+            await m.addColumn(contacts, contacts.householdId);
+            await m.addColumn(contacts, contacts.updatedByUserId);
+            await m.addColumn(contacts, contacts.deletedAt);
+            await m.addColumn(appointments, appointments.householdId);
+            await m.addColumn(appointments, appointments.updatedByUserId);
+            await m.addColumn(appointments, appointments.deletedAt);
+            await m.addColumn(medications, medications.householdId);
+            await m.addColumn(medications, medications.updatedByUserId);
+            await m.addColumn(medications, medications.deletedAt);
+            await m.addColumn(medicationIntakes, medicationIntakes.householdId);
+            await m.addColumn(medicationIntakes, medicationIntakes.updatedByUserId);
+            await m.addColumn(medicationIntakes, medicationIntakes.deletedAt);
+            await m.addColumn(foods, foods.householdId);
+            await m.addColumn(foods, foods.updatedByUserId);
+            await m.addColumn(foods, foods.deletedAt);
+            await m.addColumn(vaccinations, vaccinations.householdId);
+            await m.addColumn(vaccinations, vaccinations.updatedByUserId);
+            await m.addColumn(vaccinations, vaccinations.deletedAt);
+            await m.addColumn(insurances, insurances.householdId);
+            await m.addColumn(insurances, insurances.updatedByUserId);
+            await m.addColumn(insurances, insurances.deletedAt);
+            await m.addColumn(events, events.householdId);
+            await m.addColumn(events, events.updatedByUserId);
+            await m.addColumn(events, events.deletedAt);
+            await m.addColumn(eventTags, eventTags.householdId);
+            await m.addColumn(eventTags, eventTags.updatedByUserId);
+            await m.addColumn(eventTags, eventTags.deletedAt);
+            await m.addColumn(petWeights, petWeights.householdId);
+            await m.addColumn(petWeights, petWeights.updatedByUserId);
+            await m.addColumn(petWeights, petWeights.deletedAt);
           }
         },
         beforeOpen: (details) async {

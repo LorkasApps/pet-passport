@@ -12,4 +12,7 @@ class MedicationIntakes extends Table {
   BoolColumn get skipped =>
       boolean().withDefault(const Constant(false))();
   TextColumn get note => text().nullable()();
+  TextColumn get householdId => text().nullable()();
+  TextColumn get updatedByUserId => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 }

@@ -18,4 +18,7 @@ class Vets extends Table {
       boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get householdId => text().nullable()();
+  TextColumn get updatedByUserId => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 }
