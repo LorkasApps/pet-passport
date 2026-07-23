@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../appointments/application/appointments_providers.dart';
+import '../../diet/application/foods_providers.dart';
 import '../../insurances/application/insurances_providers.dart';
+import '../../medications/application/medications_providers.dart';
 import '../../pets/application/pets_providers.dart';
 import '../../protocol/application/events_providers.dart';
 import '../../settings/application/settings_providers.dart';
@@ -16,6 +19,9 @@ final exportServiceProvider = Provider<ExportService>((ref) {
     ref.watch(insurancesRepositoryProvider),
     ref.watch(vaccinationsRepositoryProvider),
     ref.watch(eventsRepositoryProvider),
+    ref.watch(appointmentsRepositoryProvider),
+    ref.watch(medicationsRepositoryProvider),
+    ref.watch(foodsRepositoryProvider),
   );
 });
 

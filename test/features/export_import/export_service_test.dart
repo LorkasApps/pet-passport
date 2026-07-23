@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pet_passport/core/media/media_service.dart';
+import 'package:pet_passport/features/appointments/data/appointments_repository.dart';
+import 'package:pet_passport/features/diet/data/foods_repository.dart';
 import 'package:pet_passport/features/export_import/data/export_service.dart';
 import 'package:pet_passport/features/insurances/data/insurances_repository.dart';
+import 'package:pet_passport/features/medications/data/medications_repository.dart';
 import 'package:pet_passport/features/pets/data/pets_repository.dart';
 import 'package:pet_passport/features/pets/domain/pet_enums.dart';
 import 'package:pet_passport/features/protocol/data/events_repository.dart';
@@ -40,8 +43,27 @@ void main() {
         db.petsDao,
         mediaService,
       );
-      exportService =
-          ExportService(pets, vets, insurances, vaccinations, events);
+      final appointments = AppointmentsRepository(
+        db.appointmentsDao,
+        db.petsDao,
+        db.vetsDao,
+      );
+      final medications = MedicationsRepository(
+        db.medicationsDao,
+        db.petsDao,
+        db.vetsDao,
+      );
+      final foods = FoodsRepository(db.foodsDao, db.petsDao);
+      exportService = ExportService(
+        pets,
+        vets,
+        insurances,
+        vaccinations,
+        events,
+        appointments,
+        medications,
+        foods,
+      );
     });
 
     test('buildSnapshot with empty database produces valid JSON structure', () async {
@@ -55,7 +77,7 @@ void main() {
         'pets',
       ]));
 
-      expect(snapshot['schema_version'], equals(2));
+      expect(snapshot['schema_version'], equals(3));
       expect(snapshot['app_version'], equals('0.1.0+1'));
       expect(snapshot['pets'], isA<List<dynamic>>());
       expect(snapshot['pets'], isEmpty);
@@ -195,7 +217,7 @@ void main() {
 
       // Verify it can be parsed back
       final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
-      expect(decoded['schema_version'], equals(2));
+      expect(decoded['schema_version'], equals(3));
       expect(decoded['pets'], isA<List<dynamic>>());
       expect(decoded['pets'][0]['name'], equals('Fluffy'));
     });

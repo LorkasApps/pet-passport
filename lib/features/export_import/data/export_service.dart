@@ -4,8 +4,15 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../appointments/data/appointments_repository.dart';
+import '../../appointments/domain/appointment.dart';
+import '../../diet/data/foods_repository.dart';
+import '../../diet/domain/food.dart';
 import '../../insurances/data/insurances_repository.dart';
 import '../../insurances/domain/insurance.dart';
+import '../../medications/data/medications_repository.dart';
+import '../../medications/domain/medication.dart';
+import '../../medications/domain/medication_intake.dart';
 import '../../pets/data/pets_repository.dart';
 import '../../pets/domain/pet.dart';
 import '../../pets/domain/pet_enums.dart';
@@ -24,6 +31,9 @@ class ExportService {
     this._insurances,
     this._vaccinations,
     this._events,
+    this._appointments,
+    this._medications,
+    this._foods,
   );
 
   final PetsRepository _pets;
@@ -31,8 +41,14 @@ class ExportService {
   final InsurancesRepository _insurances;
   final VaccinationsRepository _vaccinations;
   final EventsRepository _events;
+  final AppointmentsRepository _appointments;
+  final MedicationsRepository _medications;
+  final FoodsRepository _foods;
 
-  static const int schemaVersion = 2;
+  /// Bumped to 3 in 2026-07 when appointments/medications/foods joined the
+  /// snapshot. Older readers see extra keys and ignore them; the import
+  /// service accepts v1/v2/v3.
+  static const int schemaVersion = 3;
   static const String appVersion = '0.1.0+1';
 
   /// Builds a plain-JSON snapshot of every active pet. Media files are
@@ -48,7 +64,26 @@ class ExportService {
       final vaccinations =
           await _vaccinations.watchForPetUuid(pet.uuid).first;
       final events = await _events.watchForPetUuid(pet.uuid).first;
-      result.add(_petToJson(pet, vets, insurances, vaccinations, events));
+      final appointments =
+          await _appointments.watchForPetUuid(pet.uuid).first;
+      final medications = await _medications.watchForPetUuid(pet.uuid).first;
+      final foods = await _foods.watchForPetUuid(pet.uuid).first;
+      final intakesByMedUuid = <String, List<MedicationIntake>>{};
+      for (final m in medications) {
+        intakesByMedUuid[m.uuid] =
+            await _medications.watchIntakes(m.uuid).first;
+      }
+      result.add(_petToJson(
+        pet,
+        vets,
+        insurances,
+        vaccinations,
+        events,
+        appointments,
+        medications,
+        foods,
+        intakesByMedUuid,
+      ));
     }
     final tags = await _events.watchAllTags().first;
     return {
@@ -87,6 +122,10 @@ class ExportService {
     List<Insurance> insurances,
     List<Vaccination> vaccinations,
     List<Event> events,
+    List<Appointment> appointments,
+    List<Medication> medications,
+    List<Food> foods,
+    Map<String, List<MedicationIntake>> intakesByMedUuid,
   ) {
     return {
       'uuid': pet.uuid,
@@ -125,6 +164,7 @@ class ExportService {
             'phone': v.phone,
             'email': v.email,
             'notes': v.notes,
+            'is_active': v.isActive,
             'created_at': _dt(v.createdAt),
             'updated_at': _dt(v.updatedAt),
           },
@@ -202,6 +242,84 @@ class ExportService {
             ],
           },
       ],
+      'appointments': [
+        for (final a in appointments)
+          {
+            'uuid': a.uuid,
+            'type': a.type.name,
+            'vet_uuid': a.vetUuid,
+            'title': a.title,
+            'starts_at': _dt(a.startsAt),
+            'duration_minutes': a.durationMinutes,
+            'location': a.location,
+            'notes': a.notes,
+            'recurrence_freq': a.recurrenceFreq.name,
+            'recurrence_interval': a.recurrenceInterval,
+            'recurrence_weekdays': a.recurrenceWeekdays,
+            'recurrence_until': _dt(a.recurrenceUntil),
+            'reminder_offsets_minutes': a.reminderOffsetsMinutes,
+            'exceptions': [
+              for (final ex in a.exceptions)
+                {
+                  'occurrence_start': _dt(ex.occurrenceStart),
+                  'is_cancelled': ex.isCancelled,
+                  'override_starts_at': _dt(ex.overrideStartsAt),
+                },
+            ],
+            'created_at': _dt(a.createdAt),
+            'updated_at': _dt(a.updatedAt),
+          },
+      ],
+      'medications': [
+        for (final m in medications)
+          {
+            'uuid': m.uuid,
+            'name': m.name,
+            'dosage_amount': m.dosageAmount,
+            'dosage_unit': m.dosageUnit,
+            'freq_type': m.freqType.name,
+            'freq_interval': m.freqInterval,
+            'freq_weekdays': m.freqWeekdays,
+            'times_of_day': m.timesOfDay,
+            'starts_at': _dt(m.startsAt),
+            'ends_at': _dt(m.endsAt),
+            'is_active': m.isActive,
+            'notes': m.notes,
+            'prescribed_by_vet_uuid': m.prescribedByVetUuid,
+            'with_food': m.withFood,
+            'reminder_offsets_minutes': m.reminderOffsetsMinutes,
+            'intakes': [
+              for (final i in intakesByMedUuid[m.uuid] ?? const <MedicationIntake>[])
+                {
+                  'uuid': i.uuid,
+                  'taken_at': _dt(i.takenAt),
+                  'skipped': i.skipped,
+                  'note': i.note,
+                },
+            ],
+            'created_at': _dt(m.createdAt),
+            'updated_at': _dt(m.updatedAt),
+          },
+      ],
+      'foods': [
+        for (final f in foods)
+          {
+            'uuid': f.uuid,
+            'brand': f.brand,
+            'name': f.name,
+            'food_type': f.foodType.name,
+            'portion_grams': f.portionGrams,
+            'frequency_per_day': f.frequencyPerDay,
+            'times_of_day': f.timesOfDay,
+            'is_active': f.isActive,
+            'starts_at': _dt(f.startsAt),
+            'ends_at': _dt(f.endsAt),
+            'reminders_enabled': f.remindersEnabled,
+            'notes': f.notes,
+            'created_at': _dt(f.createdAt),
+            'updated_at': _dt(f.updatedAt),
+          },
+      ],
     };
   }
 
@@ -225,4 +343,3 @@ class ExportService {
         EventType.generic => 'generic',
       };
 }
-

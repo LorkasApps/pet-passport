@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:drift/drift.dart' show Value;
 
 import '../../../core/db/database.dart';
+import '../../../core/time/time_of_day_json.dart';
+import '../../appointments/domain/appointment_enums.dart';
+import '../../diet/domain/food_enums.dart';
+import '../../medications/domain/medication_enums.dart';
 import '../../pets/domain/pet_enums.dart';
 import '../../protocol/domain/event_enums.dart';
 
@@ -19,6 +23,12 @@ class ImportSummary {
     required this.vaccinationsUpdated,
     required this.eventsInserted,
     required this.eventsUpdated,
+    required this.appointmentsInserted,
+    required this.appointmentsUpdated,
+    required this.medicationsInserted,
+    required this.medicationsUpdated,
+    required this.foodsInserted,
+    required this.foodsUpdated,
     required this.tagsInserted,
     required this.errors,
   });
@@ -33,6 +43,12 @@ class ImportSummary {
   final int vaccinationsUpdated;
   final int eventsInserted;
   final int eventsUpdated;
+  final int appointmentsInserted;
+  final int appointmentsUpdated;
+  final int medicationsInserted;
+  final int medicationsUpdated;
+  final int foodsInserted;
+  final int foodsUpdated;
   final int tagsInserted;
   final List<String> errors;
 
@@ -42,6 +58,9 @@ class ImportSummary {
       insurancesInserted +
       vaccinationsInserted +
       eventsInserted +
+      appointmentsInserted +
+      medicationsInserted +
+      foodsInserted +
       tagsInserted;
 
   int get totalUpdated =>
@@ -49,7 +68,10 @@ class ImportSummary {
       vetsUpdated +
       insurancesUpdated +
       vaccinationsUpdated +
-      eventsUpdated;
+      eventsUpdated +
+      appointmentsUpdated +
+      medicationsUpdated +
+      foodsUpdated;
 }
 
 class ImportException implements Exception {
@@ -69,7 +91,7 @@ class ImportService {
 
   final AppDatabase _db;
 
-  static const Set<int> supportedSchemaVersions = {1, 2};
+  static const Set<int> supportedSchemaVersions = {1, 2, 3};
 
   Future<ImportSummary> importFromFile(File file) async {
     final content = await file.readAsString();
@@ -117,6 +139,12 @@ class ImportService {
     int vaccinationsUpdated = 0;
     int eventsInserted = 0;
     int eventsUpdated = 0;
+    int appointmentsInserted = 0;
+    int appointmentsUpdated = 0;
+    int medicationsInserted = 0;
+    int medicationsUpdated = 0;
+    int foodsInserted = 0;
+    int foodsUpdated = 0;
     int tagsInserted = 0;
     final errors = <String>[];
 
@@ -214,6 +242,47 @@ class ImportService {
               }
             }
           }
+
+          final rawAppointments = rawPet['appointments'];
+          if (rawAppointments is List) {
+            for (final ra in rawAppointments) {
+              if (ra is! Map<String, dynamic>) continue;
+              try {
+                await _upsertAppointment(petId, ra, vetIdByUuid,
+                    () => appointmentsInserted++,
+                    () => appointmentsUpdated++);
+              } catch (e) {
+                errors.add('Appointment ${ra['uuid']}: $e');
+              }
+            }
+          }
+
+          final rawMedications = rawPet['medications'];
+          if (rawMedications is List) {
+            for (final rm in rawMedications) {
+              if (rm is! Map<String, dynamic>) continue;
+              try {
+                await _upsertMedication(petId, rm, vetIdByUuid,
+                    () => medicationsInserted++,
+                    () => medicationsUpdated++);
+              } catch (e) {
+                errors.add('Medication ${rm['uuid']}: $e');
+              }
+            }
+          }
+
+          final rawFoods = rawPet['foods'];
+          if (rawFoods is List) {
+            for (final rf in rawFoods) {
+              if (rf is! Map<String, dynamic>) continue;
+              try {
+                await _upsertFood(petId, rf,
+                    () => foodsInserted++, () => foodsUpdated++);
+              } catch (e) {
+                errors.add('Food ${rf['uuid']}: $e');
+              }
+            }
+          }
         } catch (e) {
           errors.add('Pet ${rawPet['uuid']}: $e');
         }
@@ -231,6 +300,12 @@ class ImportService {
       vaccinationsUpdated: vaccinationsUpdated,
       eventsInserted: eventsInserted,
       eventsUpdated: eventsUpdated,
+      appointmentsInserted: appointmentsInserted,
+      appointmentsUpdated: appointmentsUpdated,
+      medicationsInserted: medicationsInserted,
+      medicationsUpdated: medicationsUpdated,
+      foodsInserted: foodsInserted,
+      foodsUpdated: foodsUpdated,
       tagsInserted: tagsInserted,
       errors: errors,
     );
@@ -451,6 +526,7 @@ class ImportService {
             phone: Value(raw['phone'] as String?),
             email: Value(raw['email'] as String?),
             notes: Value(raw['notes'] as String?),
+            isActive: Value((raw['is_active'] as bool?) ?? true),
             createdAt: _parseDt(raw['created_at']) ?? now,
             updatedAt: now,
           ));
@@ -466,6 +542,7 @@ class ImportService {
       phone: Value(raw['phone'] as String?),
       email: Value(raw['email'] as String?),
       notes: Value(raw['notes'] as String?),
+      isActive: Value((raw['is_active'] as bool?) ?? true),
       updatedAt: Value(now),
     ));
     onUpdate();
@@ -651,4 +728,343 @@ class ImportService {
         'female' => Sex.female,
         _ => throw ImportException('Unknown sex: $v'),
       };
+
+  AppointmentType _parseAppointmentType(dynamic v) => switch (v) {
+        'vet' => AppointmentType.vet,
+        'grooming' => AppointmentType.grooming,
+        'training' => AppointmentType.training,
+        'walk' => AppointmentType.walk,
+        'checkup' => AppointmentType.checkup,
+        'other' => AppointmentType.other,
+        _ => throw ImportException('Unknown appointment type: $v'),
+      };
+
+  RecurrenceFreq _parseRecurrenceFreq(dynamic v) => switch (v) {
+        null => RecurrenceFreq.none,
+        'none' => RecurrenceFreq.none,
+        'daily' => RecurrenceFreq.daily,
+        'weekly' => RecurrenceFreq.weekly,
+        'monthly' => RecurrenceFreq.monthly,
+        _ => throw ImportException('Unknown recurrence_freq: $v'),
+      };
+
+  FreqType _parseFreqType(dynamic v) => switch (v) {
+        'daily' => FreqType.daily,
+        'weekly' => FreqType.weekly,
+        'intervalDays' => FreqType.intervalDays,
+        _ => throw ImportException('Unknown freq_type: $v'),
+      };
+
+  FoodType _parseFoodType(dynamic v) => switch (v) {
+        'dry' => FoodType.dry,
+        'wet' => FoodType.wet,
+        'raw' => FoodType.raw,
+        'barf' => FoodType.barf,
+        'treat' => FoodType.treat,
+        'other' => FoodType.other,
+        _ => throw ImportException('Unknown food_type: $v'),
+      };
+
+  List<int> _parseOffsets(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .map((e) => (e as num?)?.toInt())
+        .whereType<int>()
+        .toList(growable: false);
+  }
+
+  List<String> _parseTimesOfDay(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw.whereType<String>().toList(growable: false);
+  }
+
+  Future<int> _upsertAppointment(
+    int petId,
+    Map<String, dynamic> raw,
+    Map<String, int> vetIdByUuid,
+    void Function() onInsert,
+    void Function() onUpdate,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    if (uuid == null || uuid.isEmpty) throw ImportException('Missing uuid');
+    final title = raw['title'] as String?;
+    if (title == null || title.isEmpty) {
+      throw ImportException('Missing title');
+    }
+    final startsAt = _parseDt(raw['starts_at']);
+    if (startsAt == null) throw ImportException('Missing starts_at');
+    final type = _parseAppointmentType(raw['type']);
+    final vetUuid = raw['vet_uuid'] as String?;
+    int? vetId = vetUuid == null ? null : vetIdByUuid[vetUuid];
+    if (vetId == null && vetUuid != null) {
+      final row = await (_db.select(_db.vets)
+            ..where((v) => v.uuid.equals(vetUuid)))
+          .getSingleOrNull();
+      vetId = row?.id;
+    }
+    final recurrenceFreq = _parseRecurrenceFreq(raw['recurrence_freq']);
+    final existing = await (_db.select(_db.appointments)
+          ..where((a) => a.uuid.equals(uuid)))
+        .getSingleOrNull();
+    final now = DateTime.now();
+    final int apptId;
+    if (existing == null) {
+      apptId = await _db.into(_db.appointments).insert(
+            AppointmentsCompanion.insert(
+              uuid: uuid,
+              petId: petId,
+              vetId: Value(vetId),
+              type: type,
+              title: title,
+              startsAt: startsAt,
+              durationMinutes:
+                  Value((raw['duration_minutes'] as num?)?.toInt() ?? 60),
+              location: Value(raw['location'] as String?),
+              notes: Value(raw['notes'] as String?),
+              recurrenceFreq: Value(recurrenceFreq),
+              recurrenceInterval:
+                  Value((raw['recurrence_interval'] as num?)?.toInt() ?? 1),
+              recurrenceWeekdays:
+                  Value((raw['recurrence_weekdays'] as num?)?.toInt() ?? 0),
+              recurrenceUntil: Value(_parseDt(raw['recurrence_until'])),
+              createdAt: _parseDt(raw['created_at']) ?? now,
+              updatedAt: now,
+            ),
+          );
+      onInsert();
+    } else {
+      await (_db.update(_db.appointments)
+            ..where((a) => a.uuid.equals(uuid)))
+          .write(AppointmentsCompanion(
+        petId: Value(petId),
+        vetId: Value(vetId),
+        type: Value(type),
+        title: Value(title),
+        startsAt: Value(startsAt),
+        durationMinutes:
+            Value((raw['duration_minutes'] as num?)?.toInt() ?? 60),
+        location: Value(raw['location'] as String?),
+        notes: Value(raw['notes'] as String?),
+        recurrenceFreq: Value(recurrenceFreq),
+        recurrenceInterval:
+            Value((raw['recurrence_interval'] as num?)?.toInt() ?? 1),
+        recurrenceWeekdays:
+            Value((raw['recurrence_weekdays'] as num?)?.toInt() ?? 0),
+        recurrenceUntil: Value(_parseDt(raw['recurrence_until'])),
+        updatedAt: Value(now),
+      ));
+      apptId = existing.id;
+      onUpdate();
+    }
+    // Rebuild reminders + exceptions.
+    await (_db.delete(_db.appointmentReminders)
+          ..where((r) => r.appointmentId.equals(apptId)))
+        .go();
+    for (final off in _parseOffsets(raw['reminder_offsets_minutes'])) {
+      await _db.into(_db.appointmentReminders).insert(
+            AppointmentRemindersCompanion.insert(
+              appointmentId: apptId,
+              offsetMinutes: off,
+            ),
+          );
+    }
+    await (_db.delete(_db.appointmentExceptions)
+          ..where((e) => e.appointmentId.equals(apptId)))
+        .go();
+    final rawExceptions = raw['exceptions'];
+    if (rawExceptions is List) {
+      for (final rx in rawExceptions) {
+        if (rx is! Map<String, dynamic>) continue;
+        final occ = _parseDt(rx['occurrence_start']);
+        if (occ == null) continue;
+        await _db.into(_db.appointmentExceptions).insert(
+              AppointmentExceptionsCompanion.insert(
+                appointmentId: apptId,
+                occurrenceStart: occ,
+                isCancelled: Value(rx['is_cancelled'] as bool? ?? false),
+                overrideStartsAt: Value(_parseDt(rx['override_starts_at'])),
+              ),
+            );
+      }
+    }
+    return apptId;
+  }
+
+  Future<int> _upsertMedication(
+    int petId,
+    Map<String, dynamic> raw,
+    Map<String, int> vetIdByUuid,
+    void Function() onInsert,
+    void Function() onUpdate,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    if (uuid == null || uuid.isEmpty) throw ImportException('Missing uuid');
+    final name = raw['name'] as String?;
+    if (name == null || name.isEmpty) throw ImportException('Missing name');
+    final startsAt = _parseDt(raw['starts_at']);
+    if (startsAt == null) throw ImportException('Missing starts_at');
+    final freqType = _parseFreqType(raw['freq_type']);
+    final vetUuid = raw['prescribed_by_vet_uuid'] as String?;
+    int? vetId = vetUuid == null ? null : vetIdByUuid[vetUuid];
+    if (vetId == null && vetUuid != null) {
+      final row = await (_db.select(_db.vets)
+            ..where((v) => v.uuid.equals(vetUuid)))
+          .getSingleOrNull();
+      vetId = row?.id;
+    }
+    final timesJson = TimeOfDayJson.encode(_parseTimesOfDay(raw['times_of_day']));
+    final existing = await (_db.select(_db.medications)
+          ..where((m) => m.uuid.equals(uuid)))
+        .getSingleOrNull();
+    final now = DateTime.now();
+    final int medId;
+    if (existing == null) {
+      medId =
+          await _db.into(_db.medications).insert(MedicationsCompanion.insert(
+                uuid: uuid,
+                petId: petId,
+                name: name,
+                dosageAmount:
+                    Value((raw['dosage_amount'] as num?)?.toDouble() ?? 0),
+                dosageUnit: Value((raw['dosage_unit'] as String?) ?? ''),
+                freqType: Value(freqType),
+                freqInterval:
+                    Value((raw['freq_interval'] as num?)?.toInt() ?? 1),
+                freqWeekdays:
+                    Value((raw['freq_weekdays'] as num?)?.toInt() ?? 0),
+                timesOfDayJson: Value(timesJson),
+                startsAt: startsAt,
+                endsAt: Value(_parseDt(raw['ends_at'])),
+                isActive: Value(raw['is_active'] as bool? ?? true),
+                notes: Value(raw['notes'] as String?),
+                prescribedByVetId: Value(vetId),
+                withFood: Value(raw['with_food'] as bool? ?? false),
+                createdAt: _parseDt(raw['created_at']) ?? now,
+                updatedAt: now,
+              ));
+      onInsert();
+    } else {
+      await (_db.update(_db.medications)..where((m) => m.uuid.equals(uuid)))
+          .write(MedicationsCompanion(
+        petId: Value(petId),
+        name: Value(name),
+        dosageAmount:
+            Value((raw['dosage_amount'] as num?)?.toDouble() ?? 0),
+        dosageUnit: Value((raw['dosage_unit'] as String?) ?? ''),
+        freqType: Value(freqType),
+        freqInterval: Value((raw['freq_interval'] as num?)?.toInt() ?? 1),
+        freqWeekdays: Value((raw['freq_weekdays'] as num?)?.toInt() ?? 0),
+        timesOfDayJson: Value(timesJson),
+        startsAt: Value(startsAt),
+        endsAt: Value(_parseDt(raw['ends_at'])),
+        isActive: Value(raw['is_active'] as bool? ?? true),
+        notes: Value(raw['notes'] as String?),
+        prescribedByVetId: Value(vetId),
+        withFood: Value(raw['with_food'] as bool? ?? false),
+        updatedAt: Value(now),
+      ));
+      medId = existing.id;
+      onUpdate();
+    }
+    // Rebuild reminders + intakes.
+    await (_db.delete(_db.medicationReminders)
+          ..where((r) => r.medicationId.equals(medId)))
+        .go();
+    for (final off in _parseOffsets(raw['reminder_offsets_minutes'])) {
+      await _db.into(_db.medicationReminders).insert(
+            MedicationRemindersCompanion.insert(
+              medicationId: medId,
+              offsetMinutes: off,
+            ),
+          );
+    }
+    await (_db.delete(_db.medicationIntakes)
+          ..where((i) => i.medicationId.equals(medId)))
+        .go();
+    final rawIntakes = raw['intakes'];
+    if (rawIntakes is List) {
+      for (final ri in rawIntakes) {
+        if (ri is! Map<String, dynamic>) continue;
+        final intakeUuid = ri['uuid'] as String?;
+        final takenAt = _parseDt(ri['taken_at']);
+        if (intakeUuid == null || intakeUuid.isEmpty || takenAt == null) {
+          continue;
+        }
+        await _db.into(_db.medicationIntakes).insert(
+              MedicationIntakesCompanion.insert(
+                uuid: intakeUuid,
+                medicationId: medId,
+                takenAt: takenAt,
+                skipped: Value(ri['skipped'] as bool? ?? false),
+                note: Value(ri['note'] as String?),
+              ),
+            );
+      }
+    }
+    return medId;
+  }
+
+  Future<int> _upsertFood(
+    int petId,
+    Map<String, dynamic> raw,
+    void Function() onInsert,
+    void Function() onUpdate,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    if (uuid == null || uuid.isEmpty) throw ImportException('Missing uuid');
+    final name = raw['name'] as String?;
+    if (name == null || name.isEmpty) throw ImportException('Missing name');
+    final startsAt = _parseDt(raw['starts_at']);
+    if (startsAt == null) throw ImportException('Missing starts_at');
+    final foodType = _parseFoodType(raw['food_type']);
+    final timesJson = TimeOfDayJson.encode(_parseTimesOfDay(raw['times_of_day']));
+    final existing = await (_db.select(_db.foods)
+          ..where((f) => f.uuid.equals(uuid)))
+        .getSingleOrNull();
+    final now = DateTime.now();
+    if (existing == null) {
+      final id = await _db.into(_db.foods).insert(FoodsCompanion.insert(
+            uuid: uuid,
+            petId: petId,
+            brand: Value((raw['brand'] as String?) ?? ''),
+            name: name,
+            foodType: Value(foodType),
+            portionGrams:
+                Value((raw['portion_grams'] as num?)?.toDouble() ?? 0),
+            frequencyPerDay:
+                Value((raw['frequency_per_day'] as num?)?.toInt() ?? 1),
+            timesOfDayJson: Value(timesJson),
+            isActive: Value(raw['is_active'] as bool? ?? true),
+            startsAt: startsAt,
+            endsAt: Value(_parseDt(raw['ends_at'])),
+            remindersEnabled:
+                Value(raw['reminders_enabled'] as bool? ?? false),
+            notes: Value(raw['notes'] as String?),
+            createdAt: _parseDt(raw['created_at']) ?? now,
+            updatedAt: now,
+          ));
+      onInsert();
+      return id;
+    }
+    await (_db.update(_db.foods)..where((f) => f.uuid.equals(uuid)))
+        .write(FoodsCompanion(
+      petId: Value(petId),
+      brand: Value((raw['brand'] as String?) ?? ''),
+      name: Value(name),
+      foodType: Value(foodType),
+      portionGrams:
+          Value((raw['portion_grams'] as num?)?.toDouble() ?? 0),
+      frequencyPerDay:
+          Value((raw['frequency_per_day'] as num?)?.toInt() ?? 1),
+      timesOfDayJson: Value(timesJson),
+      isActive: Value(raw['is_active'] as bool? ?? true),
+      startsAt: Value(startsAt),
+      endsAt: Value(_parseDt(raw['ends_at'])),
+      remindersEnabled: Value(raw['reminders_enabled'] as bool? ?? false),
+      notes: Value(raw['notes'] as String?),
+      updatedAt: Value(now),
+    ));
+    onUpdate();
+    return existing.id;
+  }
 }
