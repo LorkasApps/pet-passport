@@ -172,7 +172,7 @@ class _OverviewContent extends ConsumerWidget {
       Sex.male => l.sexMale,
       Sex.female => l.sexFemale,
     };
-    return isNeutered ? '$base · ${l.sexNeutered}' : base;
+    return '$base · ${isNeutered ? l.sexNeutered : l.sexIntact}';
   }
 }
 
