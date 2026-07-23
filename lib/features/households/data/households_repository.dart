@@ -46,18 +46,31 @@ class HouseholdsRepository {
     );
   }
 
-  /// Inserts a household. The `tg_household_creator_becomes_owner`
-  /// trigger on the DB side inserts the caller as owner in
-  /// `household_members`, so we don't have to make a second round-trip.
+  /// Creates a household via the `create_household(text)` RPC. Direct
+  /// INSERT INTO households from the client tripped RLS 42501 on release
+  /// builds even after the same session had just written to
+  /// `user_profiles` — see migration 0003 for the write-up. The RPC runs
+  /// SECURITY DEFINER and does both the household row and the caller's
+  /// owner-membership in one transaction, so we don't need a second
+  /// round-trip either.
   Future<Household> create(String name) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw StateError('create called while signed out');
-    final row = await _client
-        .from('households')
-        .insert({'name': name.trim(), 'created_by': userId})
-        .select('id, name, created_at, household_members(user_id, role)')
-        .single();
-    return _rowToDomain(row, userId);
+    final rows = await _client.rpc(
+      'create_household',
+      params: {'p_name': name.trim()},
+    ) as List<dynamic>;
+    if (rows.isEmpty) {
+      throw StateError('create_household RPC returned no row');
+    }
+    final row = (rows.first as Map).cast<String, dynamic>();
+    return Household(
+      id: row['id'] as String,
+      name: row['name'] as String,
+      role: HouseholdRole.owner,
+      memberCount: 1,
+      createdAt: DateTime.parse(row['created_at'] as String),
+    );
   }
 
   Future<Household> rename(String id, String name) async {

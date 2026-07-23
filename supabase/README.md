@@ -37,3 +37,4 @@ vor `create policy`) — sicher zum Nach-Ausführen wenn ich was ergänze.
 | - | -------------------------------- | ------------------------------------------------------- |
 | 1 | `0001_multiuser_bootstrap.sql`   | households, household_members, invite_codes, user_profiles, RLS, redeem_invite RPC |
 | 2 | `0002_rls_recursion_fix.sql`     | Fix RLS-Rekursion (`42P17`) via `is_member_of` / `is_owner_of` / `my_household_ids` SECURITY-DEFINER-Helper. Policies delegieren Membership-Check an die Helper. |
+| 3 | `0003_create_household_rpc.sql`  | `create_household(text)` SECURITY-DEFINER-RPC. Umgeht die 42501-Falle beim client-seitigen `insert into households` und macht Household-Anlage + Owner-Membership in einer Transaction. |
