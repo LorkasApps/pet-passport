@@ -473,6 +473,7 @@ class ImportService {
         await _db.into(_db.eventPhotos).insert(EventPhotosCompanion.insert(
               uuid: photoUuid,
               eventId: eventId,
+              title: Value(rp['title'] as String?),
               filePath: filePath,
               mimeType: mimeType,
               sizeBytes: Value((rp['size_bytes'] as num?)?.toInt()),
@@ -736,6 +737,7 @@ class ImportService {
           .insert(InsuranceDocumentsCompanion.insert(
             uuid: uuid,
             insuranceId: insuranceId,
+            title: Value(rd['title'] as String?),
             filePath: filePath,
             mimeType: mimeType,
             originalFilename: Value(rd['original_filename'] as String?),
@@ -761,6 +763,7 @@ class ImportService {
           .insert(VaccinationDocumentsCompanion.insert(
             uuid: uuid,
             vaccinationId: vacId,
+            title: Value(rd['title'] as String?),
             filePath: filePath,
             mimeType: mimeType,
             originalFilename: Value(rd['original_filename'] as String?),
@@ -1266,6 +1269,7 @@ class ImportService {
         await _db.into(_db.foodPhotos).insert(FoodPhotosCompanion.insert(
               uuid: photoUuid,
               foodId: foodId,
+              title: Value(rp['title'] as String?),
               filePath: filePath,
               mimeType: mimeType,
               originalFilename: Value(rp['original_filename'] as String?),

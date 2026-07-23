@@ -221,6 +221,7 @@ class ExportService {
               for (final d in ins.documents)
                 {
                   'uuid': d.uuid,
+                  'title': d.title,
                   'file_path': d.filePath,
                   'mime_type': d.mimeType,
                   'original_filename': d.originalFilename,
@@ -244,6 +245,7 @@ class ExportService {
               for (final p in e.photos)
                 {
                   'uuid': p.uuid,
+                  'title': p.title,
                   'file_path': p.filePath,
                   'mime_type': p.mimeType,
                   'size_bytes': p.sizeBytes,
@@ -270,6 +272,7 @@ class ExportService {
               for (final d in vac.documents)
                 {
                   'uuid': d.uuid,
+                  'title': d.title,
                   'file_path': d.filePath,
                   'mime_type': d.mimeType,
                   'original_filename': d.originalFilename,
@@ -372,6 +375,7 @@ class ExportService {
               for (final p in photosByFoodUuid[f.uuid] ?? const <FoodPhoto>[])
                 {
                   'uuid': p.uuid,
+                  'title': p.title,
                   'file_path': p.filePath,
                   'mime_type': p.mimeType,
                   'original_filename': p.originalFilename,

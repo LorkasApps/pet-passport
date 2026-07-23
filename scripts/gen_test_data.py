@@ -470,6 +470,7 @@ def build_snapshot() -> dict:
         "photos": [
             {
                 "uuid": new_uuid(),
+                "title": "Verpackung Vorderseite",
                 "file_path": f"foods/{food_current_uuid}/bag.jpg",
                 "mime_type": "image/jpeg",
                 "original_filename": "josera_bag.jpg",

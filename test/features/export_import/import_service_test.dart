@@ -281,6 +281,7 @@ void main() {
       await sourceDb.foodsDao.insertPhoto(FoodPhotosCompanion.insert(
         uuid: photoUuid,
         foodId: foodId,
+        title: const Value('Vorderseite'),
         filePath: 'foods/$foodUuid/$photoUuid.jpg',
         mimeType: 'image/jpeg',
         originalFilename: const Value('bag.jpg'),
@@ -318,6 +319,7 @@ void main() {
       final photos = await targetFoods.watchPhotos(foodUuid).first;
       expect(photos, hasLength(1));
       expect(photos.single.uuid, photoUuid);
+      expect(photos.single.title, 'Vorderseite');
       expect(photos.single.filePath, 'foods/$foodUuid/$photoUuid.jpg');
       expect(photos.single.originalFilename, 'bag.jpg');
       expect(photos.single.sizeBytes, 12345);
