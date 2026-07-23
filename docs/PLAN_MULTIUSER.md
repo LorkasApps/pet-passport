@@ -376,14 +376,14 @@ Jeder Milestone ist eigenständig shipbar. Zwischen Milestones bleibt die App vo
 **Deliverable:** Alle Tabellen kriegen `household_id`, Sync-Metadaten. Bestehende Daten migrieren beim ersten Login sauber.
 
 **Acceptance Criteria:**
-- [ ] Alle Feature-Tables haben `household_id` (nullable) + `updated_by_user_id` + `deleted_at`
-- [ ] Drift-Migration auf neuen Schema-Version verläuft idempotent (fresh install + upgrade beide grün)
-- [ ] Ein Nutzer mit bestehender lokaler DB, der sich erstmalig einloggt, sieht danach alle seine Tiere/Termine/etc. mit `household_id` gesetzt (auto-erstelltes „Mein Haushalt")
-- [ ] Ein Nutzer, der nicht eingeloggt ist, sieht seine Tiere weiter, `household_id` bleibt null
-- [ ] Beim Pet-Anlegen erscheint ein Household-Picker, wenn ich in >1 Household bin (Pflichtfeld, Default = zuletzt genutzt); bei genau 1 Household wird still auto-zugeordnet
-- [ ] In der Pet-Verwaltungsliste zeigt jedes Tier ein Sub-Label mit Household-Namen, wenn ich in >1 Household bin
-- [ ] Löschungen werden zu Soft-Deletes; UI filtert `deleted_at IS NULL`
-- [ ] Alle bestehenden Round-Trip- und Repository-Tests bleiben grün
+- [x] Alle Feature-Tables haben `household_id` (nullable) + `updated_by_user_id` + `deleted_at`
+- [x] Drift-Migration auf neuen Schema-Version verläuft idempotent (fresh install + upgrade beide grün)
+- [x] Ein Nutzer mit bestehender lokaler DB, der sich erstmalig einloggt, sieht danach alle seine Tiere/Termine/etc. mit `household_id` gesetzt (auto-erstelltes „Mein Haushalt")
+- [x] Ein Nutzer, der nicht eingeloggt ist, sieht seine Tiere weiter, `household_id` bleibt null
+- [x] Beim Pet-Anlegen erscheint ein Household-Picker, wenn ich in >1 Household bin (Pflichtfeld, Default = zuletzt genutzt); bei genau 1 Household wird still auto-zugeordnet
+- [x] In der Pet-Verwaltungsliste zeigt jedes Tier ein Sub-Label mit Household-Namen, wenn ich in >1 Household bin
+- [x] Löschungen werden zu Soft-Deletes; UI filtert `deleted_at IS NULL`
+- [x] Alle bestehenden Round-Trip- und Repository-Tests bleiben grün
 
 ### M3 — Push (Outbox) + Pull (Delta) für Kern-Entities
 
