@@ -56,32 +56,26 @@ class _OverviewContent extends ConsumerWidget {
             PetAvatar(pet: pet, radius: 48),
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    pet.name,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: AgeBadge(pet: pet),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: FilledButton.tonalIcon(
-                      onPressed: () => context.push('/emergency'),
-                      icon: const Icon(Icons.medical_information_outlined),
-                      label: Text(l.emergencyTitle),
-                    ),
-                  ),
-                ],
+              child: Text(
+                pet.name,
+                style: Theme.of(context).textTheme.headlineSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AgeBadge(pet: pet),
+                const SizedBox(height: 8),
+                FilledButton.tonalIcon(
+                  onPressed: () => context.push('/emergency'),
+                  icon: const Icon(Icons.medical_information_outlined),
+                  label: Text(l.emergencyTitle),
+                ),
+              ],
             ),
           ],
         ),
