@@ -98,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -226,6 +226,14 @@ class AppDatabase extends _$AppDatabase {
             // household_id / updated_by / deleted_at columns here.
             await m.createTable(pendingOps);
             await m.createTable(syncCursors);
+          }
+          if (from < 18 && to >= 18) {
+            // pet_documents was omitted from the v16 M2 rollout — bring
+            // it in line so the outbox has something to enqueue when a
+            // doc is attached / renamed / removed.
+            await m.addColumn(petDocuments, petDocuments.householdId);
+            await m.addColumn(petDocuments, petDocuments.updatedByUserId);
+            await m.addColumn(petDocuments, petDocuments.deletedAt);
           }
         },
         beforeOpen: (details) async {

@@ -7,6 +7,7 @@ import '../../../core/db/daos/pet_documents_dao.dart';
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
+import '../../../core/supabase/current_user.dart';
 import '../domain/pet_document.dart';
 
 class DocumentsRepository {
@@ -70,6 +71,8 @@ class DocumentsRepository {
       notes: Value(notes),
       createdAt: now,
       updatedAt: now,
+      householdId: Value(pet.householdId),
+      updatedByUserId: Value(currentUserId()),
     ));
     return docUuid;
   }
@@ -87,14 +90,19 @@ class DocumentsRepository {
       title: Value(title),
       notes: Value(notes),
       updatedAt: DateTime.now(),
+      updatedByUserId: Value(currentUserId()),
     ));
   }
 
   Future<void> remove(String docUuid) async {
     final row = await _docsDao.getByUuid(docUuid);
     if (row == null) return;
-    await _media.deleteFile(row.filePath);
-    await _docsDao.deleteByUuid(docUuid);
+    // Media file stays on disk until a later hard-delete sweep — the
+    // sync engine still needs the tombstone row to propagate the
+    // deletion to peers. Removing the file immediately would break
+    // "row soft-deleted, file already gone" edge cases during a slow
+    // pull on the other device.
+    await _docsDao.softDeleteByUuid(docUuid, DateTime.now());
   }
 
   PetDocument _toDomain(PetDocumentRow row, String petUuid) {

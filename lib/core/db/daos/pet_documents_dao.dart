@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../database.dart';
 import '../tables/pet_documents_table.dart';
 
@@ -12,13 +13,14 @@ class PetDocumentsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<PetDocumentRow>> watchForPet(int petId) {
     return (select(petDocuments)
-          ..where((d) => d.petId.equals(petId))
+          ..where((d) => d.petId.equals(petId) & d.deletedAt.isNull())
           ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
         .watch();
   }
 
   Future<PetDocumentRow?> getByUuid(String uuid) {
-    return (select(petDocuments)..where((d) => d.uuid.equals(uuid)))
+    return (select(petDocuments)
+          ..where((d) => d.uuid.equals(uuid) & d.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
@@ -30,8 +32,13 @@ class PetDocumentsDao extends DatabaseAccessor<AppDatabase>
     return update(petDocuments).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(petDocuments)..where((d) => d.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(petDocuments)..where((d) => d.uuid.equals(uuid)))
+        .write(PetDocumentsCompanion(
+      deletedAt: Value(deletedAt),
+      updatedAt: Value(deletedAt),
+      updatedByUserId: Value(currentUserId()),
+    ));
   }
 
   Future<int> deleteAllForPet(int petId) {
@@ -41,7 +48,8 @@ class PetDocumentsDao extends DatabaseAccessor<AppDatabase>
   Future<int> countForPet(int petId) async {
     final row = await (selectOnly(petDocuments)
           ..addColumns([petDocuments.id.count()])
-          ..where(petDocuments.petId.equals(petId)))
+          ..where(petDocuments.petId.equals(petId) &
+              petDocuments.deletedAt.isNull()))
         .getSingle();
     return row.read(petDocuments.id.count()) ?? 0;
   }

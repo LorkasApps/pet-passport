@@ -58,6 +58,7 @@ void main() {
       'events',
       'event_tags',
       'pet_weights',
+      'pet_documents',
     ];
     for (final table in topLevelTables) {
       final cols =
