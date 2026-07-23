@@ -61,6 +61,12 @@ class _MedicationsListScreenState
                   icon: Icons.medication_outlined,
                   title: l.medicationsEmptyTitle,
                   message: l.medicationsEmptyMessage,
+                  secondaryActionLabel: inactive.isEmpty
+                      ? null
+                      : l.emptyShowArchivedAction(inactive.length),
+                  onSecondaryAction: inactive.isEmpty
+                      ? null
+                      : () => setState(() => _showArchived = true),
                 );
               }
               return ListView(

@@ -107,6 +107,7 @@
   "vetsArchivedSection": "Archiv",
   "actionShowArchived": "Archivierte anzeigen",
   "actionHideArchived": "Archivierte ausblenden",
+  "emptyShowArchivedAction": "{count, plural, =1{1 archivierten Eintrag anzeigen} other{{count} archivierte Einträge anzeigen}}",
 
   "insurancesListTitle": "Versicherungen",
   "insurancesEmptyTitle": "Noch keine Versicherungen",

@@ -61,6 +61,12 @@ class _DietListScreenState extends ConsumerState<DietListScreen> {
                   icon: Icons.restaurant_outlined,
                   title: l.dietEmptyTitle,
                   message: l.dietEmptyMessage,
+                  secondaryActionLabel: inactive.isEmpty
+                      ? null
+                      : l.emptyShowArchivedAction(inactive.length),
+                  onSecondaryAction: inactive.isEmpty
+                      ? null
+                      : () => setState(() => _showArchived = true),
                 );
               }
               return ListView(

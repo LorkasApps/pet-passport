@@ -118,6 +118,10 @@
   "vetsArchivedSection": "Archived",
   "actionShowArchived": "Show archived",
   "actionHideArchived": "Hide archived",
+  "emptyShowArchivedAction": "{count, plural, =1{Show 1 archived entry} other{Show {count} archived entries}}",
+  "@emptyShowArchivedAction": {
+    "placeholders": { "count": { "type": "int" } }
+  },
 
   "insurancesListTitle": "Insurances",
   "insurancesEmptyTitle": "No insurances yet",

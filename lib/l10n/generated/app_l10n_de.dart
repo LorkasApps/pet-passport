@@ -304,6 +304,17 @@ class AppL10nDe extends AppL10n {
   String get actionHideArchived => 'Archivierte ausblenden';
 
   @override
+  String emptyShowArchivedAction(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archivierte Einträge anzeigen',
+      one: '1 archivierten Eintrag anzeigen',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get insurancesListTitle => 'Versicherungen';
 
   @override

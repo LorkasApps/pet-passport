@@ -63,6 +63,12 @@ class _VetsListScreenState extends ConsumerState<VetsListScreen> {
                   message: l.vetsEmptyMessage,
                   actionLabel: l.vetsEmptyAction,
                   onAction: () => context.push('/pets/${pet.uuid}/vets/new'),
+                  secondaryActionLabel: archived.isEmpty
+                      ? null
+                      : l.emptyShowArchivedAction(archived.length),
+                  onSecondaryAction: archived.isEmpty
+                      ? null
+                      : () => setState(() => _showArchived = true),
                 );
               }
               return ListView(

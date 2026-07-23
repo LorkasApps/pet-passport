@@ -643,6 +643,12 @@ abstract class AppL10n {
   /// **'Hide archived'**
   String get actionHideArchived;
 
+  /// No description provided for @emptyShowArchivedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show 1 archived entry} other{Show {count} archived entries}}'**
+  String emptyShowArchivedAction(int count);
+
   /// No description provided for @insurancesListTitle.
   ///
   /// In en, this message translates to:
