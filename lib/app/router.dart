@@ -8,6 +8,7 @@ import '../features/auth/presentation/auth_callback_screen.dart';
 import '../features/auth/presentation/display_name_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/households/presentation/household_detail_screen.dart';
+import '../features/households/presentation/invite_screen.dart';
 import '../features/appointments/presentation/appointment_detail_screen.dart';
 import '../features/appointments/presentation/appointment_edit_screen.dart';
 import '../features/appointments/presentation/appointments_list_screen.dart';
@@ -153,6 +154,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/households/:id',
         parentNavigatorKey: _rootKey,
         builder: (_, s) => HouseholdDetailScreen(
+          householdId: s.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/households/:id/invite',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => InviteScreen(
           householdId: s.pathParameters['id']!,
         ),
       ),

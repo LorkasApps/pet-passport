@@ -129,6 +129,13 @@ class _HouseholdDetailScreenState
                 title: Text(l.householdsMemberCount(h.memberCount)),
               ),
               if (isOwner) ...[
+                const SizedBox(height: 24),
+                FilledButton.tonalIcon(
+                  onPressed: () =>
+                      context.push('/households/${h.id}/invite'),
+                  icon: const Icon(Icons.person_add_outlined),
+                  label: Text(l.householdInvitePerson),
+                ),
                 const Divider(height: 48),
                 OutlinedButton.icon(
                   onPressed: () => _confirmDelete(l),

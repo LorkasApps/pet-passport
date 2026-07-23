@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/application/auth_providers.dart';
 import '../data/households_repository.dart';
+import '../data/invite_repository.dart';
 import '../domain/household.dart';
+import '../domain/invite_code.dart';
 
 final householdsRepositoryProvider = Provider<HouseholdsRepository>((ref) {
   return HouseholdsRepository();
@@ -43,4 +45,36 @@ class MyHouseholdsNotifier extends AsyncNotifier<List<Household>> {
 final myHouseholdsProvider =
     AsyncNotifierProvider<MyHouseholdsNotifier, List<Household>>(
   MyHouseholdsNotifier.new,
+);
+
+final inviteRepositoryProvider = Provider<InviteRepository>((ref) {
+  return InviteRepository();
+});
+
+/// Family-per-household. Watches the active codes for one household and
+/// exposes imperative generate / revoke.
+class HouseholdInvitesNotifier
+    extends FamilyAsyncNotifier<List<InviteCode>, String> {
+  @override
+  Future<List<InviteCode>> build(String householdId) {
+    return ref.read(inviteRepositoryProvider).activeFor(householdId);
+  }
+
+  Future<InviteCode> generate() async {
+    final code = await ref
+        .read(inviteRepositoryProvider)
+        .generate(arg);
+    ref.invalidateSelf();
+    return code;
+  }
+
+  Future<void> revoke(String inviteId) async {
+    await ref.read(inviteRepositoryProvider).revoke(inviteId);
+    ref.invalidateSelf();
+  }
+}
+
+final householdInvitesProvider = AsyncNotifierProvider.family<
+    HouseholdInvitesNotifier, List<InviteCode>, String>(
+  HouseholdInvitesNotifier.new,
 );

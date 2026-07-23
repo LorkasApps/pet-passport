@@ -755,6 +755,67 @@ class AppL10nDe extends AppL10n {
       'Alle Daten dieses Haushalts (Tiere, Termine, Fotos, Dokumente etc.) werden für alle Mitglieder unwiderruflich gelöscht.';
 
   @override
+  String get householdInvitePerson => 'Person einladen';
+
+  @override
+  String get inviteScreenTitle => 'Einladen';
+
+  @override
+  String get inviteHeadline => 'Person zum Haushalt einladen';
+
+  @override
+  String get inviteBody =>
+      'QR scannen, Link teilen oder Code manuell eingeben. Läuft nach 24 Stunden ab und ist einmalig einlösbar.';
+
+  @override
+  String get inviteEmptyHeadline => 'Noch kein Code';
+
+  @override
+  String get inviteEmptyBody =>
+      'Erzeuge einen Einladungscode, um jemanden zu diesem Haushalt hinzuzufügen.';
+
+  @override
+  String get inviteGenerate => 'Code erzeugen';
+
+  @override
+  String get inviteRegenerate => 'Neuen Code erzeugen';
+
+  @override
+  String get inviteRevoke => 'Code zurückziehen';
+
+  @override
+  String get inviteCopyLink => 'Link kopieren';
+
+  @override
+  String get inviteShareLink => 'Link teilen';
+
+  @override
+  String get inviteShareSubject => 'Einladung zum Haushalt';
+
+  @override
+  String inviteShareBody(String link) {
+    return 'Tritt meinem Pet-Passport-Haushalt bei: $link';
+  }
+
+  @override
+  String get inviteExpired => 'Abgelaufen';
+
+  @override
+  String inviteExpiresInHours(int hours, int minutes) {
+    return 'Läuft ab in $hours h $minutes min';
+  }
+
+  @override
+  String inviteExpiresInMinutes(int minutes, int seconds) {
+    return 'Läuft ab in $minutes min $seconds s';
+  }
+
+  @override
+  String inviteExpiresInSeconds(int seconds) {
+    return 'Läuft ab in $seconds s';
+  }
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

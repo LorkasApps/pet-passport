@@ -1417,6 +1417,108 @@ abstract class AppL10n {
   /// **'All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.'**
   String get householdDeleteConfirmBody;
 
+  /// No description provided for @householdInvitePerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite person'**
+  String get householdInvitePerson;
+
+  /// No description provided for @inviteScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get inviteScreenTitle;
+
+  /// No description provided for @inviteHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite someone to this household'**
+  String get inviteHeadline;
+
+  /// No description provided for @inviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the QR, share the link, or type the code manually. Expires after 24 hours and can be used once.'**
+  String get inviteBody;
+
+  /// No description provided for @inviteEmptyHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'No code yet'**
+  String get inviteEmptyHeadline;
+
+  /// No description provided for @inviteEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate an invite code to add someone to this household.'**
+  String get inviteEmptyBody;
+
+  /// No description provided for @inviteGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate code'**
+  String get inviteGenerate;
+
+  /// No description provided for @inviteRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate new code'**
+  String get inviteRegenerate;
+
+  /// No description provided for @inviteRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke code'**
+  String get inviteRevoke;
+
+  /// No description provided for @inviteCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get inviteCopyLink;
+
+  /// No description provided for @inviteShareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get inviteShareLink;
+
+  /// No description provided for @inviteShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Household invitation'**
+  String get inviteShareSubject;
+
+  /// No description provided for @inviteShareBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Join my Pet Passport household: {link}'**
+  String inviteShareBody(String link);
+
+  /// No description provided for @inviteExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get inviteExpired;
+
+  /// No description provided for @inviteExpiresInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {hours} h {minutes} min'**
+  String inviteExpiresInHours(int hours, int minutes);
+
+  /// No description provided for @inviteExpiresInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {minutes} min {seconds} s'**
+  String inviteExpiresInMinutes(int minutes, int seconds);
+
+  /// No description provided for @inviteExpiresInSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {seconds} s'**
+  String inviteExpiresInSeconds(int seconds);
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

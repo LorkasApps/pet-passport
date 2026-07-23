@@ -752,6 +752,67 @@ class AppL10nEn extends AppL10n {
       'All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.';
 
   @override
+  String get householdInvitePerson => 'Invite person';
+
+  @override
+  String get inviteScreenTitle => 'Invite';
+
+  @override
+  String get inviteHeadline => 'Invite someone to this household';
+
+  @override
+  String get inviteBody =>
+      'Scan the QR, share the link, or type the code manually. Expires after 24 hours and can be used once.';
+
+  @override
+  String get inviteEmptyHeadline => 'No code yet';
+
+  @override
+  String get inviteEmptyBody =>
+      'Generate an invite code to add someone to this household.';
+
+  @override
+  String get inviteGenerate => 'Generate code';
+
+  @override
+  String get inviteRegenerate => 'Generate new code';
+
+  @override
+  String get inviteRevoke => 'Revoke code';
+
+  @override
+  String get inviteCopyLink => 'Copy link';
+
+  @override
+  String get inviteShareLink => 'Share link';
+
+  @override
+  String get inviteShareSubject => 'Household invitation';
+
+  @override
+  String inviteShareBody(String link) {
+    return 'Join my Pet Passport household: $link';
+  }
+
+  @override
+  String get inviteExpired => 'Expired';
+
+  @override
+  String inviteExpiresInHours(int hours, int minutes) {
+    return 'Expires in $hours h $minutes min';
+  }
+
+  @override
+  String inviteExpiresInMinutes(int minutes, int seconds) {
+    return 'Expires in $minutes min $seconds s';
+  }
+
+  @override
+  String inviteExpiresInSeconds(int seconds) {
+    return 'Expires in $seconds s';
+  }
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

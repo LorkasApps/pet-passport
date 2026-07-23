@@ -298,6 +298,42 @@
   "householdDeleteAction": "Delete household",
   "householdDeleteConfirmTitle": "Delete this household?",
   "householdDeleteConfirmBody": "All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.",
+  "householdInvitePerson": "Invite person",
+
+  "inviteScreenTitle": "Invite",
+  "inviteHeadline": "Invite someone to this household",
+  "inviteBody": "Scan the QR, share the link, or type the code manually. Expires after 24 hours and can be used once.",
+  "inviteEmptyHeadline": "No code yet",
+  "inviteEmptyBody": "Generate an invite code to add someone to this household.",
+  "inviteGenerate": "Generate code",
+  "inviteRegenerate": "Generate new code",
+  "inviteRevoke": "Revoke code",
+  "inviteCopyLink": "Copy link",
+  "inviteShareLink": "Share link",
+  "inviteShareSubject": "Household invitation",
+  "inviteShareBody": "Join my Pet Passport household: {link}",
+  "@inviteShareBody": {
+    "placeholders": { "link": { "type": "String" } }
+  },
+  "inviteExpired": "Expired",
+  "inviteExpiresInHours": "Expires in {hours} h {minutes} min",
+  "@inviteExpiresInHours": {
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "inviteExpiresInMinutes": "Expires in {minutes} min {seconds} s",
+  "@inviteExpiresInMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" },
+      "seconds": { "type": "int" }
+    }
+  },
+  "inviteExpiresInSeconds": "Expires in {seconds} s",
+  "@inviteExpiresInSeconds": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
 
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON backup",
