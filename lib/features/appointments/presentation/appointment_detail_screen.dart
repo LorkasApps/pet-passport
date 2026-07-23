@@ -269,21 +269,42 @@ class AppointmentDetailScreen extends ConsumerWidget {
 
   Widget _locationRow(BuildContext context, AppL10n l, String address) {
     final scheme = Theme.of(context).colorScheme;
+    // Two-row layout: label sits on its own line so the address always
+    // gets the full remaining width and can wrap to as many lines as it
+    // needs. The maps action is a filled-tonal button, sized to a fixed
+    // touch target so it never visually collides with a long address.
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(l.appointmentLocationLabel,
-                style: TextStyle(color: scheme.onSurfaceVariant)),
+          Text(
+            l.appointmentLocationLabel,
+            style: TextStyle(color: scheme.onSurfaceVariant),
           ),
-          Expanded(child: Text(address)),
-          IconButton(
-            icon: const Icon(Icons.map_outlined),
-            tooltip: l.actionOpenInMaps,
-            onPressed: () => openInMaps(context, address),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  address,
+                  softWrap: true,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: IconButton.filledTonal(
+                  icon: const Icon(Icons.map_outlined),
+                  tooltip: l.actionOpenInMaps,
+                  onPressed: () => openInMaps(context, address),
+                ),
+              ),
+            ],
           ),
         ],
       ),
