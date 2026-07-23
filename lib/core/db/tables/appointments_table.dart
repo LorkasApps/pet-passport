@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../features/appointments/domain/appointment_enums.dart';
+import 'contacts_table.dart';
 import 'pets_table.dart';
 import 'vets_table.dart';
 
@@ -13,6 +14,9 @@ class Appointments extends Table {
   IntColumn get vetId => integer()
       .nullable()
       .references(Vets, #id, onDelete: KeyAction.setNull)();
+  IntColumn get contactId => integer()
+      .nullable()
+      .references(Contacts, #id, onDelete: KeyAction.setNull)();
   IntColumn get type => intEnum<AppointmentType>()();
   TextColumn get title => text().withLength(min: 1, max: 200)();
   DateTimeColumn get startsAt => dateTime()();

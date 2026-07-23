@@ -1,0 +1,65 @@
+import 'package:drift/drift.dart';
+
+import '../database.dart';
+import '../tables/contacts_table.dart';
+
+part 'contacts_dao.g.dart';
+
+@DriftAccessor(tables: [Contacts])
+class ContactsDao extends DatabaseAccessor<AppDatabase>
+    with _$ContactsDaoMixin {
+  ContactsDao(super.db);
+
+  Stream<List<ContactRow>> watchForPet(int petId) {
+    return (select(contacts)
+          ..where((c) => c.petId.equals(petId))
+          ..orderBy([
+            (c) => OrderingTerm.desc(c.isActive),
+            (c) => OrderingTerm.asc(c.name),
+          ]))
+        .watch();
+  }
+
+  Stream<List<ContactRow>> watchActiveForPet(int petId) {
+    return (select(contacts)
+          ..where((c) =>
+              c.petId.equals(petId) & c.isActive.equals(true))
+          ..orderBy([(c) => OrderingTerm.asc(c.name)]))
+        .watch();
+  }
+
+  Future<ContactRow?> getByUuid(String uuid) {
+    return (select(contacts)..where((c) => c.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
+  Future<ContactRow?> getById(int id) {
+    return (select(contacts)..where((c) => c.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Stream<ContactRow?> watchByUuid(String uuid) {
+    return (select(contacts)..where((c) => c.uuid.equals(uuid)))
+        .watchSingleOrNull();
+  }
+
+  Future<int> insertContact(ContactsCompanion companion) {
+    return into(contacts).insert(companion);
+  }
+
+  Future<bool> updateContact(ContactRow row) {
+    return update(contacts).replace(row);
+  }
+
+  Future<int> deleteByUuid(String uuid) {
+    return (delete(contacts)..where((c) => c.uuid.equals(uuid))).go();
+  }
+
+  Future<int> countForPet(int petId) async {
+    final row = await (selectOnly(contacts)
+          ..addColumns([contacts.id.count()])
+          ..where(contacts.petId.equals(petId)))
+        .getSingle();
+    return row.read(contacts.id.count()) ?? 0;
+  }
+}
