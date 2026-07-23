@@ -1676,6 +1676,17 @@ class AppL10nDe extends AppL10n {
   String get petAllergyHint => 'z. B. Hühnerfleisch, Pollen';
 
   @override
+  String get petFieldHousehold => 'Haushalt';
+
+  @override
+  String get petFieldHouseholdHelp => 'In welchem Haushalt lebt dieses Tier?';
+
+  @override
+  String petListHouseholdLabel(String household, String breed) {
+    return '$household · $breed';
+  }
+
+  @override
   String get weightChartTitle => 'Gewichtsverlauf';
 
   @override

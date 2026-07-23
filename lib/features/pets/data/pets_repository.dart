@@ -58,6 +58,7 @@ class PetsRepository {
     String? profilePhotoPath,
     String? allergies,
     String? notes,
+    String? householdId,
   }) async {
     final now = DateTime.now();
     final petUuid = _uuid.v4();
@@ -82,6 +83,7 @@ class PetsRepository {
         createdAt: now,
         updatedAt: now,
         updatedByUserId: Value(currentUserId()),
+        householdId: Value(householdId),
       ),
     );
     return petUuid;
@@ -260,6 +262,7 @@ class PetsRepository {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       deletedAt: row.deletedAt,
+      householdId: row.householdId,
       weights: (weights ?? const [])
           .map((w) => PetWeight(
                 measuredAt: w.measuredAt,

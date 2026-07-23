@@ -7,6 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../households/application/households_providers.dart';
+import '../../households/domain/household.dart';
+import '../../settings/application/settings_providers.dart';
+import '../../settings/data/settings_repository.dart';
 import '../application/current_pet_provider.dart';
 import '../application/pets_providers.dart';
 import '../domain/pet.dart';
@@ -39,8 +43,42 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
   DateTime? _dob;
   String? _photoPathTemp; // absolute path of new pick, until save
   String? _photoPathStored; // relative path stored in DB
+  String? _selectedHouseholdId;
   bool _prefilled = false;
+  bool _newModeInitialised = false;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isEdit) {
+      // Async default resolution: read "last used" from settings, fall
+      // back to the first available household. Runs once — subsequent
+      // rebuilds keep whatever the user picked.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _initNewMode());
+    }
+  }
+
+  Future<void> _initNewMode() async {
+    if (_newModeInitialised || !mounted) return;
+    final last = await ref
+        .read(settingsRepositoryProvider)
+        .getRaw(SettingsKeys.lastUsedHouseholdId);
+    final households = ref.read(myHouseholdsProvider).valueOrNull ?? const [];
+    String? initial;
+    if (last != null && households.any((h) => h.id == last)) {
+      initial = last;
+    } else if (households.length == 1) {
+      initial = households.single.id;
+    } else if (households.isNotEmpty) {
+      initial = households.first.id;
+    }
+    if (!mounted) return;
+    setState(() {
+      _selectedHouseholdId = initial;
+      _newModeInitialised = true;
+    });
+  }
 
   @override
   void dispose() {
@@ -68,6 +106,7 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
     _isNeutered = pet.isNeutered;
     _dob = pet.dateOfBirth;
     _photoPathStored = pet.profilePhotoPath;
+    _selectedHouseholdId = pet.householdId;
   }
 
   Future<void> _pickPhoto() async {
@@ -168,7 +207,17 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
           tassoNumber: tasso,
           allergies: allergies,
           notes: notes,
+          householdId: _selectedHouseholdId,
         );
+        // Sticky pick: the next new-pet defaults to the same household
+        // unless the user overrides. Skipped when the pet is unbound
+        // (offline / not signed in) so we don't pin `null` as sticky.
+        final hid = _selectedHouseholdId;
+        if (hid != null) {
+          await ref
+              .read(settingsRepositoryProvider)
+              .setRaw(SettingsKeys.lastUsedHouseholdId, hid);
+        }
         // First-ever pet becomes the active profile automatically.
         await setCurrentPet(ref, uuid);
         if (_photoPathTemp != null) {
@@ -333,6 +382,7 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
                   ? l.validationRequired
                   : (v.trim().length > 100 ? l.validationTooLong : null),
             ),
+            _householdPicker(context, l),
             const SizedBox(height: 16),
             DropdownButtonFormField<Species>(
               initialValue: _species,
@@ -452,6 +502,38 @@ class _PetEditScreenState extends ConsumerState<PetEditScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _householdPicker(BuildContext context, AppL10n l) {
+    final households = ref.watch(myHouseholdsProvider).valueOrNull ?? const [];
+    // Silent auto-assign when the user is in exactly one household (or
+    // none — pre-cloud install stays hidden). The picker only appears
+    // when a choice actually needs to be made.
+    if (households.length < 2) return const SizedBox.shrink();
+    // If the stored household_id is missing from the current list
+    // (e.g. an old pet whose household was left), fall back to no
+    // selection so the picker asks the user again instead of silently
+    // showing a stale label.
+    final value = households.any((h) => h.id == _selectedHouseholdId)
+        ? _selectedHouseholdId
+        : null;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: DropdownButtonFormField<String>(
+        initialValue: value,
+        decoration: InputDecoration(
+          labelText: l.petFieldHousehold,
+          helperText: l.petFieldHouseholdHelp,
+        ),
+        items: [
+          for (final Household h in households)
+            DropdownMenuItem(value: h.id, child: Text(h.name)),
+        ],
+        onChanged: (v) => setState(() => _selectedHouseholdId = v),
+        validator: (v) =>
+            v == null || v.isEmpty ? l.validationRequired : null,
       ),
     );
   }

@@ -3007,6 +3007,24 @@ abstract class AppL10n {
   /// **'e.g. chicken, pollen'**
   String get petAllergyHint;
 
+  /// No description provided for @petFieldHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get petFieldHousehold;
+
+  /// No description provided for @petFieldHouseholdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Which household does this pet live in?'**
+  String get petFieldHouseholdHelp;
+
+  /// No description provided for @petListHouseholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{household} · {breed}'**
+  String petListHouseholdLabel(String household, String breed);
+
   /// No description provided for @weightChartTitle.
   ///
   /// In en, this message translates to:

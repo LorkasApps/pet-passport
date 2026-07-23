@@ -24,6 +24,7 @@ class Pet {
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
+    this.householdId,
     this.weights = const [],
   });
 
@@ -46,6 +47,7 @@ class Pet {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
+  final String? householdId;
   final List<PetWeight> weights;
 
   Pet copyWith({
@@ -66,6 +68,7 @@ class Pet {
     String? Function()? notes,
     DateTime? updatedAt,
     DateTime? Function()? deletedAt,
+    String? Function()? householdId,
     List<PetWeight>? weights,
   }) {
     return Pet(
@@ -94,6 +97,7 @@ class Pet {
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt != null ? deletedAt() : this.deletedAt,
+      householdId: householdId != null ? householdId() : this.householdId,
       weights: weights ?? this.weights,
     );
   }

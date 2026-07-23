@@ -674,6 +674,16 @@
   "petAllergyAddAction": "Add",
   "petAllergyHint": "e.g. chicken, pollen",
 
+  "petFieldHousehold": "Household",
+  "petFieldHouseholdHelp": "Which household does this pet live in?",
+  "petListHouseholdLabel": "{household} · {breed}",
+  "@petListHouseholdLabel": {
+    "placeholders": {
+      "household": { "type": "String" },
+      "breed": { "type": "String" }
+    }
+  },
+
   "weightChartTitle": "Weight chart",
   "weightChartEmptyTitle": "No curve yet",
   "weightChartEmptyMessage": "The chart shows up once at least two weight events exist."

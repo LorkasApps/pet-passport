@@ -7,6 +7,7 @@ class SettingsKeys {
   static const appLockEnabled = 'app_lock_enabled';
   static const currentPetUuid = 'current_pet_uuid';
   static const reminderLeadDays = 'reminder_lead_days';
+  static const lastUsedHouseholdId = 'last_used_household_id';
 }
 
 class SettingsRepository {

@@ -547,6 +547,16 @@
   "petAllergyAddAction": "Hinzufügen",
   "petAllergyHint": "z. B. Hühnerfleisch, Pollen",
 
+  "petFieldHousehold": "Haushalt",
+  "petFieldHouseholdHelp": "In welchem Haushalt lebt dieses Tier?",
+  "petListHouseholdLabel": "{household} · {breed}",
+  "@petListHouseholdLabel": {
+    "placeholders": {
+      "household": { "type": "String" },
+      "breed": { "type": "String" }
+    }
+  },
+
   "weightChartTitle": "Gewichtsverlauf",
   "weightChartEmptyTitle": "Noch keine Kurve",
   "weightChartEmptyMessage": "Ab dem zweiten Gewichts-Event wird eine Kurve angezeigt."

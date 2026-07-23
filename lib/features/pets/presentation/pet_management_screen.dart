@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../../core/widgets/empty_state.dart';
+import '../../households/application/households_providers.dart';
 import '../application/current_pet_provider.dart';
 import '../application/pets_providers.dart';
 import 'widgets/age_badge.dart';
@@ -17,6 +18,12 @@ class PetManagementScreen extends ConsumerWidget {
     final l = AppL10n.of(context);
     final async = ref.watch(activePetsProvider);
     final currentAsync = ref.watch(currentPetProvider);
+    final households = ref.watch(myHouseholdsProvider).valueOrNull ?? const [];
+    final householdNames = {for (final h in households) h.id: h.name};
+    // The sub-label only carries the household name when membership
+    // spans multiple containers — with a single household the label is
+    // redundant noise, and the empty (offline) case has nothing to say.
+    final showHouseholdInLabel = households.length > 1;
     return Scaffold(
       appBar: AppBar(title: Text(l.petsListTitle)),
       body: async.when(
@@ -38,12 +45,23 @@ class PetManagementScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final pet = pets[i];
               final isCurrent = currentAsync.valueOrNull?.uuid == pet.uuid;
+              final breed = pet.breed?.trim();
+              final hasBreed = breed != null && breed.isNotEmpty;
+              final householdName = showHouseholdInLabel
+                  ? householdNames[pet.householdId]
+                  : null;
+              String? subtitle;
+              if (householdName != null && hasBreed) {
+                subtitle = l.petListHouseholdLabel(householdName, breed);
+              } else if (householdName != null) {
+                subtitle = householdName;
+              } else if (hasBreed) {
+                subtitle = breed;
+              }
               return ListTile(
                 leading: PetAvatar(pet: pet, radius: 24),
                 title: Text(pet.name),
-                subtitle: pet.breed == null || pet.breed!.isEmpty
-                    ? null
-                    : Text(pet.breed!),
+                subtitle: subtitle == null ? null : Text(subtitle),
                 trailing: Wrap(
                   spacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,

@@ -1671,6 +1671,17 @@ class AppL10nEn extends AppL10n {
   String get petAllergyHint => 'e.g. chicken, pollen';
 
   @override
+  String get petFieldHousehold => 'Household';
+
+  @override
+  String get petFieldHouseholdHelp => 'Which household does this pet live in?';
+
+  @override
+  String petListHouseholdLabel(String household, String breed) {
+    return '$household · $breed';
+  }
+
+  @override
   String get weightChartTitle => 'Weight chart';
 
   @override
