@@ -45,7 +45,7 @@ class AppointmentsRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _appDao.getByUuid(uuid);
+    final row = await _appDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'appointments',

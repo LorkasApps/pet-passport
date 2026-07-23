@@ -43,7 +43,7 @@ class MedicationsRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _medDao.getByUuid(uuid);
+    final row = await _medDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'medications',

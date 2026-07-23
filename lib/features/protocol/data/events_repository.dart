@@ -39,7 +39,7 @@ class EventsRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _eventsDao.getByUuid(uuid);
+    final row = await _eventsDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'events',

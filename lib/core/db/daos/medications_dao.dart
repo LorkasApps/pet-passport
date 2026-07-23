@@ -35,6 +35,14 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<MedicationRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(medications)..where((m) => m.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Stream<MedicationRow?> watchByUuid(String uuid) {
     return (select(medications)..where((m) => m.uuid.equals(uuid) & m.deletedAt.isNull()))
         .watchSingleOrNull();

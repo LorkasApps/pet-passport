@@ -52,6 +52,14 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<EventRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(events)..where((e) => e.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Stream<EventRow?> watchByUuid(String uuid) {
     return (select(events)..where((e) => e.uuid.equals(uuid) & e.deletedAt.isNull()))
         .watchSingleOrNull();

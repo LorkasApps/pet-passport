@@ -32,6 +32,14 @@ class VetsDao extends DatabaseAccessor<AppDatabase> with _$VetsDaoMixin {
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<VetRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(vets)..where((v) => v.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Future<VetRow?> getById(int id) {
     return (select(vets)..where((v) => v.id.equals(id) & v.deletedAt.isNull())).getSingleOrNull();
   }

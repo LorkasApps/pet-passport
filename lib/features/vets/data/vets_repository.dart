@@ -23,7 +23,7 @@ class VetsRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _vetsDao.getByUuid(uuid);
+    final row = await _vetsDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'vets',

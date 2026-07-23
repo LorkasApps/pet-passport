@@ -34,6 +34,14 @@ class ContactsDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<ContactRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(contacts)..where((c) => c.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Future<ContactRow?> getById(int id) {
     return (select(contacts)..where((c) => c.id.equals(id) & c.deletedAt.isNull()))
         .getSingleOrNull();

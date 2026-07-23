@@ -24,7 +24,7 @@ class ContactsRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _contactsDao.getByUuid(uuid);
+    final row = await _contactsDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'contacts',

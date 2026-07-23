@@ -24,6 +24,14 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<InsuranceRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(insurances)..where((i) => i.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Stream<InsuranceRow?> watchByUuid(String uuid) {
     return (select(insurances)..where((i) => i.uuid.equals(uuid) & i.deletedAt.isNull()))
         .watchSingleOrNull();

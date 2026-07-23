@@ -32,7 +32,7 @@ class InsurancesRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _insurancesDao.getByUuid(uuid);
+    final row = await _insurancesDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'insurances',

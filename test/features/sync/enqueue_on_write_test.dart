@@ -156,6 +156,36 @@ void main() {
       expect(payload['householdId'], 'h-1');
     });
 
+    test('softDelete of a child row enqueues a tombstone upsert',
+        () async {
+      final db = newInMemoryDatabase();
+      final outbox = SyncOutbox(db.pendingOpsDao);
+      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
+
+      final petUuid = await pets.createPet(
+        name: 'Bello',
+        species: Species.dog,
+        sex: Sex.male,
+        householdId: 'h-1',
+      );
+      final vetUuid = await vets.createVet(
+        petUuid: petUuid,
+        name: 'Dr. Klein',
+      );
+      await vets.deleteByUuid(vetUuid);
+
+      final ops = await db.pendingOpsDao.head();
+      final vetOps = ops.where((o) => o.entityTable == 'vets').toList();
+      expect(vetOps, hasLength(2),
+          reason: 'create + soft-delete should both enqueue');
+      final tombstone = vetOps.last;
+      final payload =
+          jsonDecode(tombstone.payloadJson) as Map<String, dynamic>;
+      expect(payload['deletedAt'], isNotNull,
+          reason: 'tombstone payload must carry the deleted_at timestamp');
+    });
+
     test('createVet on local-only pet stays local — no enqueue',
         () async {
       final db = newInMemoryDatabase();

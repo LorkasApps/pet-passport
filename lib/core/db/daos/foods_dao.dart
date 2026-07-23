@@ -33,6 +33,14 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
         .getSingleOrNull();
   }
 
+  /// Same as [getByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<FoodRow?> getByUuidIncludingDeleted(String uuid) {
+    return (select(foods)..where((f) => f.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
   Stream<FoodRow?> watchByUuid(String uuid) {
     return (select(foods)..where((f) => f.uuid.equals(uuid) & f.deletedAt.isNull()))
         .watchSingleOrNull();

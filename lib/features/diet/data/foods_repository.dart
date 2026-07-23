@@ -43,7 +43,7 @@ class FoodsRepository {
   Future<void> _enqueue(String uuid) async {
     final ob = outbox;
     if (ob == null) return;
-    final row = await _foodsDao.getByUuid(uuid);
+    final row = await _foodsDao.getByUuidIncludingDeleted(uuid);
     if (row == null || row.householdId == null) return;
     await ob.enqueueUpsert(
       entityTable: 'foods',
