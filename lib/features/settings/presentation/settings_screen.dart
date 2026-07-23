@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/supabase/supabase_config.dart';
+import '../../auth/application/auth_providers.dart';
 import '../../security/application/app_lock_providers.dart';
 import '../application/settings_providers.dart';
 
@@ -40,6 +43,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _SectionHeader(text: l.settingsSecurity),
           _AppLockTile(),
+          if (SupabaseConfig.isConfigured) ...[
+            _SectionHeader(text: l.settingsCloudSection),
+            const _CloudTile(),
+          ],
         ],
       ),
     );
@@ -154,6 +161,33 @@ class SettingsScreen extends ConsumerWidget {
       'en' => l.settingsLanguageEnglish,
       _ => locale.languageCode,
     };
+  }
+}
+
+class _CloudTile extends ConsumerWidget {
+  const _CloudTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppL10n.of(context);
+    final user = ref.watch(currentUserProvider);
+    if (user == null) {
+      return ListTile(
+        leading: const Icon(Icons.cloud_outlined),
+        title: Text(l.settingsSignIn),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/auth/signin'),
+      );
+    }
+    return ListTile(
+      leading: const Icon(Icons.cloud_done_outlined),
+      title: Text(l.settingsSignedInAs(user.email ?? '')),
+      subtitle: Text(l.settingsSignOut,
+          style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+      onTap: () async {
+        await ref.read(authRepositoryProvider).signOut();
+      },
+    );
   }
 }
 

@@ -1225,6 +1225,90 @@ abstract class AppL10n {
   /// **'Unlock'**
   String get appLockUnlock;
 
+  /// No description provided for @settingsCloudSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud & shared household'**
+  String get settingsCloudSection;
+
+  /// No description provided for @settingsSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable cloud (sign in)'**
+  String get settingsSignIn;
+
+  /// No description provided for @settingsSignedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {email}'**
+  String settingsSignedInAs(String email);
+
+  /// No description provided for @settingsSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get settingsSignOut;
+
+  /// No description provided for @signInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signInTitle;
+
+  /// No description provided for @signInHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with email'**
+  String get signInHeadline;
+
+  /// No description provided for @signInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll get a magic link by mail. Tapping the link signs you in directly — no password needed.'**
+  String get signInBody;
+
+  /// No description provided for @signInEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get signInEmailLabel;
+
+  /// No description provided for @signInEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get signInEmailInvalid;
+
+  /// No description provided for @signInSendAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send magic link'**
+  String get signInSendAction;
+
+  /// No description provided for @signInSkipAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back (skip cloud)'**
+  String get signInSkipAction;
+
+  /// No description provided for @signInWaitingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Mail sent'**
+  String get signInWaitingHeadline;
+
+  /// No description provided for @signInWaitingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve sent a link to {email}. Open the mail on this device and tap the link — the app will sign you in automatically.'**
+  String signInWaitingBody(String email);
+
+  /// No description provided for @signInWaitingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Different email'**
+  String get signInWaitingBack;
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

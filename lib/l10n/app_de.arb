@@ -216,6 +216,22 @@
   "appLockLockedBody": "Authentifiziere dich, um fortzufahren.",
   "appLockUnlock": "Entsperren",
 
+  "settingsCloudSection": "Cloud & geteilter Haushalt",
+  "settingsSignIn": "Cloud aktivieren (Anmelden)",
+  "settingsSignedInAs": "Angemeldet als {email}",
+  "settingsSignOut": "Abmelden",
+
+  "signInTitle": "Anmelden",
+  "signInHeadline": "Mit E-Mail anmelden",
+  "signInBody": "Du bekommst einen Magic-Link per Mail. Der Klick auf den Link meldet dich hier direkt an. Kein Passwort nötig.",
+  "signInEmailLabel": "E-Mail-Adresse",
+  "signInEmailInvalid": "Ungültige E-Mail",
+  "signInSendAction": "Magic-Link senden",
+  "signInSkipAction": "Zurück (Cloud überspringen)",
+  "signInWaitingHeadline": "Mail geschickt",
+  "signInWaitingBody": "Wir haben einen Link an {email} geschickt. Öffne die Mail auf diesem Gerät und tippe auf den Link — die App wird sich automatisch anmelden.",
+  "signInWaitingBack": "Andere E-Mail",
+
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON-Backup",
   "exportJsonHelp": "Erstellt eine JSON-Datei mit allen Tieren, Tierärzten, Versicherungen und Impfungen. Über Mail, Cloud oder eine andere App teilen.",

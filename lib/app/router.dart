@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/appointments/presentation/appointment_detail_screen.dart';
 import '../features/appointments/presentation/appointment_edit_screen.dart';
 import '../features/appointments/presentation/appointments_list_screen.dart';
@@ -85,6 +86,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const OnboardingWizardScreen(),
+      ),
+      GoRoute(
+        path: '/auth/signin',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const SignInScreen(),
       ),
       GoRoute(
         path: '/pets/new',

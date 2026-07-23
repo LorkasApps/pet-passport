@@ -641,6 +641,53 @@ class AppL10nEn extends AppL10n {
   String get appLockUnlock => 'Unlock';
 
   @override
+  String get settingsCloudSection => 'Cloud & shared household';
+
+  @override
+  String get settingsSignIn => 'Enable cloud (sign in)';
+
+  @override
+  String settingsSignedInAs(String email) {
+    return 'Signed in as $email';
+  }
+
+  @override
+  String get settingsSignOut => 'Sign out';
+
+  @override
+  String get signInTitle => 'Sign in';
+
+  @override
+  String get signInHeadline => 'Sign in with email';
+
+  @override
+  String get signInBody =>
+      'You\'ll get a magic link by mail. Tapping the link signs you in directly — no password needed.';
+
+  @override
+  String get signInEmailLabel => 'Email address';
+
+  @override
+  String get signInEmailInvalid => 'Invalid email';
+
+  @override
+  String get signInSendAction => 'Send magic link';
+
+  @override
+  String get signInSkipAction => 'Back (skip cloud)';
+
+  @override
+  String get signInWaitingHeadline => 'Mail sent';
+
+  @override
+  String signInWaitingBody(String email) {
+    return 'We\'ve sent a link to $email. Open the mail on this device and tap the link — the app will sign you in automatically.';
+  }
+
+  @override
+  String get signInWaitingBack => 'Different email';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

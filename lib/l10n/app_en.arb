@@ -254,6 +254,28 @@
   "appLockLockedBody": "Authenticate to continue.",
   "appLockUnlock": "Unlock",
 
+  "settingsCloudSection": "Cloud & shared household",
+  "settingsSignIn": "Enable cloud (sign in)",
+  "settingsSignedInAs": "Signed in as {email}",
+  "@settingsSignedInAs": {
+    "placeholders": { "email": { "type": "String" } }
+  },
+  "settingsSignOut": "Sign out",
+
+  "signInTitle": "Sign in",
+  "signInHeadline": "Sign in with email",
+  "signInBody": "You'll get a magic link by mail. Tapping the link signs you in directly — no password needed.",
+  "signInEmailLabel": "Email address",
+  "signInEmailInvalid": "Invalid email",
+  "signInSendAction": "Send magic link",
+  "signInSkipAction": "Back (skip cloud)",
+  "signInWaitingHeadline": "Mail sent",
+  "signInWaitingBody": "We've sent a link to {email}. Open the mail on this device and tap the link — the app will sign you in automatically.",
+  "@signInWaitingBody": {
+    "placeholders": { "email": { "type": "String" } }
+  },
+  "signInWaitingBack": "Different email",
+
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON backup",
   "exportJsonHelp": "Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.",

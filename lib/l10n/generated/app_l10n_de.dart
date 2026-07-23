@@ -644,6 +644,53 @@ class AppL10nDe extends AppL10n {
   String get appLockUnlock => 'Entsperren';
 
   @override
+  String get settingsCloudSection => 'Cloud & geteilter Haushalt';
+
+  @override
+  String get settingsSignIn => 'Cloud aktivieren (Anmelden)';
+
+  @override
+  String settingsSignedInAs(String email) {
+    return 'Angemeldet als $email';
+  }
+
+  @override
+  String get settingsSignOut => 'Abmelden';
+
+  @override
+  String get signInTitle => 'Anmelden';
+
+  @override
+  String get signInHeadline => 'Mit E-Mail anmelden';
+
+  @override
+  String get signInBody =>
+      'Du bekommst einen Magic-Link per Mail. Der Klick auf den Link meldet dich hier direkt an. Kein Passwort nötig.';
+
+  @override
+  String get signInEmailLabel => 'E-Mail-Adresse';
+
+  @override
+  String get signInEmailInvalid => 'Ungültige E-Mail';
+
+  @override
+  String get signInSendAction => 'Magic-Link senden';
+
+  @override
+  String get signInSkipAction => 'Zurück (Cloud überspringen)';
+
+  @override
+  String get signInWaitingHeadline => 'Mail geschickt';
+
+  @override
+  String signInWaitingBody(String email) {
+    return 'Wir haben einen Link an $email geschickt. Öffne die Mail auf diesem Gerät und tippe auf den Link — die App wird sich automatisch anmelden.';
+  }
+
+  @override
+  String get signInWaitingBack => 'Andere E-Mail';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override
