@@ -9,6 +9,8 @@ import '../../appointments/domain/appointment.dart';
 import '../../contacts/data/contacts_repository.dart';
 import '../../contacts/domain/contact.dart';
 import '../../diet/data/foods_repository.dart';
+import '../../documents/data/documents_repository.dart';
+import '../../documents/domain/pet_document.dart';
 import '../../diet/domain/food.dart';
 import '../../diet/domain/food_photo.dart';
 import '../../insurances/data/insurances_repository.dart';
@@ -38,6 +40,7 @@ class ExportService {
     this._medications,
     this._foods,
     this._contacts,
+    this._documents,
   );
 
   final PetsRepository _pets;
@@ -49,6 +52,7 @@ class ExportService {
   final MedicationsRepository _medications;
   final FoodsRepository _foods;
   final ContactsRepository _contacts;
+  final DocumentsRepository _documents;
 
   /// Bumped to 3 in 2026-07 when appointments/medications/foods joined the
   /// snapshot. Older readers see extra keys and ignore them; the import
@@ -66,6 +70,7 @@ class ExportService {
     for (final pet in pets) {
       final vets = await _vets.watchForPetUuid(pet.uuid).first;
       final contacts = await _contacts.watchForPetUuid(pet.uuid).first;
+      final documents = await _documents.watchForPetUuid(pet.uuid).first;
       final insurances = await _insurances.watchForPetUuid(pet.uuid).first;
       final vaccinations =
           await _vaccinations.watchForPetUuid(pet.uuid).first;
@@ -93,6 +98,7 @@ class ExportService {
         appointments,
         medications,
         foods,
+        documents,
         intakesByMedUuid,
         photosByFoodUuid,
       ));
@@ -138,6 +144,7 @@ class ExportService {
     List<Appointment> appointments,
     List<Medication> medications,
     List<Food> foods,
+    List<PetDocument> documents,
     Map<String, List<MedicationIntake>> intakesByMedUuid,
     Map<String, List<FoodPhoto>> photosByFoodUuid,
   ) {
@@ -330,6 +337,20 @@ class ExportService {
             ],
             'created_at': _dt(m.createdAt),
             'updated_at': _dt(m.updatedAt),
+          },
+      ],
+      'documents': [
+        for (final d in documents)
+          {
+            'uuid': d.uuid,
+            'title': d.title,
+            'file_path': d.filePath,
+            'mime_type': d.mimeType,
+            'original_filename': d.originalFilename,
+            'size_bytes': d.sizeBytes,
+            'notes': d.notes,
+            'created_at': _dt(d.createdAt),
+            'updated_at': _dt(d.updatedAt),
           },
       ],
       'foods': [

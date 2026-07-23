@@ -6,6 +6,7 @@ import 'package:pet_passport/core/media/media_service.dart';
 import 'package:pet_passport/features/appointments/data/appointments_repository.dart';
 import 'package:pet_passport/features/contacts/data/contacts_repository.dart';
 import 'package:pet_passport/features/diet/data/foods_repository.dart';
+import 'package:pet_passport/features/documents/data/documents_repository.dart';
 import 'package:pet_passport/features/export_import/data/export_service.dart';
 import 'package:pet_passport/features/insurances/data/insurances_repository.dart';
 import 'package:pet_passport/features/medications/data/medications_repository.dart';
@@ -53,6 +54,8 @@ void main() {
       );
       final foods = FoodsRepository(db.foodsDao, db.petsDao);
       final contacts = ContactsRepository(db.contactsDao, db.petsDao);
+      final documents =
+          DocumentsRepository(db.petDocumentsDao, db.petsDao, mediaService);
       exportService = ExportService(
         pets,
         vets,
@@ -63,6 +66,7 @@ void main() {
         medications,
         foods,
         contacts,
+        documents,
       );
     });
 

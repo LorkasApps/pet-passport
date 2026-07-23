@@ -10,6 +10,7 @@ import 'package:pet_passport/features/appointments/domain/appointment_enums.dart
 import 'package:pet_passport/features/contacts/data/contacts_repository.dart';
 import 'package:pet_passport/features/contacts/domain/contact_enums.dart';
 import 'package:pet_passport/features/diet/data/foods_repository.dart';
+import 'package:pet_passport/features/documents/data/documents_repository.dart';
 import 'package:pet_passport/features/diet/domain/food_enums.dart';
 import 'package:pet_passport/features/export_import/data/export_service.dart';
 import 'package:pet_passport/features/export_import/data/import_service.dart';
@@ -61,6 +62,8 @@ void main() {
           FoodsRepository(sourceDb.foodsDao, sourceDb.petsDao);
       final sourceContacts =
           ContactsRepository(sourceDb.contactsDao, sourceDb.petsDao);
+      final sourceDocuments = DocumentsRepository(
+          sourceDb.petDocumentsDao, sourceDb.petsDao, MockMediaService());
       final exportService = ExportService(
         sourcePets,
         sourceVets,
@@ -71,6 +74,7 @@ void main() {
         sourceMedications,
         sourceFoods,
         sourceContacts,
+        sourceDocuments,
       );
 
       final petUuid = await sourcePets.createPet(
@@ -137,6 +141,22 @@ void main() {
         startsAt: DateTime(2026, 6, 1),
         remindersEnabled: true,
       );
+      // Documents are stored purely by file path — the media bytes stay
+      // on the source device, so we inject a row directly.
+      final petRow = (await sourceDb.petsDao.getByUuid(petUuid))!;
+      const docUuid = 'doc-uuid-1';
+      await sourceDb.petDocumentsDao.insertDoc(PetDocumentsCompanion.insert(
+        uuid: docUuid,
+        petId: petRow.id,
+        title: const Value('Blutbild Mai'),
+        filePath: 'pets/$petUuid/docs/$docUuid.pdf',
+        mimeType: 'application/pdf',
+        originalFilename: const Value('blutbild.pdf'),
+        sizeBytes: const Value(45678),
+        notes: const Value('Referenzwerte im Notizfeld.'),
+        createdAt: DateTime(2026, 5, 20),
+        updatedAt: DateTime(2026, 5, 20),
+      ));
 
       final snapshot = await exportService.buildSnapshot();
       final jsonString = jsonEncode(snapshot);
@@ -153,6 +173,7 @@ void main() {
       expect(summary.contactsInserted, 1);
       expect(summary.medicationsInserted, 1);
       expect(summary.foodsInserted, 1);
+      expect(summary.documentsInserted, 1);
 
       final targetPets = PetsRepository(targetDb.petsDao);
       final imported = await targetPets.getByUuid(petUuid);
@@ -220,6 +241,16 @@ void main() {
       expect(foods.single.brand, 'Josera');
       expect(foods.single.timesOfDay, ['07:00', '19:00']);
       expect(foods.single.remindersEnabled, isTrue);
+
+      final targetDocuments = DocumentsRepository(
+          targetDb.petDocumentsDao, targetDb.petsDao, MockMediaService());
+      final docs = await targetDocuments.watchForPetUuid(petUuid).first;
+      expect(docs, hasLength(1));
+      expect(docs.single.uuid, docUuid);
+      expect(docs.single.title, 'Blutbild Mai');
+      expect(docs.single.mimeType, 'application/pdf');
+      expect(docs.single.originalFilename, 'blutbild.pdf');
+      expect(docs.single.sizeBytes, 45678);
     });
 
     test('food photos survive export → import round-trip', () async {
@@ -272,6 +303,8 @@ void main() {
             sourceDb.medicationsDao, sourceDb.petsDao, sourceDb.vetsDao),
         sourceFoods,
         ContactsRepository(sourceDb.contactsDao, sourceDb.petsDao),
+        DocumentsRepository(
+            sourceDb.petDocumentsDao, sourceDb.petsDao, MockMediaService()),
       );
       final jsonString = jsonEncode(await exportService.buildSnapshot());
 

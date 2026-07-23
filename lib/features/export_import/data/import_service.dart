@@ -32,6 +32,8 @@ class ImportSummary {
     required this.foodsUpdated,
     required this.contactsInserted,
     required this.contactsUpdated,
+    required this.documentsInserted,
+    required this.documentsUpdated,
     required this.tagsInserted,
     required this.errors,
   });
@@ -54,6 +56,8 @@ class ImportSummary {
   final int foodsUpdated;
   final int contactsInserted;
   final int contactsUpdated;
+  final int documentsInserted;
+  final int documentsUpdated;
   final int tagsInserted;
   final List<String> errors;
 
@@ -67,6 +71,7 @@ class ImportSummary {
       medicationsInserted +
       foodsInserted +
       contactsInserted +
+      documentsInserted +
       tagsInserted;
 
   int get totalUpdated =>
@@ -78,7 +83,8 @@ class ImportSummary {
       appointmentsUpdated +
       medicationsUpdated +
       foodsUpdated +
-      contactsUpdated;
+      contactsUpdated +
+      documentsUpdated;
 }
 
 class ImportException implements Exception {
@@ -154,6 +160,8 @@ class ImportService {
     int foodsUpdated = 0;
     int contactsInserted = 0;
     int contactsUpdated = 0;
+    int documentsInserted = 0;
+    int documentsUpdated = 0;
     int tagsInserted = 0;
     final errors = <String>[];
 
@@ -316,6 +324,19 @@ class ImportService {
               }
             }
           }
+
+          final rawDocs = rawPet['documents'];
+          if (rawDocs is List) {
+            for (final rd in rawDocs) {
+              if (rd is! Map<String, dynamic>) continue;
+              try {
+                await _upsertPetDocument(petId, rd,
+                    () => documentsInserted++, () => documentsUpdated++);
+              } catch (e) {
+                errors.add('Document ${rd['uuid']}: $e');
+              }
+            }
+          }
         } catch (e) {
           errors.add('Pet ${rawPet['uuid']}: $e');
         }
@@ -341,6 +362,8 @@ class ImportService {
       foodsUpdated: foodsUpdated,
       contactsInserted: contactsInserted,
       contactsUpdated: contactsUpdated,
+      documentsInserted: documentsInserted,
+      documentsUpdated: documentsUpdated,
       tagsInserted: tagsInserted,
       errors: errors,
     );
@@ -789,6 +812,58 @@ class ImportService {
         'intervalDays' => FreqType.intervalDays,
         _ => throw ImportException('Unknown freq_type: $v'),
       };
+
+  Future<int> _upsertPetDocument(
+    int petId,
+    Map<String, dynamic> raw,
+    void Function() onInsert,
+    void Function() onUpdate,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    if (uuid == null || uuid.isEmpty) throw ImportException('Missing uuid');
+    final filePath = raw['file_path'] as String?;
+    if (filePath == null || filePath.isEmpty) {
+      throw ImportException('Missing file_path');
+    }
+    final mimeType = raw['mime_type'] as String?;
+    if (mimeType == null || mimeType.isEmpty) {
+      throw ImportException('Missing mime_type');
+    }
+    final existing = await (_db.select(_db.petDocuments)
+          ..where((d) => d.uuid.equals(uuid)))
+        .getSingleOrNull();
+    final now = DateTime.now();
+    if (existing == null) {
+      final id =
+          await _db.into(_db.petDocuments).insert(PetDocumentsCompanion.insert(
+                uuid: uuid,
+                petId: petId,
+                title: Value(raw['title'] as String?),
+                filePath: filePath,
+                mimeType: mimeType,
+                originalFilename: Value(raw['original_filename'] as String?),
+                sizeBytes: Value((raw['size_bytes'] as num?)?.toInt()),
+                notes: Value(raw['notes'] as String?),
+                createdAt: _parseDt(raw['created_at']) ?? now,
+                updatedAt: now,
+              ));
+      onInsert();
+      return id;
+    }
+    await (_db.update(_db.petDocuments)..where((d) => d.uuid.equals(uuid)))
+        .write(PetDocumentsCompanion(
+      petId: Value(petId),
+      title: Value(raw['title'] as String?),
+      filePath: Value(filePath),
+      mimeType: Value(mimeType),
+      originalFilename: Value(raw['original_filename'] as String?),
+      sizeBytes: Value((raw['size_bytes'] as num?)?.toInt()),
+      notes: Value(raw['notes'] as String?),
+      updatedAt: Value(now),
+    ));
+    onUpdate();
+    return existing.id;
+  }
 
   ContactRole _parseContactRole(dynamic v) => switch (v) {
         null => ContactRole.other,

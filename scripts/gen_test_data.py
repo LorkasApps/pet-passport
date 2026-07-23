@@ -19,6 +19,7 @@ What the JSON import currently reads (as of DB v11 / export schema v3):
   - appointments (+ reminders + exceptions + vet_uuid cross-ref)
   - medications (+ reminders + intakes + prescribed_by_vet_uuid cross-ref)
   - foods
+  - documents (general per-pet PDF/photo bucket)
   - tags (root-level, referenced by event tag_uuids)
 
 Usage:
@@ -498,6 +499,32 @@ def build_snapshot() -> dict:
     }
     foods = [food_current, food_old]
 
+    # --- documents: 2 general docs (blutbild PDF + rescue certificate photo) ---
+    documents = [
+        {
+            "uuid": new_uuid(),
+            "title": "Blutbild Mai 2026",
+            "file_path": f"pets/{pet_uuid}/docs/blutbild_2026_05.pdf",
+            "mime_type": "application/pdf",
+            "original_filename": "blutbild_2026_05.pdf",
+            "size_bytes": 184320,
+            "notes": "Alle Werte im Normbereich außer leicht erhöhtes CRP.",
+            "created_at": iso(now - timedelta(days=60)),
+            "updated_at": iso(now - timedelta(days=60)),
+        },
+        {
+            "uuid": new_uuid(),
+            "title": "Übernahme-Vertrag",
+            "file_path": f"pets/{pet_uuid}/docs/vertrag.jpg",
+            "mime_type": "image/jpeg",
+            "original_filename": "vertrag.jpg",
+            "size_bytes": 402880,
+            "notes": None,
+            "created_at": iso(now - timedelta(days=1200)),
+            "updated_at": iso(now - timedelta(days=1200)),
+        },
+    ]
+
     pet = {
         "uuid": pet_uuid,
         "name": "Balu",
@@ -529,6 +556,7 @@ def build_snapshot() -> dict:
         "appointments": appointments,
         "medications": medications,
         "foods": foods,
+        "documents": documents,
     }
 
     return {
@@ -583,6 +611,7 @@ def main() -> None:
           f"{n_intakes} intakes total)")
     print(f"  foods:         {len(pet['foods'])} "
           f"({sum(1 for f in pet['foods'] if f['is_active'])} active)")
+    print(f"  documents:     {len(pet['documents'])}")
     print(f"  tags:          {len(snapshot['tags'])}")
     print()
     print("Import via app: Mehr → Einstellungen → Import (JSON restore).")
