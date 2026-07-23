@@ -56,7 +56,13 @@ class IcsBuilder {
       ..writeln('DTSTAMP:$dtstamp')
       ..writeln('DTSTART:${_fmtLocal(appt.startsAt)}')
       ..writeln('DTEND:${_fmtLocal(end)}')
-      ..writeln('SUMMARY:${_escapeText(appt.title)}');
+      ..writeln('SUMMARY:${_escapeText(appt.title)}')
+      // Robustness fillers Google Calendar looks for before it will
+      // commit the event — omitting these was one reason GCal fell back
+      // to 'Unable to launch event' on some devices.
+      ..writeln('SEQUENCE:0')
+      ..writeln('STATUS:CONFIRMED')
+      ..writeln('TRANSP:OPAQUE');
     final location = locationOverride ?? appt.location;
     if (location != null && location.isNotEmpty) {
       buf.writeln('LOCATION:${_escapeText(location)}');
@@ -100,7 +106,10 @@ class IcsBuilder {
       ..writeln('DTSTAMP:$dtstamp')
       ..writeln('DTSTART:${_fmtLocal(override)}')
       ..writeln('DTEND:${_fmtLocal(end)}')
-      ..writeln('SUMMARY:${_escapeText(appt.title)}');
+      ..writeln('SUMMARY:${_escapeText(appt.title)}')
+      ..writeln('SEQUENCE:0')
+      ..writeln('STATUS:CONFIRMED')
+      ..writeln('TRANSP:OPAQUE');
     final location = locationOverride ?? appt.location;
     if (location != null && location.isNotEmpty) {
       buf.writeln('LOCATION:${_escapeText(location)}');
