@@ -171,7 +171,7 @@ class _Content extends ConsumerWidget {
                           color: scheme.primary,
                         ),
                         title: Text(
-                          doc.originalFilename ?? doc.uuid,
+                          doc.displayName(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

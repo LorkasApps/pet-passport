@@ -390,6 +390,15 @@ class AppL10nDe extends AppL10n {
   String get documentFieldOriginalFilename => 'Ursprünglicher Dateiname';
 
   @override
+  String get attachmentRenameTitle => 'Umbenennen';
+
+  @override
+  String get attachmentRenameHint => 'Titel (leer lassen zum Zurücksetzen)';
+
+  @override
+  String get actionRename => 'Umbenennen';
+
+  @override
   String get actionOpenInMaps => 'In Karten öffnen';
 
   @override

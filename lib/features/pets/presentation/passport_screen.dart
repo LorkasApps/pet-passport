@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../../core/widgets/rename_dialog.dart';
 import '../application/current_pet_provider.dart';
 import '../application/pets_providers.dart';
 import '../domain/pet.dart';
@@ -195,6 +196,18 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
     );
   }
 
+  Future<void> _renameDoc(PetPassportDocument d) async {
+    final result = await showAttachmentRenameDialog(
+      context: context,
+      initialTitle: d.title,
+      subtitle: d.originalFilename,
+    );
+    if (result == null) return;
+    await ref
+        .read(petsRepositoryProvider)
+        .renamePassportDoc(d.uuid, result);
+  }
+
   Widget _docTile(PetPassportDocument d, AppL10n l) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -204,17 +217,29 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
             : Icons.image_outlined,
       ),
       title: Text(
-        d.originalFilename ?? d.uuid,
+        d.displayName(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: d.sizeBytes == null ? null : Text(_formatSize(d.sizeBytes!)),
       onTap: () => _openDoc(d.filePath),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outline),
-        tooltip: l.actionDelete,
-        onPressed: () =>
-            ref.read(petsRepositoryProvider).removePassportDoc(d.uuid),
+      trailing: PopupMenuButton<String>(
+        onSelected: (v) async {
+          switch (v) {
+            case 'rename':
+              await _renameDoc(d);
+              break;
+            case 'delete':
+              await ref
+                  .read(petsRepositoryProvider)
+                  .removePassportDoc(d.uuid);
+              break;
+          }
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem(value: 'rename', child: Text(l.actionRename)),
+          PopupMenuItem(value: 'delete', child: Text(l.actionDelete)),
+        ],
       ),
     );
   }

@@ -158,6 +158,8 @@ class _DocTile extends ConsumerWidget {
           }
         },
         itemBuilder: (_) => [
+          // 'edit' opens the full title+notes dialog. Keeping the label
+          // as 'Bearbeiten' since it edits more than just the title.
           PopupMenuItem(value: 'edit', child: Text(l.actionEdit)),
           PopupMenuItem(value: 'delete', child: Text(l.actionDelete)),
         ],

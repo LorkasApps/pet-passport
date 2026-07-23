@@ -156,7 +156,7 @@ class _InsuranceDetailContent extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   title: Text(
-                    doc.originalFilename ?? doc.uuid,
+                    doc.displayName(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

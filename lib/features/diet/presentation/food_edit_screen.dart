@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../../core/widgets/rename_dialog.dart';
 import '../../pets/application/pets_providers.dart';
 import '../application/foods_providers.dart';
 import '../domain/food.dart';
@@ -197,6 +198,18 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
         .read(foodsRepositoryProvider)
         .deleteByUuid(widget.foodUuid!);
     if (mounted) context.pop();
+  }
+
+  Future<void> _renameSavedPhoto(FoodPhoto photo) async {
+    final result = await showAttachmentRenameDialog(
+      context: context,
+      initialTitle: photo.title,
+      subtitle: photo.originalFilename,
+    );
+    if (result == null) return;
+    await ref
+        .read(foodsRepositoryProvider)
+        .renamePhoto(photo.uuid, result);
   }
 
   Future<void> _attachPhoto() async {
@@ -406,6 +419,7 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
               pending: _pendingPhotos,
               onAdd: _attachPhoto,
               onOpenSaved: _openPhoto,
+              onRenameSaved: _renameSavedPhoto,
               onRemoveSaved: (uuid) =>
                   ref.read(foodsRepositoryProvider).removePhoto(uuid),
               onRemovePending: (i) =>
@@ -444,6 +458,7 @@ class _PhotoSection extends StatelessWidget {
     required this.pending,
     required this.onAdd,
     required this.onOpenSaved,
+    required this.onRenameSaved,
     required this.onRemoveSaved,
     required this.onRemovePending,
   });
@@ -452,6 +467,7 @@ class _PhotoSection extends StatelessWidget {
   final List<_PendingPhoto> pending;
   final VoidCallback onAdd;
   final ValueChanged<String> onOpenSaved;
+  final ValueChanged<FoodPhoto> onRenameSaved;
   final ValueChanged<String> onRemoveSaved;
   final ValueChanged<int> onRemovePending;
 
@@ -460,14 +476,19 @@ class _PhotoSection extends StatelessWidget {
     final l = AppL10n.of(context);
     final chips = <Widget>[
       for (final p in savedPhotos)
-        InputChip(
-          avatar: const Icon(Icons.image_outlined, size: 18),
-          label: Text(
-            p.originalFilename ?? p.uuid.substring(0, 6),
-            style: const TextStyle(fontSize: 12),
+        // Tap chip → open the file. Long-press → rename. X → remove.
+        GestureDetector(
+          onLongPress: () => onRenameSaved(p),
+          child: InputChip(
+            avatar: const Icon(Icons.image_outlined, size: 18),
+            label: Text(
+              p.displayName(),
+              style: const TextStyle(fontSize: 12),
+            ),
+            onPressed: () => onOpenSaved(p.filePath),
+            onDeleted: () => onRemoveSaved(p.uuid),
+            deleteIcon: const Icon(Icons.close, size: 18),
           ),
-          onPressed: () => onOpenSaved(p.filePath),
-          onDeleted: () => onRemoveSaved(p.uuid),
         ),
       for (var i = 0; i < pending.length; i++)
         Chip(

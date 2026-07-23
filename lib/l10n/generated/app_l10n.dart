@@ -811,6 +811,24 @@ abstract class AppL10n {
   /// **'Original filename'**
   String get documentFieldOriginalFilename;
 
+  /// No description provided for @attachmentRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get attachmentRenameTitle;
+
+  /// No description provided for @attachmentRenameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (leave empty to reset)'**
+  String get attachmentRenameHint;
+
+  /// No description provided for @actionRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get actionRename;
+
   /// No description provided for @actionOpenInMaps.
   ///
   /// In en, this message translates to:

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../../core/widgets/rename_dialog.dart';
 import '../application/events_providers.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
@@ -210,6 +211,17 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
     }
   }
 
+  Future<void> _renameSavedPhoto(EventPhoto photo) async {
+    final result = await showAttachmentRenameDialog(
+      context: context,
+      initialTitle: photo.title,
+    );
+    if (result == null) return;
+    await ref
+        .read(eventsRepositoryProvider)
+        .renamePhoto(photo.uuid, result);
+  }
+
   Future<void> _attachPhoto() async {
     final picked = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -385,6 +397,7 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
               savedPhotos: event?.photos ?? const [],
               pending: _pendingPhotos,
               onAdd: _attachPhoto,
+              onRenameSaved: _renameSavedPhoto,
               onRemoveSaved: (uuid) =>
                   ref.read(eventsRepositoryProvider).removePhoto(uuid),
               onRemovePending: (index) =>
@@ -621,6 +634,7 @@ class _PhotoSection extends StatelessWidget {
     required this.savedPhotos,
     required this.pending,
     required this.onAdd,
+    required this.onRenameSaved,
     required this.onRemoveSaved,
     required this.onRemovePending,
   });
@@ -628,6 +642,7 @@ class _PhotoSection extends StatelessWidget {
   final List<EventPhoto> savedPhotos;
   final List<_PendingPhoto> pending;
   final VoidCallback onAdd;
+  final ValueChanged<EventPhoto> onRenameSaved;
   final ValueChanged<String> onRemoveSaved;
   final ValueChanged<int> onRemovePending;
 
@@ -636,12 +651,13 @@ class _PhotoSection extends StatelessWidget {
     final l = AppL10n.of(context);
     final chips = <Widget>[
       for (final p in savedPhotos)
-        Chip(
+        InputChip(
           avatar: const Icon(Icons.image_outlined, size: 18),
           label: Text(
-            p.uuid.substring(0, 6),
+            p.displayName(),
             style: const TextStyle(fontSize: 12),
           ),
+          onPressed: () => onRenameSaved(p),
           onDeleted: () => onRemoveSaved(p.uuid),
         ),
       for (var i = 0; i < pending.length; i++)

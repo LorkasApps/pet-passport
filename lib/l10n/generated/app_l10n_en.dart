@@ -388,6 +388,15 @@ class AppL10nEn extends AppL10n {
   String get documentFieldOriginalFilename => 'Original filename';
 
   @override
+  String get attachmentRenameTitle => 'Rename';
+
+  @override
+  String get attachmentRenameHint => 'Title (leave empty to reset)';
+
+  @override
+  String get actionRename => 'Rename';
+
+  @override
   String get actionOpenInMaps => 'Open in maps';
 
   @override

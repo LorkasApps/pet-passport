@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../../core/widgets/rename_dialog.dart';
 import '../../pets/application/pets_providers.dart';
 import '../application/insurances_providers.dart';
 import '../domain/insurance.dart';
@@ -391,7 +392,7 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
                       : Icons.image_outlined,
                 ),
                 title: Text(
-                  doc.originalFilename ?? doc.uuid,
+                  doc.displayName(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -399,11 +400,33 @@ class _InsuranceEditScreenState extends ConsumerState<InsuranceEditScreen> {
                     ? null
                     : Text(_formatSize(doc.sizeBytes!)),
                 onTap: () => _openDoc(context, doc.filePath),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => ref
-                      .read(insurancesRepositoryProvider)
-                      .removeDocument(doc.uuid),
+                trailing: PopupMenuButton<String>(
+                  onSelected: (v) async {
+                    switch (v) {
+                      case 'rename':
+                        final result = await showAttachmentRenameDialog(
+                          context: context,
+                          initialTitle: doc.title,
+                          subtitle: doc.originalFilename,
+                        );
+                        if (result == null) return;
+                        await ref
+                            .read(insurancesRepositoryProvider)
+                            .renameDocument(doc.uuid, result);
+                        break;
+                      case 'delete':
+                        await ref
+                            .read(insurancesRepositoryProvider)
+                            .removeDocument(doc.uuid);
+                        break;
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                        value: 'rename', child: Text(l.actionRename)),
+                    PopupMenuItem(
+                        value: 'delete', child: Text(l.actionDelete)),
+                  ],
                 ),
               ),
             for (var i = 0; i < _pendingDocs.length; i++)
