@@ -8,6 +8,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/calendar/ics_builder.dart';
 import '../../../core/time/recurrence.dart';
@@ -261,16 +262,18 @@ class AppointmentDetailScreen extends ConsumerWidget {
         : '${safeTitle}_${appt.uuid.substring(0, 6)}.ics';
     final file = File(p.join(tmp.path, name));
     await file.writeAsString(ics);
-    // OpenFilex fires ACTION_VIEW (Android) / UIDocumentInteraction
-    // (iOS) — calendar apps register there, whereas share_plus's
-    // ACTION_SEND only lists send-oriented targets (Gmail/Drive/…)
-    // and never surfaces Google Calendar.
+    // Try ACTION_VIEW first so Google/Samsung/iOS Calendar can pick up
+    // the .ics directly. If the device has no VIEW handler registered
+    // for text/calendar (some vendors ship Gmail without a stock
+    // calendar), fall back to the share sheet so the user can still
+    // route it through Gmail → 'Add to calendar'.
     final result = await OpenFilex.open(file.path, type: 'text/calendar');
-    if (result.type != ResultType.done && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.launchFailed)),
-      );
-    }
+    if (result.type == ResultType.done) return;
+    if (!context.mounted) return;
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'text/calendar')],
+      subject: l.actionAddToCalendarShareSubject,
+    );
   }
 
   Widget _locationRow(BuildContext context, AppL10n l, String address) {
