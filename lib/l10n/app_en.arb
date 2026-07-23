@@ -63,6 +63,7 @@
   "sexMale": "Male",
   "sexFemale": "Female",
   "sexNeutered": "Neutered",
+  "sexIntact": "Not neutered",
   "petFieldNeutered": "Neutered / spayed",
   "petFieldNeuteredHelp": "Independent of biological sex.",
 
@@ -112,6 +113,11 @@
   "vetFieldAddress": "Address",
   "vetFieldPhone": "Phone",
   "vetFieldEmail": "Email",
+  "vetActiveLabel": "Active",
+  "vetsActiveSection": "Active",
+  "vetsArchivedSection": "Archived",
+  "actionShowArchived": "Show archived",
+  "actionHideArchived": "Hide archived",
 
   "insurancesListTitle": "Insurances",
   "insurancesEmptyTitle": "No insurances yet",

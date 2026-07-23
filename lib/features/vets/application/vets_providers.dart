@@ -14,11 +14,16 @@ final vetsForPetProvider =
   return ref.watch(vetsRepositoryProvider).watchForPetUuid(petUuid);
 });
 
+final activeVetsForPetProvider =
+    StreamProvider.family<List<Vet>, String>((ref, petUuid) {
+  return ref.watch(vetsRepositoryProvider).watchActiveForPetUuid(petUuid);
+});
+
 final vetCountForPetProvider =
     StreamProvider.family<int, String>((ref, petUuid) {
   return ref
       .watch(vetsRepositoryProvider)
-      .watchForPetUuid(petUuid)
+      .watchActiveForPetUuid(petUuid)
       .map((list) => list.length);
 });
 

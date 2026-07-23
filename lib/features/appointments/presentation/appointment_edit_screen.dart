@@ -8,6 +8,7 @@ import '../../../core/time/recurrence.dart';
 import '../../../core/widgets/recurrence_editor.dart';
 import '../../../core/widgets/reminder_offset_chips.dart';
 import '../../vets/application/vets_providers.dart';
+import '../../vets/domain/vet.dart';
 import '../application/appointments_providers.dart';
 import '../domain/appointment.dart';
 import '../domain/appointment_enums.dart';
@@ -146,7 +147,15 @@ class _AppointmentEditScreenState
     final l = AppL10n.of(context);
     final locale = Localizations.localeOf(context).toString();
     final fmt = DateFormat.yMd(locale).add_Hm();
-    final vetsAsync = ref.watch(vetsForPetProvider(widget.petUuid));
+    final vetsAsync = ref.watch(activeVetsForPetProvider(widget.petUuid));
+    final selectedArchivedVet = _vetUuid == null
+        ? null
+        : ref
+            .watch(vetByUuidProvider((
+              vetUuid: _vetUuid!,
+              petUuid: widget.petUuid,
+            )))
+            .valueOrNull;
 
     if (widget.isEdit) {
       final apptAsync = ref.watch(appointmentByUuidProvider(
@@ -208,14 +217,20 @@ class _AppointmentEditScreenState
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
               data: (vets) {
-                if (vets.isEmpty) return const SizedBox.shrink();
+                final merged = <Vet>[
+                  ...vets,
+                  if (selectedArchivedVet != null &&
+                      !vets.any((v) => v.uuid == selectedArchivedVet.uuid))
+                    selectedArchivedVet,
+                ];
+                if (merged.isEmpty) return const SizedBox.shrink();
                 return DropdownButtonFormField<String?>(
                   initialValue: _vetUuid,
                   decoration: InputDecoration(labelText: l.appointmentVetLabel),
                   items: [
                     DropdownMenuItem(
                         value: null, child: Text(l.optionNone)),
-                    for (final v in vets)
+                    for (final v in merged)
                       DropdownMenuItem(value: v.uuid, child: Text(v.name)),
                   ],
                   onChanged: (v) => setState(() => _vetUuid = v),

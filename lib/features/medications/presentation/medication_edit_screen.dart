@@ -7,6 +7,7 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../../../core/time/recurrence.dart';
 import '../../../core/widgets/reminder_offset_chips.dart';
 import '../../vets/application/vets_providers.dart';
+import '../../vets/domain/vet.dart';
 import '../application/medications_providers.dart';
 import '../domain/medication.dart';
 import '../domain/medication_enums.dart';
@@ -171,7 +172,15 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
     final l = AppL10n.of(context);
     final locale = Localizations.localeOf(context).toString();
     final fmt = DateFormat.yMd(locale);
-    final vetsAsync = ref.watch(vetsForPetProvider(widget.petUuid));
+    final vetsAsync = ref.watch(activeVetsForPetProvider(widget.petUuid));
+    final selectedArchivedVet = _prescribedByVetUuid == null
+        ? null
+        : ref
+            .watch(vetByUuidProvider((
+              vetUuid: _prescribedByVetUuid!,
+              petUuid: widget.petUuid,
+            )))
+            .valueOrNull;
 
     if (widget.isEdit) {
       final medAsync = ref.watch(medicationByUuidProvider(
@@ -327,14 +336,20 @@ class _MedicationEditScreenState extends ConsumerState<MedicationEditScreen> {
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
               data: (vets) {
-                if (vets.isEmpty) return const SizedBox.shrink();
+                final merged = <Vet>[
+                  ...vets,
+                  if (selectedArchivedVet != null &&
+                      !vets.any((v) => v.uuid == selectedArchivedVet.uuid))
+                    selectedArchivedVet,
+                ];
+                if (merged.isEmpty) return const SizedBox.shrink();
                 return DropdownButtonFormField<String?>(
                   initialValue: _prescribedByVetUuid,
                   decoration: InputDecoration(
                       labelText: l.medicationPrescribedByLabel),
                   items: [
                     DropdownMenuItem(value: null, child: Text(l.optionNone)),
-                    for (final v in vets)
+                    for (final v in merged)
                       DropdownMenuItem(value: v.uuid, child: Text(v.name)),
                   ],
                   onChanged: (v) => setState(() => _prescribedByVetUuid = v),

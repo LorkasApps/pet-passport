@@ -168,6 +168,9 @@ class AppL10nEn extends AppL10n {
   String get sexNeutered => 'Neutered';
 
   @override
+  String get sexIntact => 'Not neutered';
+
+  @override
   String get petFieldNeutered => 'Neutered / spayed';
 
   @override
@@ -282,6 +285,21 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get vetFieldEmail => 'Email';
+
+  @override
+  String get vetActiveLabel => 'Active';
+
+  @override
+  String get vetsActiveSection => 'Active';
+
+  @override
+  String get vetsArchivedSection => 'Archived';
+
+  @override
+  String get actionShowArchived => 'Show archived';
+
+  @override
+  String get actionHideArchived => 'Hide archived';
 
   @override
   String get insurancesListTitle => 'Insurances';

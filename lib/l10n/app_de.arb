@@ -62,6 +62,7 @@
   "sexMale": "Männlich",
   "sexFemale": "Weiblich",
   "sexNeutered": "Kastriert",
+  "sexIntact": "Unkastriert",
   "petFieldNeutered": "Kastriert",
   "petFieldNeuteredHelp": "Unabhängig vom biologischen Geschlecht.",
 
@@ -101,6 +102,11 @@
   "vetFieldAddress": "Adresse",
   "vetFieldPhone": "Telefon",
   "vetFieldEmail": "E-Mail",
+  "vetActiveLabel": "Aktiv",
+  "vetsActiveSection": "Aktiv",
+  "vetsArchivedSection": "Archiv",
+  "actionShowArchived": "Archivierte anzeigen",
+  "actionHideArchived": "Archivierte ausblenden",
 
   "insurancesListTitle": "Versicherungen",
   "insurancesEmptyTitle": "Noch keine Versicherungen",

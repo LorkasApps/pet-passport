@@ -12,6 +12,16 @@ class VetsDao extends DatabaseAccessor<AppDatabase> with _$VetsDaoMixin {
   Stream<List<VetRow>> watchForPet(int petId) {
     return (select(vets)
           ..where((v) => v.petId.equals(petId))
+          ..orderBy([
+            (v) => OrderingTerm.desc(v.isActive),
+            (v) => OrderingTerm.asc(v.name),
+          ]))
+        .watch();
+  }
+
+  Stream<List<VetRow>> watchActiveForPet(int petId) {
+    return (select(vets)
+          ..where((v) => v.petId.equals(petId) & v.isActive.equals(true))
           ..orderBy([(v) => OrderingTerm.asc(v.name)]))
         .watch();
   }

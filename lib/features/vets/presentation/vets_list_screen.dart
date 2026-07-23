@@ -6,16 +6,38 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../pets/application/current_pet_provider.dart';
 import '../application/vets_providers.dart';
+import '../domain/vet.dart';
 
-class VetsListScreen extends ConsumerWidget {
+class VetsListScreen extends ConsumerStatefulWidget {
   const VetsListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VetsListScreen> createState() => _VetsListScreenState();
+}
+
+class _VetsListScreenState extends ConsumerState<VetsListScreen> {
+  bool _showArchived = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppL10n.of(context);
     final petAsync = ref.watch(currentPetProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l.vetsListTitle)),
+      appBar: AppBar(
+        title: Text(l.vetsListTitle),
+        actions: [
+          IconButton(
+            icon: Icon(_showArchived
+                ? Icons.visibility_off_outlined
+                : Icons.archive_outlined),
+            tooltip: _showArchived
+                ? l.actionHideArchived
+                : l.actionShowArchived,
+            onPressed: () =>
+                setState(() => _showArchived = !_showArchived),
+          ),
+        ],
+      ),
       body: petAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -32,7 +54,9 @@ class VetsListScreen extends ConsumerWidget {
                 const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('$e')),
             data: (vets) {
-              if (vets.isEmpty) {
+              final active = vets.where((v) => v.isActive).toList();
+              final archived = vets.where((v) => !v.isActive).toList();
+              if (active.isEmpty && (!_showArchived || archived.isEmpty)) {
                 return EmptyState(
                   icon: Icons.medical_services_outlined,
                   title: l.vetsEmptyTitle,
@@ -41,26 +65,15 @@ class VetsListScreen extends ConsumerWidget {
                   onAction: () => context.push('/pets/${pet.uuid}/vets/new'),
                 );
               }
-              return ListView.separated(
-                itemCount: vets.length,
-                separatorBuilder: (_, _) => const Divider(height: 0),
-                itemBuilder: (context, i) {
-                  final v = vets[i];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.secondaryContainer,
-                      child: const Icon(Icons.medical_services_outlined),
-                    ),
-                    title: Text(v.name),
-                    subtitle: (v.practice == null || v.practice!.isEmpty)
-                        ? null
-                        : Text(v.practice!),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () =>
-                        context.push('/pets/${pet.uuid}/vets/${v.uuid}'),
-                  );
-                },
+              return ListView(
+                children: [
+                  for (final v in active) _VetTile(vet: v, petUuid: pet.uuid),
+                  if (_showArchived && archived.isNotEmpty) ...[
+                    _SectionHeader(text: l.vetsArchivedSection),
+                    for (final v in archived)
+                      _VetTile(vet: v, petUuid: pet.uuid),
+                  ],
+                ],
               );
             },
           );
@@ -75,6 +88,48 @@ class VetsListScreen extends ConsumerWidget {
               icon: const Icon(Icons.add),
               label: Text(l.actionAdd),
             ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+}
+
+class _VetTile extends StatelessWidget {
+  const _VetTile({required this.vet, required this.petUuid});
+  final Vet vet;
+  final String petUuid;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: scheme.secondaryContainer,
+        child: const Icon(Icons.medical_services_outlined),
+      ),
+      title: Text(vet.name),
+      subtitle: (vet.practice == null || vet.practice!.isEmpty)
+          ? null
+          : Text(vet.practice!),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => context.push('/pets/$petUuid/vets/${vet.uuid}'),
     );
   }
 }

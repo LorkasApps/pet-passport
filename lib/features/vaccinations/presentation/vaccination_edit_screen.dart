@@ -10,6 +10,7 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../pets/application/pets_providers.dart';
 import '../../vets/application/vets_providers.dart';
+import '../../vets/domain/vet.dart';
 import '../application/vaccinations_providers.dart';
 import '../domain/vaccination.dart';
 
@@ -349,8 +350,22 @@ class _VaccinationEditScreenState
     AppL10n l,
     Vaccination? vaccination,
   ) {
-    final vetsAsync = ref.watch(vetsForPetProvider(widget.petUuid));
-    final vets = vetsAsync.valueOrNull ?? const [];
+    final vetsAsync = ref.watch(activeVetsForPetProvider(widget.petUuid));
+    final activeVets = vetsAsync.valueOrNull ?? const <Vet>[];
+    final selectedArchivedVet = _vetUuid == null
+        ? null
+        : ref
+            .watch(vetByUuidProvider((
+              vetUuid: _vetUuid!,
+              petUuid: widget.petUuid,
+            )))
+            .valueOrNull;
+    final vets = <Vet>[
+      ...activeVets,
+      if (selectedArchivedVet != null &&
+          !activeVets.any((v) => v.uuid == selectedArchivedVet.uuid))
+        selectedArchivedVet,
+    ];
     final locale = Localizations.localeOf(context).toString();
     return Scaffold(
       appBar: AppBar(

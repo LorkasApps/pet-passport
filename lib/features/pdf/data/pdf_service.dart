@@ -32,7 +32,7 @@ class PdfService {
   }) async {
     final pet = await pets.getByUuid(petUuid);
     if (pet == null) return null;
-    final vetsList = await vets.watchForPetUuid(petUuid).first;
+    final vetsList = await vets.watchActiveForPetUuid(petUuid).first;
     final vaccList = await vaccinations.watchForPetUuid(petUuid).first;
     final insList = await insurances.watchForPetUuid(petUuid).first;
     final latestWeight = await pets.watchLatestWeightForUuid(petUuid).first;

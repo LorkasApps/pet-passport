@@ -409,6 +409,12 @@ abstract class AppL10n {
   /// **'Neutered'**
   String get sexNeutered;
 
+  /// No description provided for @sexIntact.
+  ///
+  /// In en, this message translates to:
+  /// **'Not neutered'**
+  String get sexIntact;
+
   /// No description provided for @petFieldNeutered.
   ///
   /// In en, this message translates to:
@@ -606,6 +612,36 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Email'**
   String get vetFieldEmail;
+
+  /// No description provided for @vetActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get vetActiveLabel;
+
+  /// No description provided for @vetsActiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get vetsActiveSection;
+
+  /// No description provided for @vetsArchivedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get vetsArchivedSection;
+
+  /// No description provided for @actionShowArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Show archived'**
+  String get actionShowArchived;
+
+  /// No description provided for @actionHideArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide archived'**
+  String get actionHideArchived;
 
   /// No description provided for @insurancesListTitle.
   ///

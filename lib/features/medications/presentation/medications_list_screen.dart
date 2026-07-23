@@ -8,15 +8,38 @@ import '../../pets/application/current_pet_provider.dart';
 import '../application/medications_providers.dart';
 import '../domain/medication.dart';
 
-class MedicationsListScreen extends ConsumerWidget {
+class MedicationsListScreen extends ConsumerStatefulWidget {
   const MedicationsListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MedicationsListScreen> createState() =>
+      _MedicationsListScreenState();
+}
+
+class _MedicationsListScreenState
+    extends ConsumerState<MedicationsListScreen> {
+  bool _showArchived = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppL10n.of(context);
     final petAsync = ref.watch(currentPetProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l.medicationsListTitle)),
+      appBar: AppBar(
+        title: Text(l.medicationsListTitle),
+        actions: [
+          IconButton(
+            icon: Icon(_showArchived
+                ? Icons.visibility_off_outlined
+                : Icons.archive_outlined),
+            tooltip: _showArchived
+                ? l.actionHideArchived
+                : l.actionShowArchived,
+            onPressed: () =>
+                setState(() => _showArchived = !_showArchived),
+          ),
+        ],
+      ),
       body: petAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -31,23 +54,20 @@ class MedicationsListScreen extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('$e')),
             data: (list) {
-              if (list.isEmpty) {
+              final active = list.where((m) => m.isActive).toList();
+              final inactive = list.where((m) => !m.isActive).toList();
+              if (active.isEmpty && (!_showArchived || inactive.isEmpty)) {
                 return EmptyState(
                   icon: Icons.medication_outlined,
                   title: l.medicationsEmptyTitle,
                   message: l.medicationsEmptyMessage,
                 );
               }
-              final active = list.where((m) => m.isActive).toList();
-              final inactive = list.where((m) => !m.isActive).toList();
               return ListView(
                 children: [
-                  if (active.isNotEmpty) ...[
-                    _SectionHeader(text: l.medicationActiveSection),
-                    for (final m in active)
-                      _MedicationTile(medication: m, petUuid: pet.uuid),
-                  ],
-                  if (inactive.isNotEmpty) ...[
+                  for (final m in active)
+                    _MedicationTile(medication: m, petUuid: pet.uuid),
+                  if (_showArchived && inactive.isNotEmpty) ...[
                     _SectionHeader(text: l.medicationInactiveSection),
                     for (final m in inactive)
                       _MedicationTile(medication: m, petUuid: pet.uuid),

@@ -33,6 +33,7 @@ class _VetEditScreenState extends ConsumerState<VetEditScreen> {
 
   bool _prefilled = false;
   bool _saving = false;
+  bool _isActive = true;
 
   @override
   void dispose() {
@@ -54,6 +55,7 @@ class _VetEditScreenState extends ConsumerState<VetEditScreen> {
     _phoneCtrl.text = vet.phone ?? '';
     _emailCtrl.text = vet.email ?? '';
     _notesCtrl.text = vet.notes ?? '';
+    _isActive = vet.isActive;
   }
 
   String? _emptyToNull(String v) {
@@ -82,6 +84,7 @@ class _VetEditScreenState extends ConsumerState<VetEditScreen> {
           phone: phone,
           email: email,
           notes: notes,
+          isActive: _isActive,
         );
       } else {
         await repo.createVet(
@@ -92,6 +95,7 @@ class _VetEditScreenState extends ConsumerState<VetEditScreen> {
           phone: phone,
           email: email,
           notes: notes,
+          isActive: _isActive,
         );
       }
       if (mounted) context.pop();
@@ -211,6 +215,13 @@ class _VetEditScreenState extends ConsumerState<VetEditScreen> {
               controller: _notesCtrl,
               decoration: InputDecoration(labelText: l.petFieldNotes),
               maxLines: 3,
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l.vetActiveLabel),
+              value: _isActive,
+              onChanged: (v) => setState(() => _isActive = v),
             ),
             const SizedBox(height: 24),
             SizedBox(

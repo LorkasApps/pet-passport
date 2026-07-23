@@ -27,6 +27,19 @@ class VetsRepository {
         );
   }
 
+  Stream<List<Vet>> watchActiveForPetUuid(String petUuid) async* {
+    final pet = await _petsDao.getByUuid(petUuid);
+    if (pet == null) {
+      yield const [];
+      return;
+    }
+    yield* _vetsDao.watchActiveForPet(pet.id).map(
+          (rows) => rows
+              .map((r) => _toDomain(r, petUuid))
+              .toList(growable: false),
+        );
+  }
+
   Future<int> countForPetUuid(String petUuid) async {
     final pet = await _petsDao.getByUuid(petUuid);
     if (pet == null) return 0;
@@ -47,6 +60,7 @@ class VetsRepository {
     String? phone,
     String? email,
     String? notes,
+    bool isActive = true,
   }) async {
     final pet = await _petsDao.getByUuid(petUuid);
     if (pet == null) throw StateError('Pet not found: $petUuid');
@@ -61,6 +75,7 @@ class VetsRepository {
       phone: Value(phone),
       email: Value(email),
       notes: Value(notes),
+      isActive: Value(isActive),
       createdAt: now,
       updatedAt: now,
     ));
@@ -75,6 +90,7 @@ class VetsRepository {
     String? phone,
     String? email,
     String? notes,
+    bool isActive = true,
   }) async {
     final existing = await _vetsDao.getByUuid(uuid);
     if (existing == null) {
@@ -87,6 +103,16 @@ class VetsRepository {
       phone: Value(phone),
       email: Value(email),
       notes: Value(notes),
+      isActive: isActive,
+      updatedAt: DateTime.now(),
+    ));
+  }
+
+  Future<void> setActive(String uuid, bool isActive) async {
+    final existing = await _vetsDao.getByUuid(uuid);
+    if (existing == null) return;
+    await _vetsDao.updateVet(existing.copyWith(
+      isActive: isActive,
       updatedAt: DateTime.now(),
     ));
   }
@@ -105,6 +131,7 @@ class VetsRepository {
       phone: row.phone,
       email: row.email,
       notes: row.notes,
+      isActive: row.isActive,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     );

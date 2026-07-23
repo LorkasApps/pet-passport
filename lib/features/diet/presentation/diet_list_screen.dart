@@ -9,15 +9,36 @@ import '../application/foods_providers.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
 
-class DietListScreen extends ConsumerWidget {
+class DietListScreen extends ConsumerStatefulWidget {
   const DietListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DietListScreen> createState() => _DietListScreenState();
+}
+
+class _DietListScreenState extends ConsumerState<DietListScreen> {
+  bool _showArchived = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppL10n.of(context);
     final petAsync = ref.watch(currentPetProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l.dietListTitle)),
+      appBar: AppBar(
+        title: Text(l.dietListTitle),
+        actions: [
+          IconButton(
+            icon: Icon(_showArchived
+                ? Icons.visibility_off_outlined
+                : Icons.archive_outlined),
+            tooltip: _showArchived
+                ? l.actionHideArchived
+                : l.actionShowArchived,
+            onPressed: () =>
+                setState(() => _showArchived = !_showArchived),
+          ),
+        ],
+      ),
       body: petAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -33,23 +54,20 @@ class DietListScreen extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('$e')),
             data: (list) {
-              if (list.isEmpty) {
+              final active = list.where((f) => f.isActive).toList();
+              final inactive = list.where((f) => !f.isActive).toList();
+              if (active.isEmpty && (!_showArchived || inactive.isEmpty)) {
                 return EmptyState(
                   icon: Icons.restaurant_outlined,
                   title: l.dietEmptyTitle,
                   message: l.dietEmptyMessage,
                 );
               }
-              final active = list.where((f) => f.isActive).toList();
-              final inactive = list.where((f) => !f.isActive).toList();
               return ListView(
                 children: [
-                  if (active.isNotEmpty) ...[
-                    _SectionHeader(text: l.dietActiveSection),
-                    for (final f in active)
-                      _FoodTile(food: f, petUuid: pet.uuid),
-                  ],
-                  if (inactive.isNotEmpty) ...[
+                  for (final f in active)
+                    _FoodTile(food: f, petUuid: pet.uuid),
+                  if (_showArchived && inactive.isNotEmpty) ...[
                     _SectionHeader(text: l.dietInactiveSection),
                     for (final f in inactive)
                       _FoodTile(food: f, petUuid: pet.uuid),
