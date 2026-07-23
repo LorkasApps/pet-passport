@@ -28,6 +28,18 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
   @override
   void initState() {
     super.initState();
+    // If we already have a session (warm-start, or user taps a callback
+    // link while already signed in), skip the wait entirely — the
+    // ref.listen inside build won't fire because there's no change.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final user =
+          ProviderScope.containerOf(context).read(currentUserProvider);
+      if (user != null) {
+        _timeout?.cancel();
+        context.go('/home');
+      }
+    });
     _timeout = Timer(const Duration(seconds: 6), () {
       if (!mounted) return;
       // Nothing came in — bounce back to sign-in so the user can retry.
@@ -43,21 +55,13 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Fire once when the user materialises.
+    // Fire once when the user materialises (async SDK exchange).
     ref.listen<User?>(currentUserProvider, (previous, next) {
       if (next != null && mounted) {
         _timeout?.cancel();
         context.go('/home');
       }
     });
-    // If the SDK already exchanged (e.g. warm start) the user is present
-    // synchronously — jump immediately.
-    final user = ref.watch(currentUserProvider);
-    if (user != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.go('/home');
-      });
-    }
 
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
