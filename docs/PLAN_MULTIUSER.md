@@ -275,6 +275,47 @@ Nur Zugriff auf Objekte unter `household/<hid>/…` wenn der User Member dieses 
 - Datenschutzhinweis + Einwilligung beim Sign-up
 - „Alle meine Daten löschen"-Button in Settings (DSGVO Art. 17)
 
+## Security-Checkliste
+
+Gestaffelt nach „muss ab Day 0" vs. „kann später inkrementell". Die Trennung ist wichtig: RLS **ohne Ausnahme in M1**, alles andere lässt sich ohne Retro-Migration nachrüsten.
+
+### Day-0 (M1 Schema-Setup) — nicht verhandelbar
+
+- [ ] **Row Level Security auf jeder Feature-Table aktivieren.** Default ist AUS; wer das vergisst, veröffentlicht die Rows via Anon Key an alle. Muster: `household_id IN (SELECT hid FROM household_members WHERE user_id = auth.uid())` pro SELECT/INSERT/UPDATE/DELETE.
+- [ ] **Anon Key vs. Service Role Key sauber trennen.** Nur der Anon Key kommt in die App. Service Role Key umgeht RLS und wird ausschließlich für einmalige Migrations-Skripte lokal genutzt, niemals im Client-Bundle.
+- [ ] **Redirect-URL-Allowlist konfigurieren.** In Supabase Auth → URL Configuration nur `petpassport://auth/callback` (und ggf. `http://localhost:*` für Dev) zulassen. Ohne das lässt sich das Magic-Link-Redirect für Phishing missbrauchen.
+- [ ] **Storage-Bucket auf privat + Path-basierte Policies.** Kein Public-Bucket. Downloads über signierte URLs mit TTL. Policy analog zu RLS: nur eigene Household-Pfade.
+- [ ] **Storage Mime-Whitelist**: `image/jpeg`, `image/png`, `image/webp`, `application/pdf`.
+
+### M1 Quality-Gate (vor Ship des ersten Cloud-Users)
+
+- [ ] **Session-Token in `flutter_secure_storage`** (nicht `shared_preferences`). Supabase-Flutter-SDK via `pkceAsyncStorage`-Config.
+- [ ] **Auth Rate Limits senken**: OTP-Requests von 30/h auf 10/h/E-Mail, Sign-ups auf 5/h. Reicht für organische Nutzung, drosselt Massenmissbrauch.
+- [ ] **Invite-Einlöse-Endpoint hat serverseitiges Rate-Limit** (5 Falscheingaben/IP/Stunde), generische Fehlermeldung („Bitte kurz warten"), verrät nicht ob Code existiert.
+- [ ] **RLS-Test-Suite**: eine ausführbare Integration-Test-Datei, die als User A einlogged versucht, Rows von User B abzufragen — muss 0 Rows liefern. Für jede Feature-Table ein Test.
+
+### M7 Härtung (bevor App in Store)
+
+- [ ] **hCaptcha auf Auth-Endpoints** aktivieren (Supabase-Integration, kostenlos für unser Volumen). Reduziert Bot-Sign-ups.
+- [ ] **Deep-Link-Token clientseitig gegen Server validieren** bevor was passiert (z.B. „ist der Invite noch gültig?" vor Beitritts-UI).
+- [ ] **DSGVO-Rechte in Settings umsetzen**: „Alle meine Daten exportieren" (JSON-Bundle) und „Konto komplett löschen" (Cascade auf alle Rows + Storage-Objects meines Users). Löschung darf nicht andere Household-Member betreffen.
+- [ ] **Audit-Log-Sichtung** einmal pro Woche für die ersten Monate (Supabase Dashboard → Auth-Logs, DB-Logs). Ungewöhnliche Muster früh erkennen.
+
+### Optional / später
+
+- **MFA / 2FA** — für Familien-App Overkill. Magic-Link ist passwordless. Mail-Verlust ist der eigentliche Recovery-Fall und wird manuell gelöst.
+- **Custom JWT-Claim mit Household-IDs** — reine Performance-Optimierung. Erst wenn RLS-Subqueries messbar bremsen.
+- **End-to-End-Encryption** — bewusst nicht MVP. Eigener Milestone falls Anspruch kommt.
+- **IP-Allowlisting** — Mobile-App-User wandern zwischen Netzen. Sinnlos hier.
+
+### Was Supabase kostenlos + automatisch mitbringt
+
+Kein Setup nötig, nur zur Beruhigung:
+- Verschlüsselung at rest (Postgres AES-256)
+- TLS 1.3 in transit
+- DDoS-Basisschutz vor der API
+- Session-JWT-Signatur mit rotierbarem Secret
+
 ## Kosten & Free-Tier
 
 Für 2–5 User pro Haushalt reicht der **Supabase Free Tier** komfortabel. Limits (Stand Anfang 2026 — vor Start gegen supabase.com/pricing checken):
