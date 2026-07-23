@@ -150,6 +150,8 @@
   "attachmentRenameHint": "Title (leave empty to reset)",
   "actionRename": "Rename",
   "actionOpenInMaps": "Open in maps",
+  "actionAddToCalendar": "Export to calendar",
+  "actionAddToCalendarShareSubject": "Calendar entry",
   "appointmentContactLabel": "Contact",
   "emptyShowArchivedAction": "{count, plural, =1{Show 1 archived entry} other{Show {count} archived entries}}",
   "@emptyShowArchivedAction": {

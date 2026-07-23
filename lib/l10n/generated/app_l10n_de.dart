@@ -402,6 +402,12 @@ class AppL10nDe extends AppL10n {
   String get actionOpenInMaps => 'In Karten öffnen';
 
   @override
+  String get actionAddToCalendar => 'In Kalender exportieren';
+
+  @override
+  String get actionAddToCalendarShareSubject => 'Kalender-Eintrag';
+
+  @override
   String get appointmentContactLabel => 'Kontakt';
 
   @override

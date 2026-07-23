@@ -139,6 +139,8 @@
   "attachmentRenameHint": "Titel (leer lassen zum Zurücksetzen)",
   "actionRename": "Umbenennen",
   "actionOpenInMaps": "In Karten öffnen",
+  "actionAddToCalendar": "In Kalender exportieren",
+  "actionAddToCalendarShareSubject": "Kalender-Eintrag",
   "appointmentContactLabel": "Kontakt",
   "emptyShowArchivedAction": "{count, plural, =1{1 archivierten Eintrag anzeigen} other{{count} archivierte Einträge anzeigen}}",
 

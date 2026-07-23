@@ -835,6 +835,18 @@ abstract class AppL10n {
   /// **'Open in maps'**
   String get actionOpenInMaps;
 
+  /// No description provided for @actionAddToCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to calendar'**
+  String get actionAddToCalendar;
+
+  /// No description provided for @actionAddToCalendarShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar entry'**
+  String get actionAddToCalendarShareSubject;
+
   /// No description provided for @appointmentContactLabel.
   ///
   /// In en, this message translates to:

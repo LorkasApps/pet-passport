@@ -400,6 +400,12 @@ class AppL10nEn extends AppL10n {
   String get actionOpenInMaps => 'Open in maps';
 
   @override
+  String get actionAddToCalendar => 'Export to calendar';
+
+  @override
+  String get actionAddToCalendarShareSubject => 'Calendar entry';
+
+  @override
   String get appointmentContactLabel => 'Contact';
 
   @override

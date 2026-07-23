@@ -1,9 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../core/calendar/ics_builder.dart';
 import '../../../core/time/recurrence.dart';
 import '../../../core/util/maps_launcher.dart';
 import '../../contacts/application/contacts_providers.dart';
@@ -11,6 +17,7 @@ import '../../contacts/presentation/contacts_list_screen.dart'
     show contactRoleLabel;
 import '../../vets/application/vets_providers.dart';
 import '../application/appointments_providers.dart';
+import '../domain/appointment.dart';
 import '../domain/appointment_enums.dart';
 
 class AppointmentDetailScreen extends ConsumerWidget {
@@ -33,6 +40,27 @@ class AppointmentDetailScreen extends ConsumerWidget {
     ));
     return Scaffold(
       appBar: AppBar(title: Text(l.appointmentDetailTitle), actions: [
+        IconButton(
+          icon: const Icon(Icons.event_available_outlined),
+          tooltip: l.actionAddToCalendar,
+          onPressed: () async {
+            final a = apptAsync.valueOrNull;
+            if (a == null) return;
+            // Vet appointments derive their location from vet.address
+            // (edit hides the free-text field for that type), so mirror
+            // that when handing the appointment to the ICS builder.
+            final vet = a.vetUuid == null
+                ? null
+                : ref
+                    .read(vetByUuidProvider(
+                      (vetUuid: a.vetUuid!, petUuid: petUuid),
+                    ))
+                    .valueOrNull;
+            final locationOverride =
+                a.type == AppointmentType.vet ? vet?.address : null;
+            await _shareIcs(context, l, a, locationOverride);
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: l.actionEdit,
@@ -207,6 +235,35 @@ class AppointmentDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _shareIcs(
+    BuildContext context,
+    AppL10n l,
+    Appointment appt,
+    String? locationOverride,
+  ) async {
+    final ics = IcsBuilder.buildAppointment(
+      appt,
+      locationOverride: locationOverride,
+    );
+    final tmp = await getTemporaryDirectory();
+    // Slot the uuid into the filename so multiple exports don't overwrite
+    // each other in the share-sheet cache. Title alone is unsafe (may
+    // contain slashes / colons / language-specific chars).
+    final safeTitle = appt.title
+        .replaceAll(RegExp(r'[^A-Za-z0-9._\- ]'), '_')
+        .trim()
+        .replaceAll(RegExp(r'\s+'), '_');
+    final name = safeTitle.isEmpty
+        ? 'appointment_${appt.uuid}.ics'
+        : '${safeTitle}_${appt.uuid.substring(0, 6)}.ics';
+    final file = File(p.join(tmp.path, name));
+    await file.writeAsString(ics);
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'text/calendar')],
+      subject: l.actionAddToCalendarShareSubject,
     );
   }
 
