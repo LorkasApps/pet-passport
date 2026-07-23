@@ -187,7 +187,7 @@ class MedicationsRepository {
 
   Future<void> deleteByUuid(String uuid) async {
     await notifications?.cancelAllForEntity(entity: 'med', uuid: uuid);
-    await _medDao.deleteByUuid(uuid);
+    await _medDao.softDeleteByUuid(uuid, DateTime.now());
   }
 
   // --- intake ---
@@ -228,7 +228,7 @@ class MedicationsRepository {
   }
 
   Future<void> deleteIntake(String intakeUuid) async {
-    await _medDao.deleteIntakeByUuid(intakeUuid);
+    await _medDao.softDeleteIntakeByUuid(intakeUuid, DateTime.now());
   }
 
   /// Adherence over the last 7 days: (taken, expected). `expected` counts

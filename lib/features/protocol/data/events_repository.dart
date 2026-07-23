@@ -171,7 +171,7 @@ class EventsRepository {
           await _media.deleteFile(p.filePath);
         }
       }
-      await _eventsDao.deleteByUuid(uuid);
+      await _eventsDao.softDeleteByUuid(uuid, DateTime.now());
     });
   }
 
@@ -265,7 +265,7 @@ class EventsRepository {
   }
 
   Future<void> deleteTag(String tagUuid) async {
-    await _eventsDao.deleteTagByUuid(tagUuid);
+    await _eventsDao.softDeleteTagByUuid(tagUuid, DateTime.now());
   }
 
   // ── Mapping ─────────────────────────────────────────────────────────

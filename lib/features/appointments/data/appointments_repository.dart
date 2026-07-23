@@ -203,7 +203,7 @@ class AppointmentsRepository {
 
   Future<void> deleteByUuid(String uuid) async {
     await notifications?.cancelAllForEntity(entity: 'appt', uuid: uuid);
-    await _appDao.deleteByUuid(uuid);
+    await _appDao.softDeleteByUuid(uuid, DateTime.now());
   }
 
   Future<void> rescheduleAllUpcomingReminders() async {

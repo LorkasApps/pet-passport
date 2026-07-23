@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../database.dart';
 import '../tables/appointment_exceptions_table.dart';
 import '../tables/appointment_reminders_table.dart';
@@ -14,13 +15,14 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<AppointmentRow>> watchForPet(int petId) {
     return (select(appointments)
-          ..where((a) => a.petId.equals(petId))
+          ..where((a) => a.petId.equals(petId) & a.deletedAt.isNull())
           ..orderBy([(a) => OrderingTerm.asc(a.startsAt)]))
         .watch();
   }
 
   Stream<List<AppointmentRow>> watchAll() {
     return (select(appointments)
+          ..where((a) => a.deletedAt.isNull())
           ..orderBy([(a) => OrderingTerm.asc(a.startsAt)]))
         .watch();
   }
@@ -29,7 +31,7 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
   /// Recurring appointments are returned by their base row only; occurrence
   /// expansion is a job for the caller.
   Stream<List<AppointmentRow>> watchAllInRange({DateTime? from, DateTime? to}) {
-    final query = select(appointments);
+    final query = select(appointments)..where((a) => a.deletedAt.isNull());
     if (from != null) {
       query.where((a) => a.startsAt.isBiggerOrEqualValue(from));
     }
@@ -41,12 +43,12 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<AppointmentRow?> getByUuid(String uuid) {
-    return (select(appointments)..where((a) => a.uuid.equals(uuid)))
+    return (select(appointments)..where((a) => a.uuid.equals(uuid) & a.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Stream<AppointmentRow?> watchByUuid(String uuid) {
-    return (select(appointments)..where((a) => a.uuid.equals(uuid)))
+    return (select(appointments)..where((a) => a.uuid.equals(uuid) & a.deletedAt.isNull()))
         .watchSingleOrNull();
   }
 
@@ -58,8 +60,12 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
     return update(appointments).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(appointments)..where((a) => a.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(appointments)..where((a) => a.uuid.equals(uuid)))
+        .write(AppointmentsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   /// All rows whose starts_at is in the future OR whose recurrence_until is
@@ -68,8 +74,8 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
   Future<List<AppointmentRow>> getAllActive(DateTime now) {
     return (select(appointments)
           ..where((a) =>
-              a.startsAt.isBiggerOrEqualValue(now) |
-              a.recurrenceUntil.isBiggerOrEqualValue(now))
+              (a.startsAt.isBiggerOrEqualValue(now) |
+              a.recurrenceUntil.isBiggerOrEqualValue(now)) & a.deletedAt.isNull())
           ..orderBy([(a) => OrderingTerm.asc(a.startsAt)]))
         .get();
   }

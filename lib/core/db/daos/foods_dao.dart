@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../database.dart';
 import '../tables/food_photos_table.dart';
 import '../tables/foods_table.dart';
@@ -12,7 +13,7 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
 
   Stream<List<FoodRow>> watchForPet(int petId) {
     return (select(foods)
-          ..where((f) => f.petId.equals(petId))
+          ..where((f) => f.petId.equals(petId) & f.deletedAt.isNull())
           ..orderBy([
             (f) => OrderingTerm.desc(f.isActive),
             (f) => OrderingTerm.asc(f.name),
@@ -22,18 +23,18 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
 
   Stream<List<FoodRow>> watchActiveForPet(int petId) {
     return (select(foods)
-          ..where((f) => f.petId.equals(petId) & f.isActive.equals(true))
+          ..where((f) => f.petId.equals(petId) & f.isActive.equals(true) & f.deletedAt.isNull())
           ..orderBy([(f) => OrderingTerm.asc(f.name)]))
         .watch();
   }
 
   Future<FoodRow?> getByUuid(String uuid) {
-    return (select(foods)..where((f) => f.uuid.equals(uuid)))
+    return (select(foods)..where((f) => f.uuid.equals(uuid) & f.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Stream<FoodRow?> watchByUuid(String uuid) {
-    return (select(foods)..where((f) => f.uuid.equals(uuid)))
+    return (select(foods)..where((f) => f.uuid.equals(uuid) & f.deletedAt.isNull()))
         .watchSingleOrNull();
   }
 
@@ -45,8 +46,12 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
     return update(foods).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(foods)..where((f) => f.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(foods)..where((f) => f.uuid.equals(uuid)))
+        .write(FoodsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   /// Active foods with reminders enabled — used by boot reschedule to
@@ -54,7 +59,7 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
   Future<List<FoodRow>> getAllActiveWithReminders() {
     return (select(foods)
           ..where((f) =>
-              f.isActive.equals(true) & f.remindersEnabled.equals(true)))
+              f.isActive.equals(true) & f.remindersEnabled.equals(true) & f.deletedAt.isNull()))
         .get();
   }
 

@@ -177,7 +177,7 @@ class VaccinationsRepository {
         await media?.deleteFile(d.filePath);
       }
     }
-    await _vacDao.deleteByUuid(uuid);
+    await _vacDao.softDeleteByUuid(uuid, DateTime.now());
     await notifications?.cancelVaccinationReminder(uuid);
   }
 

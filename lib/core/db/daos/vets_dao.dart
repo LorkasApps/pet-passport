@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../database.dart';
 import '../tables/vets_table.dart';
 
@@ -11,7 +12,7 @@ class VetsDao extends DatabaseAccessor<AppDatabase> with _$VetsDaoMixin {
 
   Stream<List<VetRow>> watchForPet(int petId) {
     return (select(vets)
-          ..where((v) => v.petId.equals(petId))
+          ..where((v) => v.petId.equals(petId) & v.deletedAt.isNull())
           ..orderBy([
             (v) => OrderingTerm.desc(v.isActive),
             (v) => OrderingTerm.asc(v.name),
@@ -21,22 +22,22 @@ class VetsDao extends DatabaseAccessor<AppDatabase> with _$VetsDaoMixin {
 
   Stream<List<VetRow>> watchActiveForPet(int petId) {
     return (select(vets)
-          ..where((v) => v.petId.equals(petId) & v.isActive.equals(true))
+          ..where((v) => v.petId.equals(petId) & v.isActive.equals(true) & v.deletedAt.isNull())
           ..orderBy([(v) => OrderingTerm.asc(v.name)]))
         .watch();
   }
 
   Future<VetRow?> getByUuid(String uuid) {
-    return (select(vets)..where((v) => v.uuid.equals(uuid)))
+    return (select(vets)..where((v) => v.uuid.equals(uuid) & v.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Future<VetRow?> getById(int id) {
-    return (select(vets)..where((v) => v.id.equals(id))).getSingleOrNull();
+    return (select(vets)..where((v) => v.id.equals(id) & v.deletedAt.isNull())).getSingleOrNull();
   }
 
   Stream<VetRow?> watchByUuid(String uuid) {
-    return (select(vets)..where((v) => v.uuid.equals(uuid)))
+    return (select(vets)..where((v) => v.uuid.equals(uuid) & v.deletedAt.isNull()))
         .watchSingleOrNull();
   }
 
@@ -48,14 +49,18 @@ class VetsDao extends DatabaseAccessor<AppDatabase> with _$VetsDaoMixin {
     return update(vets).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(vets)..where((v) => v.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(vets)..where((v) => v.uuid.equals(uuid)))
+        .write(VetsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   Future<int> countForPet(int petId) async {
     final row = await (selectOnly(vets)
           ..addColumns([vets.id.count()])
-          ..where(vets.petId.equals(petId)))
+          ..where(vets.petId.equals(petId) & vets.deletedAt.isNull()))
         .getSingle();
     return row.read(vets.id.count()) ?? 0;
   }

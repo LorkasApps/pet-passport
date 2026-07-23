@@ -158,7 +158,7 @@ class FoodsRepository {
         await media!.deleteFile(p.filePath);
       }
     }
-    await _foodsDao.deleteByUuid(uuid);
+    await _foodsDao.softDeleteByUuid(uuid, DateTime.now());
   }
 
   // --- photos ---

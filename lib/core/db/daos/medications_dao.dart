@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../database.dart';
 import '../tables/medication_intakes_table.dart';
 import '../tables/medication_reminders_table.dart';
@@ -14,7 +15,7 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<MedicationRow>> watchForPet(int petId) {
     return (select(medications)
-          ..where((m) => m.petId.equals(petId))
+          ..where((m) => m.petId.equals(petId) & m.deletedAt.isNull())
           ..orderBy([
             (m) => OrderingTerm.desc(m.isActive),
             (m) => OrderingTerm.asc(m.name),
@@ -24,18 +25,18 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<MedicationRow>> watchActiveForPet(int petId) {
     return (select(medications)
-          ..where((m) => m.petId.equals(petId) & m.isActive.equals(true))
+          ..where((m) => m.petId.equals(petId) & m.isActive.equals(true) & m.deletedAt.isNull())
           ..orderBy([(m) => OrderingTerm.asc(m.name)]))
         .watch();
   }
 
   Future<MedicationRow?> getByUuid(String uuid) {
-    return (select(medications)..where((m) => m.uuid.equals(uuid)))
+    return (select(medications)..where((m) => m.uuid.equals(uuid) & m.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Stream<MedicationRow?> watchByUuid(String uuid) {
-    return (select(medications)..where((m) => m.uuid.equals(uuid)))
+    return (select(medications)..where((m) => m.uuid.equals(uuid) & m.deletedAt.isNull()))
         .watchSingleOrNull();
   }
 
@@ -47,8 +48,12 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
     return update(medications).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(medications)..where((m) => m.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(medications)..where((m) => m.uuid.equals(uuid)))
+        .write(MedicationsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   /// All active medications whose `ends_at` has not passed. Boot-reschedule
@@ -57,7 +62,7 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
     return (select(medications)
           ..where((m) =>
               m.isActive.equals(true) &
-              (m.endsAt.isNull() | m.endsAt.isBiggerOrEqualValue(now))))
+              (m.endsAt.isNull() | m.endsAt.isBiggerOrEqualValue(now)) & m.deletedAt.isNull()))
         .get();
   }
 
@@ -87,7 +92,7 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
     DateTime? from,
     DateTime? to,
   }) {
-    final query = select(medicationIntakes);
+    final query = select(medicationIntakes)..where((i) => i.deletedAt.isNull());
     if (from != null) {
       query.where((i) => i.takenAt.isBiggerOrEqualValue(from));
     }
@@ -100,7 +105,7 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<MedicationIntakeRow>> watchIntakesFor(int medicationId) {
     return (select(medicationIntakes)
-          ..where((i) => i.medicationId.equals(medicationId))
+          ..where((i) => i.medicationId.equals(medicationId) & i.deletedAt.isNull())
           ..orderBy([(i) => OrderingTerm.desc(i.takenAt)]))
         .watch();
   }
@@ -109,8 +114,12 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
     return into(medicationIntakes).insert(companion);
   }
 
-  Future<int> deleteIntakeByUuid(String uuid) {
-    return (delete(medicationIntakes)..where((i) => i.uuid.equals(uuid))).go();
+  Future<int> softDeleteIntakeByUuid(String uuid, DateTime deletedAt) {
+    return (update(medicationIntakes)..where((i) => i.uuid.equals(uuid)))
+        .write(MedicationIntakesCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   Future<int> countIntakesSince(int medicationId, DateTime since) async {
@@ -119,7 +128,8 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
           ..where(
             medicationIntakes.medicationId.equals(medicationId) &
                 medicationIntakes.takenAt.isBiggerOrEqualValue(since) &
-                medicationIntakes.skipped.equals(false),
+                medicationIntakes.skipped.equals(false) &
+                medicationIntakes.deletedAt.isNull(),
           ))
         .getSingle();
     return row.read(medicationIntakes.id.count()) ?? 0;

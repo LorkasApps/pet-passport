@@ -127,7 +127,7 @@ class ContactsRepository {
   }
 
   Future<void> deleteByUuid(String uuid) {
-    return _contactsDao.deleteByUuid(uuid);
+    return _contactsDao.softDeleteByUuid(uuid, DateTime.now());
   }
 
   Contact _toDomain(ContactRow row, String petUuid) {

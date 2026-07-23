@@ -114,7 +114,7 @@ class InsurancesRepository {
     for (final d in docs) {
       await _media.deleteFile(d.filePath);
     }
-    await _insurancesDao.deleteByUuid(uuid);
+    await _insurancesDao.softDeleteByUuid(uuid, DateTime.now());
   }
 
   Future<String> attachDocument({

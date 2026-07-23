@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../../../features/protocol/domain/event_enums.dart';
 import '../database.dart';
 import '../tables/event_photos_table.dart';
@@ -19,7 +20,7 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
     DateTime? from,
     DateTime? to,
   }) {
-    final query = select(events)..where((e) => e.petId.equals(petId));
+    final query = select(events)..where((e) => e.petId.equals(petId) & e.deletedAt.isNull());
     if (typeFilter != null) {
       query.where((e) => e.eventType.equalsValue(typeFilter));
     }
@@ -35,7 +36,7 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
 
   /// Cross-pet stream, filtered by occurredAt window. Newest first.
   Stream<List<EventRow>> watchAllInRange({DateTime? from, DateTime? to}) {
-    final query = select(events);
+    final query = select(events)..where((e) => e.deletedAt.isNull());
     if (from != null) {
       query.where((e) => e.occurredAt.isBiggerOrEqualValue(from));
     }
@@ -47,12 +48,12 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
   }
 
   Future<EventRow?> getByUuid(String uuid) {
-    return (select(events)..where((e) => e.uuid.equals(uuid)))
+    return (select(events)..where((e) => e.uuid.equals(uuid) & e.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Stream<EventRow?> watchByUuid(String uuid) {
-    return (select(events)..where((e) => e.uuid.equals(uuid)))
+    return (select(events)..where((e) => e.uuid.equals(uuid) & e.deletedAt.isNull()))
         .watchSingleOrNull();
   }
 
@@ -64,23 +65,29 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
     return update(events).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(events)..where((e) => e.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(events)..where((e) => e.uuid.equals(uuid)))
+        .write(EventsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   // ── Tags ──────────────────────────────────────────────────────────────
   Stream<List<EventTagRow>> watchAllTags() {
-    return (select(eventTags)..orderBy([(t) => OrderingTerm.asc(t.label)]))
+    return (select(eventTags)
+          ..where((t) => t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.label)]))
         .watch();
   }
 
   Future<EventTagRow?> getTagByUuid(String uuid) {
-    return (select(eventTags)..where((t) => t.uuid.equals(uuid)))
+    return (select(eventTags)..where((t) => t.uuid.equals(uuid) & t.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Future<EventTagRow?> getTagByLabel(String label) {
-    return (select(eventTags)..where((t) => t.label.equals(label)))
+    return (select(eventTags)..where((t) => t.label.equals(label) & t.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
@@ -88,8 +95,12 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
     return into(eventTags).insert(companion);
   }
 
-  Future<int> deleteTagByUuid(String uuid) {
-    return (delete(eventTags)..where((t) => t.uuid.equals(uuid))).go();
+  Future<int> softDeleteTagByUuid(String uuid, DateTime deletedAt) {
+    return (update(eventTags)..where((t) => t.uuid.equals(uuid)))
+        .write(EventTagsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   Future<void> linkTagToEvent(int eventId, int tagId) async {

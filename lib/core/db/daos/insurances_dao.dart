@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../supabase/current_user.dart';
 import '../database.dart';
 import '../tables/insurance_documents_table.dart';
 import '../tables/insurances_table.dart';
@@ -13,18 +14,18 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<InsuranceRow>> watchForPet(int petId) {
     return (select(insurances)
-          ..where((i) => i.petId.equals(petId))
+          ..where((i) => i.petId.equals(petId) & i.deletedAt.isNull())
           ..orderBy([(i) => OrderingTerm.asc(i.provider)]))
         .watch();
   }
 
   Future<InsuranceRow?> getByUuid(String uuid) {
-    return (select(insurances)..where((i) => i.uuid.equals(uuid)))
+    return (select(insurances)..where((i) => i.uuid.equals(uuid) & i.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
   Stream<InsuranceRow?> watchByUuid(String uuid) {
-    return (select(insurances)..where((i) => i.uuid.equals(uuid)))
+    return (select(insurances)..where((i) => i.uuid.equals(uuid) & i.deletedAt.isNull()))
         .watchSingleOrNull();
   }
 
@@ -36,14 +37,18 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
     return update(insurances).replace(row);
   }
 
-  Future<int> deleteByUuid(String uuid) {
-    return (delete(insurances)..where((i) => i.uuid.equals(uuid))).go();
+  Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    return (update(insurances)..where((i) => i.uuid.equals(uuid)))
+        .write(InsurancesCompanion(
+          deletedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   Future<int> countForPet(int petId) async {
     final row = await (selectOnly(insurances)
           ..addColumns([insurances.id.count()])
-          ..where(insurances.petId.equals(petId)))
+          ..where(insurances.petId.equals(petId) & insurances.deletedAt.isNull()))
         .getSingle();
     return row.read(insurances.id.count()) ?? 0;
   }

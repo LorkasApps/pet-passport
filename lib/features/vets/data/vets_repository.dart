@@ -122,7 +122,7 @@ class VetsRepository {
   }
 
   Future<void> deleteByUuid(String uuid) {
-    return _vetsDao.deleteByUuid(uuid);
+    return _vetsDao.softDeleteByUuid(uuid, DateTime.now());
   }
 
   Vet _toDomain(VetRow row, String petUuid) {
