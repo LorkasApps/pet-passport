@@ -90,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -159,6 +159,18 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 14 && to >= 14) {
             await m.createTable(petDocuments);
+          }
+          if (from < 15 && to >= 15) {
+            // Rename support: every attachment surface picks up an
+            // optional user-editable title. Physical file names stay put.
+            await m.addColumn(eventPhotos, eventPhotos.title);
+            await m.addColumn(foodPhotos, foodPhotos.title);
+            await m.addColumn(
+                insuranceDocuments, insuranceDocuments.title);
+            await m.addColumn(
+                vaccinationDocuments, vaccinationDocuments.title);
+            await m.addColumn(
+                petPassportDocuments, petPassportDocuments.title);
           }
         },
         beforeOpen: (details) async {

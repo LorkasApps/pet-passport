@@ -209,9 +209,22 @@ class FoodsRepository {
     await _foodsDao.deletePhotoByUuid(photoUuid);
   }
 
+  /// Rename a food photo. Only the [title] column changes — the physical
+  /// file, its extension and `original_filename` all stay untouched.
+  /// Passing an empty string clears the title.
+  Future<void> renamePhoto(String photoUuid, String? title) async {
+    final trimmed = title?.trim();
+    final existing = await _foodsDao.getPhotoByUuid(photoUuid);
+    if (existing == null) return;
+    await _foodsDao.updatePhoto(existing.copyWith(
+      title: Value(trimmed == null || trimmed.isEmpty ? null : trimmed),
+    ));
+  }
+
   FoodPhoto _toDomainPhoto(FoodPhotoRow row) {
     return FoodPhoto(
       uuid: row.uuid,
+      title: row.title,
       filePath: row.filePath,
       mimeType: row.mimeType,
       originalFilename: row.originalFilename,

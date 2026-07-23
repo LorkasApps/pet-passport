@@ -31,6 +31,7 @@ class Insurance {
 class InsuranceDocument {
   const InsuranceDocument({
     required this.uuid,
+    this.title,
     required this.filePath,
     required this.mimeType,
     this.originalFilename,
@@ -39,9 +40,18 @@ class InsuranceDocument {
   });
 
   final String uuid;
+  final String? title;
   final String filePath;
   final String mimeType;
   final String? originalFilename;
   final int? sizeBytes;
   final DateTime createdAt;
+
+  String displayName() {
+    if (title != null && title!.isNotEmpty) return title!;
+    if (originalFilename != null && originalFilename!.isNotEmpty) {
+      return originalFilename!;
+    }
+    return uuid.substring(0, 6);
+  }
 }

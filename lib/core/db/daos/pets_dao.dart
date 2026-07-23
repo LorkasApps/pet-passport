@@ -86,4 +86,10 @@ class PetsDao extends DatabaseAccessor<AppDatabase> with _$PetsDaoMixin {
     return (delete(petPassportDocuments)..where((d) => d.uuid.equals(uuid)))
         .go();
   }
+
+  Future<int> renamePassportDoc(String uuid, String? title) {
+    return (update(petPassportDocuments)
+          ..where((d) => d.uuid.equals(uuid)))
+        .write(PetPassportDocumentsCompanion(title: Value(title)));
+  }
 }

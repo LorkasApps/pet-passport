@@ -90,6 +90,12 @@ class VaccinationsDao extends DatabaseAccessor<AppDatabase>
         .go();
   }
 
+  Future<int> renameDocument(String uuid, String? title) {
+    return (update(vaccinationDocuments)
+          ..where((d) => d.uuid.equals(uuid)))
+        .write(VaccinationDocumentsCompanion(title: Value(title)));
+  }
+
   Future<VaccinationDocumentRow?> getDocumentByUuid(String uuid) {
     return (select(vaccinationDocuments)..where((d) => d.uuid.equals(uuid)))
         .getSingleOrNull();

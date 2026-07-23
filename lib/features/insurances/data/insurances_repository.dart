@@ -148,6 +148,17 @@ class InsurancesRepository {
     await _media.deleteFile(row.filePath);
   }
 
+  /// Rename an insurance document — only the [title] column changes; the
+  /// underlying file and `original_filename` are left alone. Passing an
+  /// empty string clears the title.
+  Future<void> renameDocument(String docUuid, String? title) async {
+    final trimmed = title?.trim();
+    await _insurancesDao.renameDocument(
+      docUuid,
+      trimmed == null || trimmed.isEmpty ? null : trimmed,
+    );
+  }
+
   Insurance _toDomain(
     InsuranceRow row,
     String petUuid,
@@ -166,6 +177,7 @@ class InsurancesRepository {
       documents: docs
           .map((d) => InsuranceDocument(
                 uuid: d.uuid,
+                title: d.title,
                 filePath: d.filePath,
                 mimeType: d.mimeType,
                 originalFilename: d.originalFilename,

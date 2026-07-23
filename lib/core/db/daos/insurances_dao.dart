@@ -65,6 +65,12 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
         .go();
   }
 
+  Future<int> renameDocument(String uuid, String? title) {
+    return (update(insuranceDocuments)
+          ..where((d) => d.uuid.equals(uuid)))
+        .write(InsuranceDocumentsCompanion(title: Value(title)));
+  }
+
   Future<InsuranceDocumentRow?> getDocumentByUuid(String uuid) {
     return (select(insuranceDocuments)..where((d) => d.uuid.equals(uuid)))
         .getSingleOrNull();

@@ -203,6 +203,18 @@ class EventsRepository {
     await _media.deleteFile(row.filePath);
   }
 
+  /// User-visible rename — only touches the [title] column, so the
+  /// on-disk file, its extension and original filename all stay put.
+  /// Passing an empty string (or null) clears the title back to unset.
+  Future<void> renamePhoto(String photoUuid, String? title) async {
+    final trimmed = title?.trim();
+    await (_db.update(_db.eventPhotos)
+          ..where((p) => p.uuid.equals(photoUuid)))
+        .write(EventPhotosCompanion(
+      title: Value(trimmed == null || trimmed.isEmpty ? null : trimmed),
+    ));
+  }
+
   // ── Tags ────────────────────────────────────────────────────────────
   Stream<List<EventTag>> watchAllTags() {
     return _eventsDao.watchAllTags().map(
@@ -269,6 +281,7 @@ class EventsRepository {
       photos: photoRows
           .map((p) => EventPhoto(
                 uuid: p.uuid,
+                title: p.title,
                 filePath: p.filePath,
                 mimeType: p.mimeType,
                 sizeBytes: p.sizeBytes,

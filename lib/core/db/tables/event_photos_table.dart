@@ -8,6 +8,7 @@ class EventPhotos extends Table {
   TextColumn get uuid => text().unique()();
   IntColumn get eventId =>
       integer().references(Events, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text().nullable()();
   TextColumn get filePath => text()();
   TextColumn get mimeType => text()();
   IntColumn get sizeBytes => integer().nullable()();

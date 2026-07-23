@@ -191,9 +191,21 @@ class PetsRepository {
     await _dao.deletePassportDocByUuid(docUuid);
   }
 
+  /// Rename a passport document — only the [title] column changes; the
+  /// underlying file and `original_filename` remain untouched. Passing
+  /// an empty string clears the title.
+  Future<void> renamePassportDoc(String docUuid, String? title) async {
+    final trimmed = title?.trim();
+    await _dao.renamePassportDoc(
+      docUuid,
+      trimmed == null || trimmed.isEmpty ? null : trimmed,
+    );
+  }
+
   PetPassportDocument _toPassportDoc(PetPassportDocumentRow row) {
     return PetPassportDocument(
       uuid: row.uuid,
+      title: row.title,
       filePath: row.filePath,
       mimeType: row.mimeType,
       originalFilename: row.originalFilename,

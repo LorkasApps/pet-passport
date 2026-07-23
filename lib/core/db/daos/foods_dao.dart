@@ -76,6 +76,10 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
     return into(foodPhotos).insert(companion);
   }
 
+  Future<bool> updatePhoto(FoodPhotoRow row) {
+    return update(foodPhotos).replace(row);
+  }
+
   Future<int> deletePhotoByUuid(String uuid) {
     return (delete(foodPhotos)..where((p) => p.uuid.equals(uuid))).go();
   }

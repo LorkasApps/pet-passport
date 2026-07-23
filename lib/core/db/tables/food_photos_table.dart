@@ -8,6 +8,7 @@ class FoodPhotos extends Table {
   TextColumn get uuid => text().unique()();
   IntColumn get foodId =>
       integer().references(Foods, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text().nullable()();
   TextColumn get filePath => text()();
   TextColumn get mimeType => text().withLength(min: 1, max: 128)();
   TextColumn get originalFilename => text().nullable()();

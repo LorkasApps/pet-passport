@@ -223,6 +223,7 @@ class VaccinationsRepository {
       documents: docs
           .map((d) => VaccinationDocument(
                 uuid: d.uuid,
+                title: d.title,
                 filePath: d.filePath,
                 mimeType: d.mimeType,
                 originalFilename: d.originalFilename,
@@ -271,5 +272,16 @@ class VaccinationsRepository {
     if (row == null) return;
     await _vacDao.deleteDocumentByUuid(docUuid);
     await media?.deleteFile(row.filePath);
+  }
+
+  /// Rename a vaccination document — only the [title] column changes;
+  /// underlying file + `original_filename` stay untouched. Empty string
+  /// clears the title.
+  Future<void> renameDocument(String docUuid, String? title) async {
+    final trimmed = title?.trim();
+    await _vacDao.renameDocument(
+      docUuid,
+      trimmed == null || trimmed.isEmpty ? null : trimmed,
+    );
   }
 }

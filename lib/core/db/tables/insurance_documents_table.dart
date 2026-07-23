@@ -8,6 +8,7 @@ class InsuranceDocuments extends Table {
   TextColumn get uuid => text().unique()();
   IntColumn get insuranceId => integer()
       .references(Insurances, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text().nullable()();
   TextColumn get filePath => text()(); // relative to app documents dir
   TextColumn get mimeType => text()();
   TextColumn get originalFilename => text().nullable()();
