@@ -36,6 +36,11 @@ class MoreScreen extends ConsumerWidget {
           title: Text(l.vetsListTitle),
           onTap: () => context.push('/vets'),
         ),
+        ListTile(
+          leading: const Icon(Icons.contact_page_outlined),
+          title: Text(l.moreContacts),
+          onTap: () => context.push('/contacts'),
+        ),
         const Divider(),
         // Alltag
         ListTile(

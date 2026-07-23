@@ -643,6 +643,126 @@ abstract class AppL10n {
   /// **'Hide archived'**
   String get actionHideArchived;
 
+  /// No description provided for @contactsListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts'**
+  String get contactsListTitle;
+
+  /// No description provided for @contactsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts yet'**
+  String get contactsEmptyTitle;
+
+  /// No description provided for @contactsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Dog sitters, trainers and other people your pet relies on.'**
+  String get contactsEmptyMessage;
+
+  /// No description provided for @contactsEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get contactsEmptyAction;
+
+  /// No description provided for @contactEditNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New contact'**
+  String get contactEditNewTitle;
+
+  /// No description provided for @contactEditEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit contact'**
+  String get contactEditEditTitle;
+
+  /// No description provided for @contactFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get contactFieldName;
+
+  /// No description provided for @contactFieldRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get contactFieldRole;
+
+  /// No description provided for @contactFieldOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation / company'**
+  String get contactFieldOrganization;
+
+  /// No description provided for @contactFieldAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get contactFieldAddress;
+
+  /// No description provided for @contactFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get contactFieldPhone;
+
+  /// No description provided for @contactFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get contactFieldEmail;
+
+  /// No description provided for @contactActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get contactActiveLabel;
+
+  /// No description provided for @contactRoleSitter.
+  ///
+  /// In en, this message translates to:
+  /// **'Sitter'**
+  String get contactRoleSitter;
+
+  /// No description provided for @contactRoleTrainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Trainer'**
+  String get contactRoleTrainer;
+
+  /// No description provided for @contactRoleGroomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Groomer'**
+  String get contactRoleGroomer;
+
+  /// No description provided for @contactRoleOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get contactRoleOther;
+
+  /// No description provided for @moreContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacts'**
+  String get moreContacts;
+
+  /// No description provided for @actionOpenInMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in maps'**
+  String get actionOpenInMaps;
+
+  /// No description provided for @appointmentContactLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get appointmentContactLabel;
+
   /// No description provided for @emptyShowArchivedAction.
   ///
   /// In en, this message translates to:

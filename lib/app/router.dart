@@ -39,6 +39,9 @@ import '../features/timeline/presentation/timeline_screen.dart';
 import '../features/vaccinations/presentation/vaccination_detail_screen.dart';
 import '../features/vaccinations/presentation/vaccination_edit_screen.dart';
 import '../features/vaccinations/presentation/vaccinations_list_screen.dart';
+import '../features/contacts/presentation/contact_detail_screen.dart';
+import '../features/contacts/presentation/contact_edit_screen.dart';
+import '../features/contacts/presentation/contacts_list_screen.dart';
 import '../features/vets/presentation/vet_detail_screen.dart';
 import '../features/vets/presentation/vet_edit_screen.dart';
 import '../features/vets/presentation/vets_list_screen.dart';
@@ -120,6 +123,34 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, s) => VetEditScreen(
           petUuid: s.pathParameters['petId']!,
           vetUuid: s.pathParameters['vetId'],
+        ),
+      ),
+      GoRoute(
+        path: '/contacts',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const ContactsListScreen(),
+      ),
+      GoRoute(
+        path: '/pets/:petId/contacts/new',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => ContactEditScreen(
+          petUuid: s.pathParameters['petId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/contacts/:contactId',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => ContactDetailScreen(
+          petUuid: s.pathParameters['petId']!,
+          contactUuid: s.pathParameters['contactId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:petId/contacts/:contactId/edit',
+        parentNavigatorKey: _rootKey,
+        builder: (_, s) => ContactEditScreen(
+          petUuid: s.pathParameters['petId']!,
+          contactUuid: s.pathParameters['contactId'],
         ),
       ),
       GoRoute(

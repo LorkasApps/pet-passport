@@ -304,6 +304,67 @@ class AppL10nDe extends AppL10n {
   String get actionHideArchived => 'Archivierte ausblenden';
 
   @override
+  String get contactsListTitle => 'Kontakte';
+
+  @override
+  String get contactsEmptyTitle => 'Noch keine Kontakte';
+
+  @override
+  String get contactsEmptyMessage =>
+      'Hundesitter, Trainer und andere Bezugspersonen an einem Ort.';
+
+  @override
+  String get contactsEmptyAction => 'Kontakt hinzufügen';
+
+  @override
+  String get contactEditNewTitle => 'Neuer Kontakt';
+
+  @override
+  String get contactEditEditTitle => 'Kontakt bearbeiten';
+
+  @override
+  String get contactFieldName => 'Name';
+
+  @override
+  String get contactFieldRole => 'Rolle';
+
+  @override
+  String get contactFieldOrganization => 'Organisation / Firma';
+
+  @override
+  String get contactFieldAddress => 'Adresse';
+
+  @override
+  String get contactFieldPhone => 'Telefon';
+
+  @override
+  String get contactFieldEmail => 'E-Mail';
+
+  @override
+  String get contactActiveLabel => 'Aktiv';
+
+  @override
+  String get contactRoleSitter => 'Hundesitter';
+
+  @override
+  String get contactRoleTrainer => 'Trainer';
+
+  @override
+  String get contactRoleGroomer => 'Fellpflege';
+
+  @override
+  String get contactRoleOther => 'Sonstige';
+
+  @override
+  String get moreContacts => 'Kontakte';
+
+  @override
+  String get actionOpenInMaps => 'In Karten öffnen';
+
+  @override
+  String get appointmentContactLabel => 'Kontakt';
+
+  @override
   String emptyShowArchivedAction(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

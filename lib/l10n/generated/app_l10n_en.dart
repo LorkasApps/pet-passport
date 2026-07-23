@@ -302,6 +302,67 @@ class AppL10nEn extends AppL10n {
   String get actionHideArchived => 'Hide archived';
 
   @override
+  String get contactsListTitle => 'Contacts';
+
+  @override
+  String get contactsEmptyTitle => 'No contacts yet';
+
+  @override
+  String get contactsEmptyMessage =>
+      'Dog sitters, trainers and other people your pet relies on.';
+
+  @override
+  String get contactsEmptyAction => 'Add contact';
+
+  @override
+  String get contactEditNewTitle => 'New contact';
+
+  @override
+  String get contactEditEditTitle => 'Edit contact';
+
+  @override
+  String get contactFieldName => 'Name';
+
+  @override
+  String get contactFieldRole => 'Role';
+
+  @override
+  String get contactFieldOrganization => 'Organisation / company';
+
+  @override
+  String get contactFieldAddress => 'Address';
+
+  @override
+  String get contactFieldPhone => 'Phone';
+
+  @override
+  String get contactFieldEmail => 'Email';
+
+  @override
+  String get contactActiveLabel => 'Active';
+
+  @override
+  String get contactRoleSitter => 'Sitter';
+
+  @override
+  String get contactRoleTrainer => 'Trainer';
+
+  @override
+  String get contactRoleGroomer => 'Groomer';
+
+  @override
+  String get contactRoleOther => 'Other';
+
+  @override
+  String get moreContacts => 'Contacts';
+
+  @override
+  String get actionOpenInMaps => 'Open in maps';
+
+  @override
+  String get appointmentContactLabel => 'Contact';
+
+  @override
   String emptyShowArchivedAction(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
