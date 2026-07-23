@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../../households/application/households_providers.dart';
 import '../application/profile_providers.dart';
 
 /// One-time forced screen the router shows after first sign-in until the
@@ -39,6 +40,15 @@ class _DisplayNameScreenState extends ConsumerState<DisplayNameScreen> {
       await ref
           .read(myProfileProvider.notifier)
           .saveDisplayName(_ctrl.text);
+      // First-run bootstrap: make sure the user has at least one
+      // household so subsequent screens have something to bind data to.
+      // Idempotent — a returning user with existing memberships is a
+      // no-op here.
+      if (!mounted) return;
+      final l = AppL10n.of(context);
+      await ref
+          .read(householdsRepositoryProvider)
+          .ensureDefault(l.householdsDefaultName);
       if (!mounted) return;
       context.go('/home');
     } catch (e) {

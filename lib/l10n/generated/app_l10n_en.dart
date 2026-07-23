@@ -704,6 +704,54 @@ class AppL10nEn extends AppL10n {
   String get displayNameTooShort => 'At least 2 characters';
 
   @override
+  String get householdsSection => 'My households';
+
+  @override
+  String get householdsDefaultName => 'My household';
+
+  @override
+  String get householdsEmpty => 'No households';
+
+  @override
+  String householdsMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get householdsRoleOwner => 'Owner';
+
+  @override
+  String get householdsRoleMember => 'Member';
+
+  @override
+  String get householdsCreate => 'Create household';
+
+  @override
+  String get householdsCreateHint => 'Name (e.g. The Wilsons)';
+
+  @override
+  String get householdDetailTitle => 'Household';
+
+  @override
+  String get householdFieldName => 'Name';
+
+  @override
+  String get householdDeleteAction => 'Delete household';
+
+  @override
+  String get householdDeleteConfirmTitle => 'Delete this household?';
+
+  @override
+  String get householdDeleteConfirmBody =>
+      'All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override

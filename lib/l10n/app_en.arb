@@ -282,6 +282,23 @@
   "displayNameLabel": "Display name",
   "displayNameTooShort": "At least 2 characters",
 
+  "householdsSection": "My households",
+  "householdsDefaultName": "My household",
+  "householdsEmpty": "No households",
+  "householdsMemberCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@householdsMemberCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "householdsRoleOwner": "Owner",
+  "householdsRoleMember": "Member",
+  "householdsCreate": "Create household",
+  "householdsCreateHint": "Name (e.g. The Wilsons)",
+  "householdDetailTitle": "Household",
+  "householdFieldName": "Name",
+  "householdDeleteAction": "Delete household",
+  "householdDeleteConfirmTitle": "Delete this household?",
+  "householdDeleteConfirmBody": "All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.",
+
   "exportTitle": "Import / Export",
   "exportJsonTitle": "JSON backup",
   "exportJsonHelp": "Creates a JSON file with all pets, vets, insurances and vaccinations. Share it via email, cloud or another app.",

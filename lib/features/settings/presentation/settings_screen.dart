@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/supabase/supabase_config.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../households/application/households_providers.dart';
+import '../../households/domain/household.dart';
 import '../../security/application/app_lock_providers.dart';
 import '../application/settings_providers.dart';
 
@@ -46,6 +48,7 @@ class SettingsScreen extends ConsumerWidget {
           if (SupabaseConfig.isConfigured) ...[
             _SectionHeader(text: l.settingsCloudSection),
             const _CloudTile(),
+            const _HouseholdsSection(),
           ],
         ],
       ),
@@ -161,6 +164,112 @@ class SettingsScreen extends ConsumerWidget {
       'en' => l.settingsLanguageEnglish,
       _ => locale.languageCode,
     };
+  }
+}
+
+class _HouseholdsSection extends ConsumerWidget {
+  const _HouseholdsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppL10n.of(context);
+    final signedIn = ref.watch(isSignedInProvider);
+    if (!signedIn) return const SizedBox.shrink();
+    final async = ref.watch(myHouseholdsProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SectionHeader(text: l.householdsSection),
+        async.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('$e'),
+          ),
+          data: (households) {
+            if (households.isEmpty) {
+              return ListTile(
+                leading: const Icon(Icons.home_outlined),
+                title: Text(l.householdsEmpty),
+              );
+            }
+            return Column(
+              children: [
+                for (final h in households) _HouseholdTile(h: h),
+              ],
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.add),
+          title: Text(l.householdsCreate),
+          onTap: () => _promptCreate(context, ref, l),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _promptCreate(
+    BuildContext context,
+    WidgetRef ref,
+    AppL10n l,
+  ) async {
+    final ctrl = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.householdsCreate),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(hintText: l.householdsCreateHint),
+          onSubmitted: (_) => Navigator.pop(ctx, ctrl.text.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: Text(l.actionSave),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name == null || name.isEmpty) return;
+    await ref.read(myHouseholdsProvider.notifier).create(name);
+  }
+}
+
+class _HouseholdTile extends StatelessWidget {
+  const _HouseholdTile({required this.h});
+
+  final Household h;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppL10n.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: scheme.secondaryContainer,
+        child: Icon(h.isOwner ? Icons.workspace_premium : Icons.home_outlined,
+            color: scheme.onSecondaryContainer),
+      ),
+      title: Text(h.name),
+      subtitle: Text(
+        '${h.isOwner ? l.householdsRoleOwner : l.householdsRoleMember}'
+        ' · ${l.householdsMemberCount(h.memberCount)}',
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => context.push('/households/${h.id}'),
+    );
   }
 }
 

@@ -1339,6 +1339,84 @@ abstract class AppL10n {
   /// **'At least 2 characters'**
   String get displayNameTooShort;
 
+  /// No description provided for @householdsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'My households'**
+  String get householdsSection;
+
+  /// No description provided for @householdsDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'My household'**
+  String get householdsDefaultName;
+
+  /// No description provided for @householdsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No households'**
+  String get householdsEmpty;
+
+  /// No description provided for @householdsMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
+  String householdsMemberCount(int count);
+
+  /// No description provided for @householdsRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get householdsRoleOwner;
+
+  /// No description provided for @householdsRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get householdsRoleMember;
+
+  /// No description provided for @householdsCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create household'**
+  String get householdsCreate;
+
+  /// No description provided for @householdsCreateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (e.g. The Wilsons)'**
+  String get householdsCreateHint;
+
+  /// No description provided for @householdDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get householdDetailTitle;
+
+  /// No description provided for @householdFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get householdFieldName;
+
+  /// No description provided for @householdDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete household'**
+  String get householdDeleteAction;
+
+  /// No description provided for @householdDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this household?'**
+  String get householdDeleteConfirmTitle;
+
+  /// No description provided for @householdDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.'**
+  String get householdDeleteConfirmBody;
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

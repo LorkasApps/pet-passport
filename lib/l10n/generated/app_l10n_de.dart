@@ -707,6 +707,54 @@ class AppL10nDe extends AppL10n {
   String get displayNameTooShort => 'Mindestens 2 Zeichen';
 
   @override
+  String get householdsSection => 'Meine Haushalte';
+
+  @override
+  String get householdsDefaultName => 'Mein Haushalt';
+
+  @override
+  String get householdsEmpty => 'Keine Haushalte';
+
+  @override
+  String householdsMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Mitglieder',
+      one: '1 Mitglied',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get householdsRoleOwner => 'Owner';
+
+  @override
+  String get householdsRoleMember => 'Mitglied';
+
+  @override
+  String get householdsCreate => 'Neuen Haushalt anlegen';
+
+  @override
+  String get householdsCreateHint => 'Name (z.B. Familie Weber)';
+
+  @override
+  String get householdDetailTitle => 'Haushalt';
+
+  @override
+  String get householdFieldName => 'Name';
+
+  @override
+  String get householdDeleteAction => 'Haushalt löschen';
+
+  @override
+  String get householdDeleteConfirmTitle => 'Haushalt wirklich löschen?';
+
+  @override
+  String get householdDeleteConfirmBody =>
+      'Alle Daten dieses Haushalts (Tiere, Termine, Fotos, Dokumente etc.) werden für alle Mitglieder unwiderruflich gelöscht.';
+
+  @override
   String get exportTitle => 'Import / Export';
 
   @override
