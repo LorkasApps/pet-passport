@@ -691,6 +691,22 @@ class AppL10nDe extends AppL10n {
   String get signInWaitingBack => 'Andere E-Mail';
 
   @override
+  String get signInConsentPrefix => 'Ich habe die ';
+
+  @override
+  String get signInConsentLink => 'Datenschutzhinweise';
+
+  @override
+  String get signInConsentSuffix =>
+      ' gelesen und stimme der Verarbeitung meiner E-Mail und der Haushalts-Daten in der Cloud zu.';
+
+  @override
+  String get privacyNoticeTitle => 'Datenschutz';
+
+  @override
+  String get privacyNoticeOpenAction => 'Datenschutzhinweise öffnen';
+
+  @override
   String get displayNameTitle => 'Anzeigename';
 
   @override

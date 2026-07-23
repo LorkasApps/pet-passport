@@ -6,6 +6,7 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../features/auth/application/profile_providers.dart';
 import '../features/auth/presentation/auth_callback_screen.dart';
 import '../features/auth/presentation/display_name_screen.dart';
+import '../features/auth/presentation/privacy_notice_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/households/presentation/household_detail_screen.dart';
 import '../features/households/presentation/invite_screen.dart';
@@ -140,6 +141,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // or complete an interrupted auth flow.
       if (needsDisplayNameListenable.value &&
           loc != '/profile/setup' &&
+          loc != '/privacy' &&
           !loc.startsWith('/auth/')) {
         return '/profile/setup';
       }
@@ -173,6 +175,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile/setup',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const DisplayNameScreen(),
+      ),
+      GoRoute(
+        path: '/privacy',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const PrivacyNoticeScreen(),
       ),
       GoRoute(
         path: '/households/:id',

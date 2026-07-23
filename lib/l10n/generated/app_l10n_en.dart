@@ -688,6 +688,22 @@ class AppL10nEn extends AppL10n {
   String get signInWaitingBack => 'Different email';
 
   @override
+  String get signInConsentPrefix => 'I have read the ';
+
+  @override
+  String get signInConsentLink => 'privacy notice';
+
+  @override
+  String get signInConsentSuffix =>
+      ' and consent to my email and household data being processed in the cloud.';
+
+  @override
+  String get privacyNoticeTitle => 'Privacy';
+
+  @override
+  String get privacyNoticeOpenAction => 'Open privacy notice';
+
+  @override
   String get displayNameTitle => 'Display name';
 
   @override

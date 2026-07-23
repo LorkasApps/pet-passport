@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,13 +9,17 @@ import '../application/auth_providers.dart';
 /// Entry point for turning cloud features on. Reachable from Settings.
 ///
 /// Two states:
-///   1. Idle — email input + "Magic Link senden" button
+///   1. Idle — email input + consent checkbox + "Magic Link senden"
 ///   2. Waiting — "Mail geschickt, öffne den Link auf deinem Gerät"
 ///
 /// The auth callback (`petpassport://auth/callback`) is handled by the
 /// Supabase SDK's built-in deep-link observer; we don't need our own
 /// callback screen. Once the session flips to signed-in, the app root
 /// will react to the auth-state stream and navigate onwards.
+///
+/// DSGVO gate: user must tick a consent checkbox linking to `/privacy`
+/// before the send button enables. Consent is not persisted — the very
+/// act of tapping the magic-link in the mail confirms it downstream.
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
@@ -25,17 +30,27 @@ class SignInScreen extends ConsumerStatefulWidget {
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _linkRecognizer = TapGestureRecognizer();
   bool _sending = false;
   String? _error;
   bool _linkSent = false;
+  bool _consent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _linkRecognizer.onTap = () => context.push('/privacy');
+  }
 
   @override
   void dispose() {
     _emailCtrl.dispose();
+    _linkRecognizer.dispose();
     super.dispose();
   }
 
   Future<void> _send() async {
+    if (!_consent) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final email = _emailCtrl.text.trim();
     setState(() {
@@ -67,17 +82,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   Widget _buildForm(AppL10n l) {
+    final theme = Theme.of(context);
+    final canSend = _consent && !_sending;
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.signInHeadline, style: Theme.of(context).textTheme.titleLarge),
+          Text(l.signInHeadline, style: theme.textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(
             l.signInBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
           ),
           const SizedBox(height: 24),
@@ -92,8 +109,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             validator: (v) {
               final s = v?.trim() ?? '';
               if (s.isEmpty) return l.validationRequired;
-              // Cheap gate: SDK does the real validation. Just catch
-              // obviously-not-an-email so the user gets fast feedback.
               if (!s.contains('@') || !s.contains('.')) {
                 return l.signInEmailInvalid;
               }
@@ -101,8 +116,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             },
           ),
           const SizedBox(height: 16),
+          _ConsentRow(
+            checked: _consent,
+            onChanged: (v) => setState(() => _consent = v ?? false),
+            linkRecognizer: _linkRecognizer,
+            prefix: l.signInConsentPrefix,
+            link: l.signInConsentLink,
+            suffix: l.signInConsentSuffix,
+          ),
+          const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: _sending ? null : _send,
+            onPressed: canSend ? _send : null,
             icon: _sending
                 ? const SizedBox(
                     width: 16,
@@ -116,9 +140,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             const SizedBox(height: 16),
             Text(
               _error!,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: theme.colorScheme.error),
             ),
           ],
           const Spacer(),
@@ -153,6 +175,63 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         OutlinedButton(
           onPressed: () => setState(() => _linkSent = false),
           child: Text(l.signInWaitingBack),
+        ),
+      ],
+    );
+  }
+}
+
+class _ConsentRow extends StatelessWidget {
+  const _ConsentRow({
+    required this.checked,
+    required this.onChanged,
+    required this.linkRecognizer,
+    required this.prefix,
+    required this.link,
+    required this.suffix,
+  });
+
+  final bool checked;
+  final ValueChanged<bool?> onChanged;
+  final TapGestureRecognizer linkRecognizer;
+  final String prefix;
+  final String link;
+  final String suffix;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Checkbox(
+          value: checked,
+          onChanged: onChanged,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: GestureDetector(
+              onTap: () => onChanged(!checked),
+              child: RichText(
+                text: TextSpan(
+                  style: theme.textTheme.bodyMedium,
+                  children: [
+                    TextSpan(text: prefix),
+                    TextSpan(
+                      text: link,
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: linkRecognizer,
+                    ),
+                    TextSpan(text: suffix),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );

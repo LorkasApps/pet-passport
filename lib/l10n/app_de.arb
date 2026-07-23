@@ -231,6 +231,12 @@
   "signInWaitingHeadline": "Mail geschickt",
   "signInWaitingBody": "Wir haben einen Link an {email} geschickt. Öffne die Mail auf diesem Gerät und tippe auf den Link — die App wird sich automatisch anmelden.",
   "signInWaitingBack": "Andere E-Mail",
+  "signInConsentPrefix": "Ich habe die ",
+  "signInConsentLink": "Datenschutzhinweise",
+  "signInConsentSuffix": " gelesen und stimme der Verarbeitung meiner E-Mail und der Haushalts-Daten in der Cloud zu.",
+
+  "privacyNoticeTitle": "Datenschutz",
+  "privacyNoticeOpenAction": "Datenschutzhinweise öffnen",
 
   "displayNameTitle": "Anzeigename",
   "displayNameHeadline": "Wie sollst du in der App heißen?",

@@ -1309,6 +1309,36 @@ abstract class AppL10n {
   /// **'Different email'**
   String get signInWaitingBack;
 
+  /// No description provided for @signInConsentPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read the '**
+  String get signInConsentPrefix;
+
+  /// No description provided for @signInConsentLink.
+  ///
+  /// In en, this message translates to:
+  /// **'privacy notice'**
+  String get signInConsentLink;
+
+  /// No description provided for @signInConsentSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' and consent to my email and household data being processed in the cloud.'**
+  String get signInConsentSuffix;
+
+  /// No description provided for @privacyNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacyNoticeTitle;
+
+  /// No description provided for @privacyNoticeOpenAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open privacy notice'**
+  String get privacyNoticeOpenAction;
+
   /// No description provided for @displayNameTitle.
   ///
   /// In en, this message translates to:

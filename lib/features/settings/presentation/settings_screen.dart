@@ -50,6 +50,13 @@ class SettingsScreen extends ConsumerWidget {
             const _CloudTile(),
             const _HouseholdsSection(),
           ],
+          _SectionHeader(text: l.privacyNoticeTitle),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: Text(l.privacyNoticeOpenAction),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/privacy'),
+          ),
         ],
       ),
     );

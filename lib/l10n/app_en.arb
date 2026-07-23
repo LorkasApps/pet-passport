@@ -275,6 +275,12 @@
     "placeholders": { "email": { "type": "String" } }
   },
   "signInWaitingBack": "Different email",
+  "signInConsentPrefix": "I have read the ",
+  "signInConsentLink": "privacy notice",
+  "signInConsentSuffix": " and consent to my email and household data being processed in the cloud.",
+
+  "privacyNoticeTitle": "Privacy",
+  "privacyNoticeOpenAction": "Open privacy notice",
 
   "displayNameTitle": "Display name",
   "displayNameHeadline": "How should you appear in the app?",
