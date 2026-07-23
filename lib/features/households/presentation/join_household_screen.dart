@@ -6,7 +6,6 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../../auth/application/auth_providers.dart';
 import '../application/households_providers.dart';
 import '../data/invite_repository.dart';
-import 'qr_scan_screen.dart';
 
 /// Unified entry point for joining a household via invite code. Handles
 /// three arrival paths equally:
