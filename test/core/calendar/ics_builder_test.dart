@@ -49,6 +49,9 @@ void main() {
       expect(ics, startsWith('BEGIN:VCALENDAR\r\n'));
       expect(ics.trim(), endsWith('END:VCALENDAR'));
       expect(ics, contains('VERSION:2.0'));
+      // Google Calendar's importer expects METHOD:PUBLISH on shared
+      // one-off events; regression-guard it.
+      expect(ics, contains('METHOD:PUBLISH'));
       expect(ics, contains('UID:appt-1@pet-passport'));
       expect(ics, contains('DTSTART:20260801T093000'));
       expect(ics, contains('DTEND:20260801T101500'));
@@ -82,13 +85,19 @@ void main() {
           freq: RecurrenceFreq.weekly,
           weekdays: 5,
           interval: 2,
-          until: DateTime.utc(2027, 1, 1, 0, 0, 0),
+          // RFC 5545 §3.3.10: DTSTART is floating local, so UNTIL must
+          // also be floating local. Using a plain (non-UTC) DateTime
+          // here mirrors what the app stores.
+          until: DateTime(2027, 1, 1),
         ),
       );
       expect(
         ics,
-        contains('RRULE:FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=2;UNTIL=20270101T000000Z'),
+        contains(
+            'RRULE:FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=2;UNTIL=20270101T000000'),
       );
+      // Regression guard: no stray Z suffix on UNTIL.
+      expect(ics.contains('UNTIL=20270101T000000Z'), isFalse);
     });
 
     test('cancelled exceptions become EXDATE; overrides become extra VEVENTs',

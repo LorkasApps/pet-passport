@@ -28,7 +28,11 @@ class IcsBuilder {
       ..writeln('BEGIN:VCALENDAR')
       ..writeln('VERSION:2.0')
       ..writeln('PRODID:-//LorkasApps//PetPassport//EN')
-      ..writeln('CALSCALE:GREGORIAN');
+      ..writeln('CALSCALE:GREGORIAN')
+      // METHOD:PUBLISH is what Google Calendar's importer expects on a
+      // one-off event share — omitting it made GCal silently reject the
+      // file while Gmail happily forwarded it as an attachment.
+      ..writeln('METHOD:PUBLISH');
     _writeMainEvent(buf, appt, locationOverride: locationOverride);
     for (final ex in appt.exceptions.where((e) => !e.isCancelled)) {
       _writeExceptionOverride(buf, appt, ex, locationOverride: locationOverride);
@@ -136,7 +140,11 @@ class IcsBuilder {
     }
     final until = a.recurrenceUntil;
     if (until != null) {
-      parts.add('UNTIL=${_fmtUtc(until.toUtc())}');
+      // RFC 5545 §3.3.10: when DTSTART is a date with local time, UNTIL
+      // MUST also be a date with local time. Emitting `UNTIL=…Z` while
+      // DTSTART is floating local is exactly the invalid combination
+      // Google Calendar rejects.
+      parts.add('UNTIL=${_fmtLocal(until)}');
     }
     return parts.join(';');
   }
