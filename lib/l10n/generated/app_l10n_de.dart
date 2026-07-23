@@ -739,6 +739,9 @@ class AppL10nDe extends AppL10n {
   String get alltagAddEventFabTooltip => 'Eintrag hinzufügen';
 
   @override
+  String get alltagSearchHint => 'Titel durchsuchen';
+
+  @override
   String get eventEditNewTitle => 'Neuer Eintrag';
 
   @override

@@ -254,6 +254,9 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
     }
   }
 
+  // Retained for the currently-disabled tag section — flip _TagSection back
+  // on and this becomes reachable again.
+  // ignore: unused_element
   Future<void> _newTagDialog(AppL10n l) async {
     final ctrl = TextEditingController();
     final label = await showDialog<String>(
@@ -359,18 +362,25 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
               maxLines: 3,
             ),
             const SizedBox(height: 24),
-            _TagSection(
-              selectedUuids: _selectedTagUuids,
-              onToggle: (uuid) => setState(() {
-                if (_selectedTagUuids.contains(uuid)) {
-                  _selectedTagUuids.remove(uuid);
-                } else {
-                  _selectedTagUuids.add(uuid);
-                }
-              }),
-              onNewTag: () => _newTagDialog(l),
-            ),
-            const SizedBox(height: 24),
+            // Tags are currently disabled — there's no filter surface for
+            // them yet (Alltag filters by type + range only, plus text
+            // search on title). Domain / DB / repo methods stay so we can
+            // re-enable this section with a one-line uncomment when the
+            // filter surface catches up. `_prefill` still hydrates the
+            // selected uuids so existing tags survive an edit cycle.
+            //
+            // _TagSection(
+            //   selectedUuids: _selectedTagUuids,
+            //   onToggle: (uuid) => setState(() {
+            //     if (_selectedTagUuids.contains(uuid)) {
+            //       _selectedTagUuids.remove(uuid);
+            //     } else {
+            //       _selectedTagUuids.add(uuid);
+            //     }
+            //   }),
+            //   onNewTag: () => _newTagDialog(l),
+            // ),
+            // const SizedBox(height: 24),
             _PhotoSection(
               savedPhotos: event?.photos ?? const [],
               pending: _pendingPhotos,
@@ -537,6 +547,9 @@ String _activityLabel(AppL10n l, ActivityType t) => switch (t) {
       ActivityType.other => l.eventActivityTypeOther,
     };
 
+// Kept around for a future re-enable of tag editing on events — see the
+// commented-out usage in _buildScaffold.
+// ignore: unused_element
 class _TagSection extends ConsumerWidget {
   const _TagSection({
     required this.selectedUuids,

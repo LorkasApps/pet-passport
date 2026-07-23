@@ -21,6 +21,14 @@ class AlltagScreen extends ConsumerStatefulWidget {
 class _AlltagScreenState extends ConsumerState<AlltagScreen> {
   EventType? _typeFilter;
   int _rangeDays = 30;
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +56,32 @@ class _AlltagScreenState extends ConsumerState<AlltagScreen> {
         return Scaffold(
           body: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (v) => setState(() => _query = v),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: l.alltagSearchHint,
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.clear),
+                            tooltip: l.actionClear,
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() => _query = '');
+                            },
+                          ),
+                    isDense: true,
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                  ),
+                ),
+              ),
               _FilterRow(
                 selected: _typeFilter,
                 onChanged: (v) => setState(() => _typeFilter = v),
@@ -60,7 +94,17 @@ class _AlltagScreenState extends ConsumerState<AlltagScreen> {
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Center(child: Text('$e')),
                   data: (events) {
-                    if (events.isEmpty) {
+                    // Client-side title search — the query volume is small
+                    // (already type + range filtered) and the DAO doesn't
+                    // index title, so pushing this into SQL isn't worth it.
+                    final q = _query.trim().toLowerCase();
+                    final filtered = q.isEmpty
+                        ? events
+                        : events
+                            .where((e) =>
+                                (e.title ?? '').toLowerCase().contains(q))
+                            .toList();
+                    if (filtered.isEmpty) {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.all(24),
@@ -76,11 +120,11 @@ class _AlltagScreenState extends ConsumerState<AlltagScreen> {
                       );
                     }
                     return ListView.separated(
-                      itemCount: events.length,
+                      itemCount: filtered.length,
                       separatorBuilder: (_, _) =>
                           const Divider(height: 1),
                       itemBuilder: (context, i) =>
-                          _EventTile(event: events[i], petUuid: pet.uuid),
+                          _EventTile(event: filtered[i], petUuid: pet.uuid),
                     );
                   },
                 ),
@@ -248,8 +292,8 @@ class _EventTile extends StatelessWidget {
         [
           _payloadSummary(event, locale),
           DateFormat.yMd(locale).add_Hm().format(event.occurredAt),
-          if (event.tags.isNotEmpty)
-            event.tags.map((t) => '#${t.label}').join(' '),
+          // Tags are collected in the domain but currently not shown —
+          // deactivated together with the tag section on event edit.
         ].where((s) => s.isNotEmpty).join(' · '),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

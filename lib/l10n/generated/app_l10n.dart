@@ -1357,6 +1357,12 @@ abstract class AppL10n {
   /// **'Add entry'**
   String get alltagAddEventFabTooltip;
 
+  /// No description provided for @alltagSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search titles'**
+  String get alltagSearchHint;
+
   /// No description provided for @eventEditNewTitle.
   ///
   /// In en, this message translates to:

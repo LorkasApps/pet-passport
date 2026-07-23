@@ -294,6 +294,7 @@
   },
   "alltagNoEventsForFilter": "No entries match the current filter.",
   "alltagAddEventFabTooltip": "Add entry",
+  "alltagSearchHint": "Search titles",
 
   "eventEditNewTitle": "New entry",
   "eventEditEditTitle": "Edit entry",
