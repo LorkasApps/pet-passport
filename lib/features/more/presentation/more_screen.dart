@@ -15,6 +15,29 @@ class MoreScreen extends ConsumerWidget {
     final petUuid = petAsync.valueOrNull?.uuid;
     return ListView(
       children: [
+        // Kritisch: Notfall + Gesundheitsdokumente
+        ListTile(
+          leading: const Icon(Icons.medical_information_outlined),
+          title: Text(l.emergencyTitle),
+          onTap: () => context.push('/emergency'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.badge_outlined),
+          title: Text(l.passportTitle),
+          onTap: () => context.push('/passport'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.vaccines_outlined),
+          title: Text(l.vaccinationsListTitle),
+          onTap: () => context.push('/vaccinations'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.medical_services_outlined),
+          title: Text(l.vetsListTitle),
+          onTap: () => context.push('/vets'),
+        ),
+        const Divider(),
+        // Alltag
         ListTile(
           leading: const Icon(Icons.event_outlined),
           title: Text(l.moreAppointments),
@@ -30,6 +53,13 @@ class MoreScreen extends ConsumerWidget {
           title: Text(l.moreDiet),
           onTap: () => context.push('/diet'),
         ),
+        const Divider(),
+        // Historie / Analyse
+        ListTile(
+          leading: const Icon(Icons.timeline_outlined),
+          title: Text(l.moreTimeline),
+          onTap: () => context.push('/timeline'),
+        ),
         ListTile(
           leading: const Icon(Icons.show_chart),
           title: Text(l.moreWeightChart),
@@ -38,37 +68,13 @@ class MoreScreen extends ConsumerWidget {
               ? null
               : () => context.push('/pets/$petUuid/charts/weight'),
         ),
-        ListTile(
-          leading: const Icon(Icons.vaccines_outlined),
-          title: Text(l.vaccinationsListTitle),
-          onTap: () => context.push('/vaccinations'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.badge_outlined),
-          title: Text(l.passportTitle),
-          onTap: () => context.push('/passport'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.medical_services_outlined),
-          title: Text(l.vetsListTitle),
-          onTap: () => context.push('/vets'),
-        ),
+        const Divider(),
+        // Dokumente / Admin
         ListTile(
           leading: const Icon(Icons.shield_outlined),
           title: Text(l.insurancesListTitle),
           onTap: () => context.push('/insurances'),
         ),
-        ListTile(
-          leading: const Icon(Icons.timeline_outlined),
-          title: Text(l.moreTimeline),
-          onTap: () => context.push('/timeline'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.medical_information_outlined),
-          title: Text(l.emergencyTitle),
-          onTap: () => context.push('/emergency'),
-        ),
-        const Divider(),
         ListTile(
           leading: const Icon(Icons.picture_as_pdf_outlined),
           title: Text(l.morePdf),
@@ -80,12 +86,12 @@ class MoreScreen extends ConsumerWidget {
           onTap: () => context.push('/export'),
         ),
         const Divider(),
+        // Verwaltung
         ListTile(
           leading: const Icon(Icons.pets_outlined),
           title: Text(l.moreManagePets),
           onTap: () => context.push('/pets'),
         ),
-        const Divider(),
         ListTile(
           leading: const Icon(Icons.settings_outlined),
           title: Text(l.settingsTitle),
