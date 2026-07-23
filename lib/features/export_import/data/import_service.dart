@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' show Value;
 import '../../../core/db/database.dart';
 import '../../../core/time/time_of_day_json.dart';
 import '../../appointments/domain/appointment_enums.dart';
+import '../../contacts/domain/contact_enums.dart';
 import '../../diet/domain/food_enums.dart';
 import '../../medications/domain/medication_enums.dart';
 import '../../pets/domain/pet_enums.dart';
@@ -29,6 +30,8 @@ class ImportSummary {
     required this.medicationsUpdated,
     required this.foodsInserted,
     required this.foodsUpdated,
+    required this.contactsInserted,
+    required this.contactsUpdated,
     required this.tagsInserted,
     required this.errors,
   });
@@ -49,6 +52,8 @@ class ImportSummary {
   final int medicationsUpdated;
   final int foodsInserted;
   final int foodsUpdated;
+  final int contactsInserted;
+  final int contactsUpdated;
   final int tagsInserted;
   final List<String> errors;
 
@@ -61,6 +66,7 @@ class ImportSummary {
       appointmentsInserted +
       medicationsInserted +
       foodsInserted +
+      contactsInserted +
       tagsInserted;
 
   int get totalUpdated =>
@@ -71,7 +77,8 @@ class ImportSummary {
       eventsUpdated +
       appointmentsUpdated +
       medicationsUpdated +
-      foodsUpdated;
+      foodsUpdated +
+      contactsUpdated;
 }
 
 class ImportException implements Exception {
@@ -145,6 +152,8 @@ class ImportService {
     int medicationsUpdated = 0;
     int foodsInserted = 0;
     int foodsUpdated = 0;
+    int contactsInserted = 0;
+    int contactsUpdated = 0;
     int tagsInserted = 0;
     final errors = <String>[];
 
@@ -203,6 +212,25 @@ class ImportService {
             }
           }
 
+          final contactIdByUuid = <String, int>{};
+          final rawContacts = rawPet['contacts'];
+          if (rawContacts is List) {
+            for (final rc in rawContacts) {
+              if (rc is! Map<String, dynamic>) continue;
+              try {
+                final contactId = await _upsertContact(
+                  petId,
+                  rc,
+                  () => contactsInserted++,
+                  () => contactsUpdated++,
+                );
+                contactIdByUuid[rc['uuid'] as String] = contactId;
+              } catch (e) {
+                errors.add('Contact ${rc['uuid']}: $e');
+              }
+            }
+          }
+
           final rawInsurances = rawPet['insurances'];
           if (rawInsurances is List) {
             for (final ri in rawInsurances) {
@@ -248,9 +276,14 @@ class ImportService {
             for (final ra in rawAppointments) {
               if (ra is! Map<String, dynamic>) continue;
               try {
-                await _upsertAppointment(petId, ra, vetIdByUuid,
-                    () => appointmentsInserted++,
-                    () => appointmentsUpdated++);
+                await _upsertAppointment(
+                  petId,
+                  ra,
+                  vetIdByUuid,
+                  contactIdByUuid,
+                  () => appointmentsInserted++,
+                  () => appointmentsUpdated++,
+                );
               } catch (e) {
                 errors.add('Appointment ${ra['uuid']}: $e');
               }
@@ -306,6 +339,8 @@ class ImportService {
       medicationsUpdated: medicationsUpdated,
       foodsInserted: foodsInserted,
       foodsUpdated: foodsUpdated,
+      contactsInserted: contactsInserted,
+      contactsUpdated: contactsUpdated,
       tagsInserted: tagsInserted,
       errors: errors,
     );
@@ -755,6 +790,65 @@ class ImportService {
         _ => throw ImportException('Unknown freq_type: $v'),
       };
 
+  ContactRole _parseContactRole(dynamic v) => switch (v) {
+        null => ContactRole.other,
+        'sitter' => ContactRole.sitter,
+        'trainer' => ContactRole.trainer,
+        'groomer' => ContactRole.groomer,
+        'other' => ContactRole.other,
+        _ => throw ImportException('Unknown contact role: $v'),
+      };
+
+  Future<int> _upsertContact(
+    int petId,
+    Map<String, dynamic> raw,
+    void Function() onInsert,
+    void Function() onUpdate,
+  ) async {
+    final uuid = raw['uuid'] as String?;
+    if (uuid == null || uuid.isEmpty) throw ImportException('Missing uuid');
+    final name = raw['name'] as String?;
+    if (name == null || name.isEmpty) throw ImportException('Missing name');
+    final role = _parseContactRole(raw['role']);
+    final existing = await (_db.select(_db.contacts)
+          ..where((c) => c.uuid.equals(uuid)))
+        .getSingleOrNull();
+    final now = DateTime.now();
+    if (existing == null) {
+      final id = await _db.into(_db.contacts).insert(ContactsCompanion.insert(
+            uuid: uuid,
+            petId: petId,
+            role: Value(role),
+            name: name,
+            organization: Value(raw['organization'] as String?),
+            address: Value(raw['address'] as String?),
+            phone: Value(raw['phone'] as String?),
+            email: Value(raw['email'] as String?),
+            notes: Value(raw['notes'] as String?),
+            isActive: Value((raw['is_active'] as bool?) ?? true),
+            createdAt: _parseDt(raw['created_at']) ?? now,
+            updatedAt: now,
+          ));
+      onInsert();
+      return id;
+    }
+    await (_db.update(_db.contacts)..where((c) => c.uuid.equals(uuid)))
+        .write(ContactsCompanion(
+      petId: Value(petId),
+      role: Value(role),
+      name: Value(name),
+      organization: Value(raw['organization'] as String?),
+      address: Value(raw['address'] as String?),
+      phone: Value(raw['phone'] as String?),
+      email: Value(raw['email'] as String?),
+      notes: Value(raw['notes'] as String?),
+      isActive: Value((raw['is_active'] as bool?) ?? true),
+      updatedAt: Value(now),
+    ));
+    onUpdate();
+    return existing.id;
+  }
+
   FoodType _parseFoodType(dynamic v) => switch (v) {
         'dry' => FoodType.dry,
         'wet' => FoodType.wet,
@@ -782,6 +876,7 @@ class ImportService {
     int petId,
     Map<String, dynamic> raw,
     Map<String, int> vetIdByUuid,
+    Map<String, int> contactIdByUuid,
     void Function() onInsert,
     void Function() onUpdate,
   ) async {
@@ -802,6 +897,15 @@ class ImportService {
           .getSingleOrNull();
       vetId = row?.id;
     }
+    final contactUuid = raw['contact_uuid'] as String?;
+    int? contactId =
+        contactUuid == null ? null : contactIdByUuid[contactUuid];
+    if (contactId == null && contactUuid != null) {
+      final row = await (_db.select(_db.contacts)
+            ..where((c) => c.uuid.equals(contactUuid)))
+          .getSingleOrNull();
+      contactId = row?.id;
+    }
     final recurrenceFreq = _parseRecurrenceFreq(raw['recurrence_freq']);
     final existing = await (_db.select(_db.appointments)
           ..where((a) => a.uuid.equals(uuid)))
@@ -814,6 +918,7 @@ class ImportService {
               uuid: uuid,
               petId: petId,
               vetId: Value(vetId),
+              contactId: Value(contactId),
               type: type,
               title: title,
               startsAt: startsAt,
@@ -838,6 +943,7 @@ class ImportService {
           .write(AppointmentsCompanion(
         petId: Value(petId),
         vetId: Value(vetId),
+        contactId: Value(contactId),
         type: Value(type),
         title: Value(title),
         startsAt: Value(startsAt),

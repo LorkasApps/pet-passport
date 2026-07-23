@@ -7,6 +7,8 @@ import 'package:pet_passport/core/db/database.dart';
 import 'package:pet_passport/core/media/media_service.dart';
 import 'package:pet_passport/features/appointments/data/appointments_repository.dart';
 import 'package:pet_passport/features/appointments/domain/appointment_enums.dart';
+import 'package:pet_passport/features/contacts/data/contacts_repository.dart';
+import 'package:pet_passport/features/contacts/domain/contact_enums.dart';
 import 'package:pet_passport/features/diet/data/foods_repository.dart';
 import 'package:pet_passport/features/diet/domain/food_enums.dart';
 import 'package:pet_passport/features/export_import/data/export_service.dart';
@@ -57,6 +59,8 @@ void main() {
       );
       final sourceFoods =
           FoodsRepository(sourceDb.foodsDao, sourceDb.petsDao);
+      final sourceContacts =
+          ContactsRepository(sourceDb.contactsDao, sourceDb.petsDao);
       final exportService = ExportService(
         sourcePets,
         sourceVets,
@@ -66,6 +70,7 @@ void main() {
         sourceAppointments,
         sourceMedications,
         sourceFoods,
+        sourceContacts,
       );
 
       final petUuid = await sourcePets.createPet(
@@ -95,6 +100,21 @@ void main() {
         vetUuid: vetUuid,
         location: 'Praxis',
         reminderOffsetsMinutes: const [60, 1440],
+      );
+      final contactUuid = await sourceContacts.createContact(
+        petUuid: petUuid,
+        name: 'Jan Sitter',
+        role: ContactRole.sitter,
+        phone: '+49 555 12345',
+      );
+      final trainAppointmentUuid =
+          await sourceAppointments.createAppointment(
+        petUuid: petUuid,
+        type: AppointmentType.training,
+        title: 'Hundeschule',
+        startsAt: DateTime(2026, 8, 3, 17),
+        contactUuid: contactUuid,
+        location: 'Trainingsplatz',
       );
       final medUuid = await sourceMedications.createMedication(
         petUuid: petUuid,
@@ -129,7 +149,8 @@ void main() {
       expect(summary.petsInserted, 1);
       expect(summary.vetsInserted, 1);
       expect(summary.vaccinationsInserted, 1);
-      expect(summary.appointmentsInserted, 1);
+      expect(summary.appointmentsInserted, 2);
+      expect(summary.contactsInserted, 1);
       expect(summary.medicationsInserted, 1);
       expect(summary.foodsInserted, 1);
 
@@ -158,11 +179,25 @@ void main() {
       final targetAppointments = AppointmentsRepository(targetDb.appointmentsDao, targetDb.petsDao, targetDb.vetsDao, targetDb.contactsDao,
       );
       final appts = await targetAppointments.watchForPetUuid(petUuid).first;
-      expect(appts, hasLength(1));
-      expect(appts.single.uuid, apptUuid);
-      expect(appts.single.title, 'Kontrolle');
-      expect(appts.single.vetUuid, vetUuid);
-      expect(appts.single.reminderOffsetsMinutes, [60, 1440]);
+      expect(appts, hasLength(2));
+      final vetAppt = appts.firstWhere((a) => a.uuid == apptUuid);
+      expect(vetAppt.title, 'Kontrolle');
+      expect(vetAppt.vetUuid, vetUuid);
+      expect(vetAppt.contactUuid, isNull);
+      expect(vetAppt.reminderOffsetsMinutes, [60, 1440]);
+      final trainAppt =
+          appts.firstWhere((a) => a.uuid == trainAppointmentUuid);
+      expect(trainAppt.vetUuid, isNull);
+      expect(trainAppt.contactUuid, contactUuid);
+      expect(trainAppt.location, 'Trainingsplatz');
+
+      final targetContacts =
+          ContactsRepository(targetDb.contactsDao, targetDb.petsDao);
+      final contacts = await targetContacts.watchForPetUuid(petUuid).first;
+      expect(contacts, hasLength(1));
+      expect(contacts.single.uuid, contactUuid);
+      expect(contacts.single.role, ContactRole.sitter);
+      expect(contacts.single.phone, '+49 555 12345');
 
       final targetMedications = MedicationsRepository(
         targetDb.medicationsDao,
@@ -236,6 +271,7 @@ void main() {
         MedicationsRepository(
             sourceDb.medicationsDao, sourceDb.petsDao, sourceDb.vetsDao),
         sourceFoods,
+        ContactsRepository(sourceDb.contactsDao, sourceDb.petsDao),
       );
       final jsonString = jsonEncode(await exportService.buildSnapshot());
 

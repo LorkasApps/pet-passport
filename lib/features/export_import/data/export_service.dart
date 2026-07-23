@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../appointments/data/appointments_repository.dart';
 import '../../appointments/domain/appointment.dart';
+import '../../contacts/data/contacts_repository.dart';
+import '../../contacts/domain/contact.dart';
 import '../../diet/data/foods_repository.dart';
 import '../../diet/domain/food.dart';
 import '../../diet/domain/food_photo.dart';
@@ -35,6 +37,7 @@ class ExportService {
     this._appointments,
     this._medications,
     this._foods,
+    this._contacts,
   );
 
   final PetsRepository _pets;
@@ -45,6 +48,7 @@ class ExportService {
   final AppointmentsRepository _appointments;
   final MedicationsRepository _medications;
   final FoodsRepository _foods;
+  final ContactsRepository _contacts;
 
   /// Bumped to 3 in 2026-07 when appointments/medications/foods joined the
   /// snapshot. Older readers see extra keys and ignore them; the import
@@ -61,6 +65,7 @@ class ExportService {
     final result = <Map<String, dynamic>>[];
     for (final pet in pets) {
       final vets = await _vets.watchForPetUuid(pet.uuid).first;
+      final contacts = await _contacts.watchForPetUuid(pet.uuid).first;
       final insurances = await _insurances.watchForPetUuid(pet.uuid).first;
       final vaccinations =
           await _vaccinations.watchForPetUuid(pet.uuid).first;
@@ -81,6 +86,7 @@ class ExportService {
       result.add(_petToJson(
         pet,
         vets,
+        contacts,
         insurances,
         vaccinations,
         events,
@@ -125,6 +131,7 @@ class ExportService {
   Map<String, dynamic> _petToJson(
     Pet pet,
     List<Vet> vets,
+    List<Contact> contacts,
     List<Insurance> insurances,
     List<Vaccination> vaccinations,
     List<Event> events,
@@ -174,6 +181,22 @@ class ExportService {
             'is_active': v.isActive,
             'created_at': _dt(v.createdAt),
             'updated_at': _dt(v.updatedAt),
+          },
+      ],
+      'contacts': [
+        for (final c in contacts)
+          {
+            'uuid': c.uuid,
+            'role': c.role.name,
+            'name': c.name,
+            'organization': c.organization,
+            'address': c.address,
+            'phone': c.phone,
+            'email': c.email,
+            'notes': c.notes,
+            'is_active': c.isActive,
+            'created_at': _dt(c.createdAt),
+            'updated_at': _dt(c.updatedAt),
           },
       ],
       'insurances': [
@@ -255,6 +278,7 @@ class ExportService {
             'uuid': a.uuid,
             'type': a.type.name,
             'vet_uuid': a.vetUuid,
+            'contact_uuid': a.contactUuid,
             'title': a.title,
             'starts_at': _dt(a.startsAt),
             'duration_minutes': a.durationMinutes,

@@ -12,6 +12,7 @@ What the JSON import currently reads (as of DB v11 / export schema v3):
   - pets (all fields incl. chip/tasso/passport/allergies/photo path)
   - weights (list under each pet)
   - vets (incl. is_active)
+  - contacts (sitter/trainer/groomer/other, is_active)
   - insurances (+ documents metadata)
   - vaccinations (+ documents metadata, vet_uuid cross-ref)
   - events (weight/feeding/symptom/activity/generic + payload + tags + photos)
@@ -99,6 +100,48 @@ def build_snapshot() -> dict:
         "updated_at": iso(now - timedelta(days=180)),
     }
     vets = [vet_active, vet_archived]
+
+    # --- contacts: sitter (active) + trainer (active) + old groomer (archived) ---
+    contact_sitter = {
+        "uuid": new_uuid(),
+        "role": "sitter",
+        "name": "Lisa Müller",
+        "organization": None,
+        "address": "Bergstraße 3, 22083 Hamburg",
+        "phone": "+49 176 1234567",
+        "email": "lisa.mueller@example.com",
+        "notes": "Nachbarin, kann kurzfristig einspringen.",
+        "is_active": True,
+        "created_at": iso(now - timedelta(days=180)),
+        "updated_at": iso(now - timedelta(days=30)),
+    }
+    contact_trainer = {
+        "uuid": new_uuid(),
+        "role": "trainer",
+        "name": "Marco Bauer",
+        "organization": "Hundeschule Elbe",
+        "address": "Elbchaussee 200, 22763 Hamburg",
+        "phone": "+49 40 9876543",
+        "email": "marco@hundeschule-elbe.example",
+        "notes": "Trainer für Rückruf + Leinenführigkeit.",
+        "is_active": True,
+        "created_at": iso(now - timedelta(days=250)),
+        "updated_at": iso(now - timedelta(days=60)),
+    }
+    contact_groomer = {
+        "uuid": new_uuid(),
+        "role": "groomer",
+        "name": "Sabine Klein",
+        "organization": "Hundesalon Klein (geschlossen)",
+        "address": None,
+        "phone": None,
+        "email": None,
+        "notes": "Salon nicht mehr aktiv. Nur Referenz für alte Termine.",
+        "is_active": False,
+        "created_at": iso(now - timedelta(days=800)),
+        "updated_at": iso(now - timedelta(days=300)),
+    }
+    contacts = [contact_sitter, contact_trainer, contact_groomer]
 
     # --- insurance (+ document metadata; file itself is NOT restored) ---
     insurance = {
@@ -305,10 +348,12 @@ def build_snapshot() -> dict:
         "uuid": new_uuid(),
         "type": "vet",
         "vet_uuid": vet_active["uuid"],
+        "contact_uuid": None,
         "title": "Jährliche Vorsorge",
         "starts_at": iso(now + timedelta(days=14, hours=9)),
         "duration_minutes": 45,
-        "location": "Tierklinik Nord, Raum 2",
+        # Vet-appointments derive their location from the linked vet.
+        "location": None,
         "notes": "Blutbild + Zähne-Check.",
         "recurrence_freq": "none",
         "recurrence_interval": 1,
@@ -321,12 +366,13 @@ def build_snapshot() -> dict:
     }
     appt_recurring = {
         "uuid": new_uuid(),
-        "type": "grooming",
+        "type": "training",
         "vet_uuid": None,
-        "title": "Fellpflege",
+        "contact_uuid": contact_trainer["uuid"],
+        "title": "Hundeschule Kurs",
         "starts_at": iso(now + timedelta(days=3, hours=10)),
         "duration_minutes": 90,
-        "location": "Hundesalon Elbe",
+        "location": "Elbchaussee 200, 22763 Hamburg",
         "notes": None,
         "recurrence_freq": "monthly",
         "recurrence_interval": 1,
@@ -476,6 +522,7 @@ def build_snapshot() -> dict:
         "updated_at": iso(now - timedelta(days=1)),
         "weights": weights,
         "vets": vets,
+        "contacts": contacts,
         "insurances": [insurance],
         "vaccinations": vaccinations,
         "events": events,
@@ -520,6 +567,9 @@ def main() -> None:
     print(f"  vets:          {len(pet['vets'])} "
           f"(active={sum(1 for v in pet['vets'] if v['is_active'])}, "
           f"archived={sum(1 for v in pet['vets'] if not v['is_active'])})")
+    print(f"  contacts:      {len(pet['contacts'])} "
+          f"(active={sum(1 for c in pet['contacts'] if c['is_active'])}, "
+          f"archived={sum(1 for c in pet['contacts'] if not c['is_active'])})")
     print(f"  insurances:    {len(pet['insurances'])}")
     print(f"  vaccinations:  {len(pet['vaccinations'])} "
           "(1 upcoming due, 1 overdue, 1 done)")

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pet_passport/core/media/media_service.dart';
 import 'package:pet_passport/features/appointments/data/appointments_repository.dart';
+import 'package:pet_passport/features/contacts/data/contacts_repository.dart';
 import 'package:pet_passport/features/diet/data/foods_repository.dart';
 import 'package:pet_passport/features/export_import/data/export_service.dart';
 import 'package:pet_passport/features/insurances/data/insurances_repository.dart';
@@ -51,6 +52,7 @@ void main() {
         db.vetsDao,
       );
       final foods = FoodsRepository(db.foodsDao, db.petsDao);
+      final contacts = ContactsRepository(db.contactsDao, db.petsDao);
       exportService = ExportService(
         pets,
         vets,
@@ -60,6 +62,7 @@ void main() {
         appointments,
         medications,
         foods,
+        contacts,
       );
     });
 
