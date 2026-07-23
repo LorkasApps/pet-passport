@@ -131,6 +131,22 @@ class MediaService {
     );
   }
 
+  /// Copies [source] to `<media>/pets/<petUuid>/docs/<docUuid><ext>` for
+  /// the general per-pet document bucket. Same rationale as passport docs
+  /// — nesting under the pet folder means orphaned files vanish with the
+  /// pet during the startup sweep.
+  Future<String> savePetDocument({
+    required String petUuid,
+    required String docUuid,
+    required File source,
+  }) async {
+    return _copyDocument(
+      source: source,
+      relativeDir: p.join('pets', petUuid, 'docs'),
+      docUuid: docUuid,
+    );
+  }
+
   /// Removes media directories whose owning entity no longer exists in the
   /// DB. Called once on cold start. Best-effort — filesystem errors are
   /// swallowed since the DB is source of truth.

@@ -10,6 +10,7 @@ import '../../features/protocol/domain/event_enums.dart';
 import 'daos/appointments_dao.dart';
 import 'daos/contacts_dao.dart';
 import 'daos/events_dao.dart';
+import 'daos/pet_documents_dao.dart';
 import 'daos/foods_dao.dart';
 import 'daos/insurances_dao.dart';
 import 'daos/medications_dao.dart';
@@ -33,6 +34,7 @@ import 'tables/insurances_table.dart';
 import 'tables/medication_intakes_table.dart';
 import 'tables/medication_reminders_table.dart';
 import 'tables/medications_table.dart';
+import 'tables/pet_documents_table.dart';
 import 'tables/pet_passport_documents_table.dart';
 import 'tables/pet_weights_table.dart';
 import 'tables/pets_table.dart';
@@ -66,6 +68,7 @@ part 'database.g.dart';
     FoodPhotos,
     PetPassportDocuments,
     Contacts,
+    PetDocuments,
   ],
   daos: [
     PetsDao,
@@ -78,6 +81,7 @@ part 'database.g.dart';
     MedicationsDao,
     FoodsDao,
     ContactsDao,
+    PetDocumentsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -86,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -152,6 +156,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 13 && to >= 13) {
             await m.createTable(contacts);
             await m.addColumn(appointments, appointments.contactId);
+          }
+          if (from < 14 && to >= 14) {
+            await m.createTable(petDocuments);
           }
         },
         beforeOpen: (details) async {
