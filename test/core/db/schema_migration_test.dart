@@ -34,4 +34,37 @@ void main() {
     final names = photoCols.map((r) => r.data['name']).toSet();
     expect(names, contains('title'));
   });
+
+  test('v16 sync columns present on every top-level table', () async {
+    // Guards the M2 schema promise: every entity that participates in
+    // cloud sync exposes the household_id / updated_by_user_id /
+    // deleted_at triplet. A future refactor that drops any of these
+    // columns from a table trips this test — pick the removal
+    // deliberately, don't slip it in.
+    final db =
+        AppDatabase.forTesting(NativeDatabase.memory(logStatements: false));
+    addTearDown(db.close);
+
+    const topLevelTables = [
+      'pets',
+      'vets',
+      'contacts',
+      'appointments',
+      'medications',
+      'medication_intakes',
+      'foods',
+      'vaccinations',
+      'insurances',
+      'events',
+      'event_tags',
+      'pet_weights',
+    ];
+    for (final table in topLevelTables) {
+      final cols =
+          await db.customSelect('PRAGMA table_info($table)').get();
+      final names = cols.map((r) => r.data['name']).toSet();
+      expect(names, containsAll(<String>['household_id', 'updated_by_user_id', 'deleted_at']),
+          reason: 'table `$table` is missing one of the M2 sync columns');
+    }
+  });
 }
