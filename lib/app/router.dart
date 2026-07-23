@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
+import '../features/auth/presentation/auth_callback_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/appointments/presentation/appointment_detail_screen.dart';
 import '../features/appointments/presentation/appointment_edit_screen.dart';
@@ -72,6 +73,25 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: onboardingListenable,
     redirect: (context, state) {
       final loc = state.matchedLocation;
+      final raw = state.uri.toString();
+
+      // Magic-link deep link comes in with the full custom scheme URI:
+      //   petpassport://auth/callback?code=...
+      // GoRouter can't match that against a pathed route, so it errors
+      // out ("no routes for location …"). Normalise to the pathed route
+      // and let AuthCallbackScreen wait for the SDK's parallel PKCE
+      // exchange to finish.
+      final isAuthCallback = raw.contains('auth/callback');
+      if (isAuthCallback && loc != '/auth/callback') {
+        return '/auth/callback';
+      }
+      if (loc == '/auth/callback') {
+        // Once we're on the pathed route the auth callback runs its
+        // course inside the screen — skip the onboarding gate below so
+        // an un-onboarded new install doesn't bounce out of the flow.
+        return null;
+      }
+
       final onboardingCompleted = onboardingListenable.value;
       if (!onboardingCompleted && loc != '/onboarding') {
         return '/onboarding';
@@ -91,6 +111,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/signin',
         parentNavigatorKey: _rootKey,
         builder: (_, _) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: '/auth/callback',
+        parentNavigatorKey: _rootKey,
+        builder: (_, _) => const AuthCallbackScreen(),
       ),
       GoRoute(
         path: '/pets/new',
