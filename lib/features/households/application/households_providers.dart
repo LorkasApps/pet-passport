@@ -4,6 +4,7 @@ import '../../auth/application/auth_providers.dart';
 import '../data/households_repository.dart';
 import '../data/invite_repository.dart';
 import '../domain/household.dart';
+import '../domain/household_member.dart';
 import '../domain/invite_code.dart';
 
 final householdsRepositoryProvider = Provider<HouseholdsRepository>((ref) {
@@ -77,4 +78,36 @@ class HouseholdInvitesNotifier
 final householdInvitesProvider = AsyncNotifierProvider.family<
     HouseholdInvitesNotifier, List<InviteCode>, String>(
   HouseholdInvitesNotifier.new,
+);
+
+/// Members of one household, keyed by household id. Refetched after
+/// remove/leave so the UI updates without a full page reload.
+class HouseholdMembersNotifier
+    extends FamilyAsyncNotifier<List<HouseholdMember>, String> {
+  @override
+  Future<List<HouseholdMember>> build(String householdId) {
+    return ref
+        .read(householdsRepositoryProvider)
+        .listMembersOf(householdId);
+  }
+
+  Future<void> removeMember(String userId) async {
+    await ref.read(householdsRepositoryProvider).removeMember(
+          householdId: arg,
+          userId: userId,
+        );
+    ref.invalidateSelf();
+    // Household summary caches member count — invalidate it too.
+    ref.invalidate(myHouseholdsProvider);
+  }
+
+  Future<void> leave() async {
+    await ref.read(householdsRepositoryProvider).leave(arg);
+    ref.invalidate(myHouseholdsProvider);
+  }
+}
+
+final householdMembersProvider = AsyncNotifierProvider.family<
+    HouseholdMembersNotifier, List<HouseholdMember>, String>(
+  HouseholdMembersNotifier.new,
 );

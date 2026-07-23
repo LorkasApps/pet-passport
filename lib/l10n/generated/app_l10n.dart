@@ -1423,6 +1423,72 @@ abstract class AppL10n {
   /// **'Invite person'**
   String get householdInvitePerson;
 
+  /// No description provided for @householdMembersHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get householdMembersHeader;
+
+  /// No description provided for @householdMembersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No members.'**
+  String get householdMembersEmpty;
+
+  /// No description provided for @householdMemberSelfSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (you)'**
+  String householdMemberSelfSuffix(String name);
+
+  /// No description provided for @householdMemberRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get householdMemberRemoveAction;
+
+  /// No description provided for @householdMemberRemoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get householdMemberRemoveConfirmTitle;
+
+  /// No description provided for @householdMemberRemoveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from the household and lose access to all its data immediately.'**
+  String householdMemberRemoveConfirmBody(String name);
+
+  /// No description provided for @householdLeaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave household'**
+  String get householdLeaveAction;
+
+  /// No description provided for @householdLeaveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this household?'**
+  String get householdLeaveConfirmTitle;
+
+  /// No description provided for @householdLeaveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will lose access to all its data. Other members keep theirs.'**
+  String get householdLeaveConfirmBody;
+
+  /// No description provided for @householdLeaveSoloOwnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot leave'**
+  String get householdLeaveSoloOwnerTitle;
+
+  /// No description provided for @householdLeaveSoloOwnerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are the only owner. Invite someone and transfer the owner role, or delete the household entirely.'**
+  String get householdLeaveSoloOwnerBody;
+
   /// No description provided for @inviteScreenTitle.
   ///
   /// In en, this message translates to:

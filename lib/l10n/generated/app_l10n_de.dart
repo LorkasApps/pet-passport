@@ -758,6 +758,45 @@ class AppL10nDe extends AppL10n {
   String get householdInvitePerson => 'Person einladen';
 
   @override
+  String get householdMembersHeader => 'Mitglieder';
+
+  @override
+  String get householdMembersEmpty => 'Keine Mitglieder.';
+
+  @override
+  String householdMemberSelfSuffix(String name) {
+    return '$name (du)';
+  }
+
+  @override
+  String get householdMemberRemoveAction => 'Entfernen';
+
+  @override
+  String get householdMemberRemoveConfirmTitle => 'Mitglied entfernen?';
+
+  @override
+  String householdMemberRemoveConfirmBody(String name) {
+    return '$name wird aus dem Haushalt entfernt und verliert sofort Zugriff auf alle Daten.';
+  }
+
+  @override
+  String get householdLeaveAction => 'Haushalt verlassen';
+
+  @override
+  String get householdLeaveConfirmTitle => 'Haushalt verlassen?';
+
+  @override
+  String get householdLeaveConfirmBody =>
+      'Du verlierst danach den Zugriff auf alle Daten dieses Haushalts. Andere Mitglieder behalten ihn.';
+
+  @override
+  String get householdLeaveSoloOwnerTitle => 'Kann nicht verlassen';
+
+  @override
+  String get householdLeaveSoloOwnerBody =>
+      'Du bist die einzige Person mit Owner-Rolle. Lade jemanden ein und übertrage die Owner-Rolle, oder lösche den Haushalt komplett.';
+
+  @override
   String get inviteScreenTitle => 'Einladen';
 
   @override

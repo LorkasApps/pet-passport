@@ -299,6 +299,23 @@
   "householdDeleteConfirmTitle": "Delete this household?",
   "householdDeleteConfirmBody": "All data in this household (pets, appointments, photos, documents etc.) will be permanently deleted for every member.",
   "householdInvitePerson": "Invite person",
+  "householdMembersHeader": "Members",
+  "householdMembersEmpty": "No members.",
+  "householdMemberSelfSuffix": "{name} (you)",
+  "@householdMemberSelfSuffix": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "householdMemberRemoveAction": "Remove",
+  "householdMemberRemoveConfirmTitle": "Remove member?",
+  "householdMemberRemoveConfirmBody": "{name} will be removed from the household and lose access to all its data immediately.",
+  "@householdMemberRemoveConfirmBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "householdLeaveAction": "Leave household",
+  "householdLeaveConfirmTitle": "Leave this household?",
+  "householdLeaveConfirmBody": "You will lose access to all its data. Other members keep theirs.",
+  "householdLeaveSoloOwnerTitle": "Cannot leave",
+  "householdLeaveSoloOwnerBody": "You are the only owner. Invite someone and transfer the owner role, or delete the household entirely.",
 
   "inviteScreenTitle": "Invite",
   "inviteHeadline": "Invite someone to this household",

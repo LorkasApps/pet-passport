@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/household.dart';
+import '../domain/household_member.dart';
 
 /// CRUD for households the current user is a member of. Server-side RLS
 /// keeps every method automatically scoped: the caller only ever sees /
@@ -83,5 +84,59 @@ class HouseholdsRepository {
     final mine = await listMine();
     if (mine.isNotEmpty) return;
     await create(defaultName);
+  }
+
+  /// Members of one household including each member's display name.
+  /// PostgREST embed hits user_profiles under the FK — RLS on both
+  /// tables restricts visibility to households I'm actually in.
+  Future<List<HouseholdMember>> listMembersOf(String householdId) async {
+    final rows = await _client
+        .from('household_members')
+        .select('user_id, role, joined_at, user_profiles(display_name)')
+        .eq('household_id', householdId)
+        .order('joined_at', ascending: true);
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map(_memberFromRow)
+        .toList(growable: false);
+  }
+
+  HouseholdMember _memberFromRow(Map<String, dynamic> row) {
+    final profile = row['user_profiles'] as Map<String, dynamic>?;
+    return HouseholdMember(
+      userId: row['user_id'] as String,
+      // If the profile row is missing (edge case: joined before setting a
+      // display name) we fall back to the uuid's short prefix so the UI
+      // has *something* to render.
+      displayName: (profile?['display_name'] as String?) ??
+          (row['user_id'] as String).substring(0, 6),
+      role: householdRoleFromRaw(row['role'] as String?),
+      joinedAt: DateTime.parse(row['joined_at'] as String),
+    );
+  }
+
+  /// Owner removes another member. RLS enforces the owner-only
+  /// restriction server-side; this method just issues the DELETE.
+  Future<void> removeMember({
+    required String householdId,
+    required String userId,
+  }) async {
+    await _client
+        .from('household_members')
+        .delete()
+        .eq('household_id', householdId)
+        .eq('user_id', userId);
+  }
+
+  /// Current user leaves a household. The RLS DELETE policy on
+  /// household_members allows self-removal.
+  Future<void> leave(String householdId) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw StateError('leave called while signed out');
+    await _client
+        .from('household_members')
+        .delete()
+        .eq('household_id', householdId)
+        .eq('user_id', userId);
   }
 }
