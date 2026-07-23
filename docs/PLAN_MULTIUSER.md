@@ -363,12 +363,13 @@ Jeder Milestone ist eigenständig shipbar. Zwischen Milestones bleibt die App vo
 **Deliverable:** Login, Household anlegen/beitreten, Members-Liste. Daten bleiben noch rein lokal.
 
 **Acceptance Criteria:**
-- [ ] Ich kann mich mit Magic Link einloggen und ausloggen
-- [ ] Ich kann in Einstellungen **alle meine Households** sehen (Name, Member-Liste, meine Rolle pro Household, mein Anzeigename)
-- [ ] Ich kann als Owner in jedem meiner Households einen Invite-Token generieren (QR + Text-Code + teilbarer Link) und wieder invalidieren
-- [ ] Ich kann einen Code / Deep-Link / QR einlösen und werde Member — auch wenn ich schon in anderen Households bin (additive Membership)
-- [ ] Rollen (Owner/Member) werden pro Household korrekt angezeigt; Owner kann Member entfernen
-- [ ] Ohne Login funktioniert die App weiter wie bisher (Opt-in)
+- [x] Ich kann mich mit Magic Link einloggen und ausloggen
+- [x] Ich kann in Einstellungen **alle meine Households** sehen (Name, Member-Liste, meine Rolle pro Household, mein Anzeigename)
+- [x] Ich kann als Owner in jedem meiner Households einen Invite-Token generieren (QR + Text-Code + teilbarer Link) und wieder invalidieren
+- [x] Ich kann einen Code / Deep-Link / QR einlösen und werde Member — auch wenn ich schon in anderen Households bin (additive Membership)
+- [x] Rollen (Owner/Member) werden pro Household korrekt angezeigt; Owner kann Member entfernen
+- [x] Ohne Login funktioniert die App weiter wie bisher (Opt-in)
+- [x] DSGVO-Datenschutzhinweis in-app + Consent-Gate vor Magic-Link (M1-10)
 
 ### M2 — Schema-Erweiterung + Migration lokaler Daten
 
