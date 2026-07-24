@@ -37,6 +37,11 @@ Future<String?> resolveMediaPath(
 
 /// Wraps [resolveMediaPath] + [OpenFilex] with a friendly snack-bar
 /// fallback. Every doc/photo tap in the app funnels through this.
+///
+/// On resolve failure the snackbar surfaces the underlying error from
+/// [MediaFetcher.lastError] so the user (and support) can see whether
+/// it's a 404, an RLS deny, a session issue, or the network — a
+/// generic "unavailable" was actively unhelpful during debugging.
 Future<void> openMedia(
   BuildContext context,
   WidgetRef ref, {
@@ -51,7 +56,16 @@ Future<void> openMedia(
     storageKey: storageKey,
   );
   if (absolute == null) {
-    messenger.showSnackBar(SnackBar(content: Text(l.mediaUnavailable)));
+    final reason = ref.read(mediaFetcherProvider)?.lastError;
+    final text = reason == null
+        ? l.mediaUnavailable
+        : '${l.mediaUnavailable}: $reason';
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(text),
+        duration: const Duration(seconds: 8),
+      ),
+    );
     return;
   }
   final result = await OpenFilex.open(absolute);

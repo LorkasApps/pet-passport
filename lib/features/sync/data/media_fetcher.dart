@@ -30,23 +30,39 @@ class MediaFetcher {
 
   static const bucket = 'media';
 
+  /// Records the reason for the most recent failed [resolve] call so
+  /// UI code can surface the underlying storage error instead of a
+  /// generic "unavailable". Reset to null on the next successful
+  /// resolve.
+  String? lastError;
+
   /// Returns an absolute local path where the file lives now. Blocks
   /// on a download if we don't have it yet. Returns null on any
   /// terminal failure (missing storage key, RLS deny, 404) so
-  /// callers can fall back to a placeholder.
+  /// callers can fall back to a placeholder — the specific reason
+  /// lives in [lastError] afterwards.
   Future<String?> resolve({
     required String? storageKey,
     String? localHintAbsolute,
   }) async {
     if (localHintAbsolute != null) {
       final f = File(localHintAbsolute);
-      if (await f.exists()) return localHintAbsolute;
+      if (await f.exists()) {
+        lastError = null;
+        return localHintAbsolute;
+      }
     }
-    if (storageKey == null) return null;
+    if (storageKey == null) {
+      lastError = 'no storage key';
+      return null;
+    }
 
     final cached = await _cachedPath(storageKey);
     final f = File(cached);
-    if (await f.exists()) return cached;
+    if (await f.exists()) {
+      lastError = null;
+      return cached;
+    }
 
     final result = await _storage.downloadObject(
       bucket: bucket,
@@ -56,9 +72,13 @@ class MediaFetcher {
       case StorageDownloadOk(:final bytes):
         await f.parent.create(recursive: true);
         await f.writeAsBytes(bytes, flush: true);
+        lastError = null;
         return cached;
-      case StorageDownloadRetryable():
-      case StorageDownloadTerminal():
+      case StorageDownloadRetryable(:final reason):
+        lastError = 'retryable: $reason';
+        return null;
+      case StorageDownloadTerminal(:final reason):
+        lastError = reason;
         return null;
     }
   }
