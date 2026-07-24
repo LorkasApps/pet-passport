@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pet_passport/features/pets/data/pets_repository.dart';
 import 'package:pet_passport/features/pets/domain/pet_enums.dart';
-import 'package:pet_passport/features/sync/data/cloud_api.dart';
 import 'package:pet_passport/features/sync/data/push_worker.dart';
 import 'package:pet_passport/features/sync/data/sync_outbox.dart';
 
