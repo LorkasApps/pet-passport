@@ -37,6 +37,7 @@
   "onboardingWelcomeBody": "Track your pets' health, appointments, and daily life — all in one place, stored only on your device.",
   "onboardingAddFirstPetTitle": "Add your first pet",
   "onboardingAddFirstPetBody": "Let's set up a profile for your pet. You can add more later.",
+  "onboardingHaveInvite": "I have an invite link",
 
   "petsListTitle": "My pets",
   "petsListEmpty": "No pets yet",

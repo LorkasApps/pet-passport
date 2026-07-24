@@ -277,6 +277,12 @@ abstract class AppL10n {
   /// **'Let\'s set up a profile for your pet. You can add more later.'**
   String get onboardingAddFirstPetBody;
 
+  /// No description provided for @onboardingHaveInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'I have an invite link'**
+  String get onboardingHaveInvite;
+
   /// No description provided for @petsListTitle.
   ///
   /// In en, this message translates to:

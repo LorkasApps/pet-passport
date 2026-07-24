@@ -102,6 +102,9 @@ class AppL10nEn extends AppL10n {
       'Let\'s set up a profile for your pet. You can add more later.';
 
   @override
+  String get onboardingHaveInvite => 'I have an invite link';
+
+  @override
   String get petsListTitle => 'My pets';
 
   @override

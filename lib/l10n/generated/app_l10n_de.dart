@@ -104,6 +104,9 @@ class AppL10nDe extends AppL10n {
       'Lege ein Profil für dein Tier an. Weitere kannst du später hinzufügen.';
 
   @override
+  String get onboardingHaveInvite => 'Ich habe einen Einladungslink';
+
+  @override
   String get petsListTitle => 'Meine Tiere';
 
   @override
