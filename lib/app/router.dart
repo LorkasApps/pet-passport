@@ -44,6 +44,7 @@ import '../features/protocol/presentation/event_detail_screen.dart';
 import '../features/protocol/presentation/event_edit_screen.dart';
 import '../features/settings/application/settings_providers.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/sync/presentation/sync_status_badge.dart';
 import '../features/timeline/presentation/timeline_screen.dart';
 import '../features/vaccinations/presentation/vaccination_detail_screen.dart';
 import '../features/vaccinations/presentation/vaccination_edit_screen.dart';
@@ -551,6 +552,7 @@ class _MainShell extends ConsumerWidget {
     final petAsync = ref.watch(currentPetProvider);
     return Scaffold(
       appBar: AppBar(
+        actions: const [SyncStatusBadge()],
         title: petAsync.when(
           loading: () => const SizedBox.shrink(),
           error: (_, _) => const SizedBox.shrink(),

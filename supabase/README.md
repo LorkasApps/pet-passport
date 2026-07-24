@@ -40,3 +40,4 @@ vor `create policy`) — sicher zum Nach-Ausführen wenn ich was ergänze.
 | 3 | `0003_create_household_rpc.sql`  | `create_household(text)` SECURITY-DEFINER-RPC. Umgeht die 42501-Falle beim client-seitigen `insert into households` und macht Household-Anlage + Owner-Membership in einer Transaction. |
 | 4 | `0004_feature_tables.sql`        | pets + 9 Kind-Tables (vets, contacts, appointments, medications, foods, vaccinations, insurances, events, pet_documents). Uuid-PKs, uuid-FKs zu households + Eltern. RLS-Gate `household_id IN my_household_ids()` auf allen. |
 | 5 | `0005_household_members_profile_fk.sql` | Zweite FK `household_members.user_id → user_profiles.user_id`. Ohne die kann PostgREST das `user_profiles(display_name)`-Embed im Mitglieder-Query nicht auflösen (PGRST200). |
+| 6 | `0006_realtime_publication.sql`  | Fügt alle 10 Feature-Tables der `supabase_realtime`-Publication hinzu. Ohne feuert kein `postgres_changes`-Event, egal wie der Client subscribed. |

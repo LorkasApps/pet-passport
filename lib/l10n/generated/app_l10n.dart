@@ -1507,6 +1507,42 @@ abstract class AppL10n {
   /// **'Sync started'**
   String get syncNowDone;
 
+  /// No description provided for @syncBadgeSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything synced'**
+  String get syncBadgeSynced;
+
+  /// No description provided for @syncBadgeSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncBadgeSyncing;
+
+  /// No description provided for @syncBadgeOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline — will catch up on next connection'**
+  String get syncBadgeOffline;
+
+  /// No description provided for @syncBadgeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync error — details in Settings'**
+  String get syncBadgeError;
+
+  /// No description provided for @syncBadgeSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in to cloud'**
+  String get syncBadgeSignedOut;
+
+  /// No description provided for @syncLastErrorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last error'**
+  String get syncLastErrorLabel;
+
   /// No description provided for @householdMemberSelfSuffix.
   ///
   /// In en, this message translates to:

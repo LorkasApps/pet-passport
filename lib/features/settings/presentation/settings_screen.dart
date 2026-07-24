@@ -406,12 +406,21 @@ class _SyncTile extends ConsumerWidget {
     final l = AppL10n.of(context);
     final countAsync = ref.watch(pendingOpsCountProvider);
     final count = countAsync.valueOrNull ?? 0;
-    final subtitle = count == 0
+    final lastError = ref.watch(pendingOpsLastErrorProvider).valueOrNull;
+    final base = count == 0
         ? l.syncStatusIdle
         : l.syncStatusPending(count);
+    final subtitle = lastError == null
+        ? base
+        : '$base\n${l.syncLastErrorLabel}: $lastError';
     return ListTile(
+      isThreeLine: lastError != null,
       leading: Icon(
-        count == 0 ? Icons.cloud_done_outlined : Icons.cloud_upload_outlined,
+        lastError != null
+            ? Icons.cloud_off_outlined
+            : (count == 0
+                ? Icons.cloud_done_outlined
+                : Icons.cloud_upload_outlined),
       ),
       title: Text(l.syncStatusTitle),
       subtitle: Text(subtitle),

@@ -29,7 +29,6 @@ import '../../helpers/fake_cloud_api.dart';
 ///     guard for the fix in the previous commit).
 ///   * FIFO + backoff don't lose ops across many drain cycles.
 void main() {
-  const householdId = 'h-conv';
   const sequences = 10;
   const opsPerSequence = 40;
 

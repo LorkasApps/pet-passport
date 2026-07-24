@@ -806,6 +806,24 @@ class AppL10nEn extends AppL10n {
   String get syncNowDone => 'Sync started';
 
   @override
+  String get syncBadgeSynced => 'Everything synced';
+
+  @override
+  String get syncBadgeSyncing => 'Syncing…';
+
+  @override
+  String get syncBadgeOffline => 'Offline — will catch up on next connection';
+
+  @override
+  String get syncBadgeError => 'Sync error — details in Settings';
+
+  @override
+  String get syncBadgeSignedOut => 'Not signed in to cloud';
+
+  @override
+  String get syncLastErrorLabel => 'Last error';
+
+  @override
   String householdMemberSelfSuffix(String name) {
     return '$name (you)';
   }

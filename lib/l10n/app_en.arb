@@ -314,6 +314,12 @@
   "syncStatusPending": "{count, plural, =1{1 change waiting to upload} other{{count} changes waiting to upload}}",
   "syncNowAction": "Sync now",
   "syncNowDone": "Sync started",
+  "syncBadgeSynced": "Everything synced",
+  "syncBadgeSyncing": "Syncing…",
+  "syncBadgeOffline": "Offline — will catch up on next connection",
+  "syncBadgeError": "Sync error — details in Settings",
+  "syncBadgeSignedOut": "Not signed in to cloud",
+  "syncLastErrorLabel": "Last error",
   "householdMemberSelfSuffix": "{name} (you)",
   "@householdMemberSelfSuffix": {
     "placeholders": { "name": { "type": "String" } }

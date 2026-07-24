@@ -71,4 +71,16 @@ class PendingOpsDao extends DatabaseAccessor<AppDatabase>
     final q = selectOnly(pendingOps)..addColumns([pendingOps.id.count()]);
     return q.watchSingle().map((r) => r.read(pendingOps.id.count()) ?? 0);
   }
+
+  /// Most recent `last_error` across the outbox — the message the
+  /// sync-status UI surfaces so the user can see WHY nothing's
+  /// draining. Null when no op has an error attached.
+  Stream<String?> watchLastError() {
+    return (select(pendingOps)
+          ..where((o) => o.lastError.isNotNull())
+          ..orderBy([(o) => OrderingTerm.desc(o.lastAttemptAt)])
+          ..limit(1))
+        .watchSingleOrNull()
+        .map((r) => r?.lastError);
+  }
 }

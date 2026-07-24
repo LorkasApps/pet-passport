@@ -138,9 +138,30 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
         if (list == null || list.isEmpty) return;
         if (!ref.read(isSignedInProvider)) return;
         _kickPull(list);
+        // Realtime subscriptions live off the same trigger — same
+        // scope, and start() is idempotent (stops any existing subs
+        // first) so a household join/leave reconfigures cleanly.
+        unawaited(ref.read(realtimeEngineProvider)?.start(
+              householdIds: list.map((h) => h.id).toList(),
+            ) ??
+            Future.value());
       },
       fireImmediately: true,
     );
+
+    // Fallback-to-pull: when the realtime channel drops (network
+    // blip, Supabase restart) we do a poll pull so nothing goes
+    // missing between the drop and the reconnect. Realtime itself
+    // handles reconnection internally on network return.
+    final rtEngine = ref.read(realtimeEngineProvider);
+    if (rtEngine != null) {
+      rtEngine.onDisconnect.listen((_) {
+        final list =
+            ref.read(myHouseholdsProvider).valueOrNull ?? const [];
+        if (list.isEmpty) return;
+        _kickPull(list);
+      });
+    }
   }
 
   Future<void> _kickPull(List<Household> households) async {

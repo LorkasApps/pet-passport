@@ -104,18 +104,14 @@ class PullEngine {
       if (page.rows.isEmpty) break;
 
       for (final row in page.rows) {
-        final local = fromCloudShape(row);
-        final resolved = await _resolveIncomingFks(table, local);
-        if (resolved == null) {
-          missing++;
-          continue;
-        }
-        final outcome = await _apply(table, resolved);
+        final outcome = await applyRow(table, row);
         switch (outcome) {
-          case _ApplyOutcome.wrote:
+          case RealtimeApplyOutcome.wrote:
             applied++;
-          case _ApplyOutcome.lwwSkipped:
+          case RealtimeApplyOutcome.lwwSkipped:
             skipped++;
+          case RealtimeApplyOutcome.missingParent:
+            missing++;
         }
       }
 
@@ -136,6 +132,26 @@ class PullEngine {
       lwwSkipped: skipped,
       missingParent: missing,
     );
+  }
+
+  /// Apply one cloud-shape row (as returned by fetchChangesSince or a
+  /// postgres_changes payload) to the local DB. Reverse-shape → FK
+  /// resolve → LWW check → upsert. Extracted so the realtime engine
+  /// can reuse the exact same code path a delta pull uses.
+  Future<RealtimeApplyOutcome> applyRow(
+    String table,
+    Map<String, dynamic> cloudRow,
+  ) async {
+    final local = fromCloudShape(cloudRow);
+    final resolved = await _resolveIncomingFks(table, local);
+    if (resolved == null) return RealtimeApplyOutcome.missingParent;
+    final outcome = await _apply(table, resolved);
+    switch (outcome) {
+      case _ApplyOutcome.wrote:
+        return RealtimeApplyOutcome.wrote;
+      case _ApplyOutcome.lwwSkipped:
+        return RealtimeApplyOutcome.lwwSkipped;
+    }
   }
 
   /// Turn incoming uuid-FKs (`petId: "abc-uuid"`) into local int ids
@@ -593,6 +609,10 @@ class _IncomingFk {
 }
 
 enum _ApplyOutcome { wrote, lwwSkipped }
+
+/// Outcome variants exposed by [PullEngine.applyRow] — the realtime
+/// engine surfaces these for its own counters.
+enum RealtimeApplyOutcome { wrote, lwwSkipped, missingParent }
 
 class PullResult {
   const PullResult({
