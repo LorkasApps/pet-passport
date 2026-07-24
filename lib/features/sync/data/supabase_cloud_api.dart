@@ -82,7 +82,7 @@ class SupabaseCloudApi implements CloudApi {
   @override
   Future<CloudFetchResult> fetchChangesSince({
     required String table,
-    required DateTime? since,
+    required int? sinceSeq,
     required List<String> householdIds,
     int limit = 500,
   }) async {
@@ -94,12 +94,13 @@ class SupabaseCloudApi implements CloudApi {
     // PostgREST returns a wide-open resource; we page with
     // limit(limit+1) so we can tell "more" from "exact fit" without a
     // second call.
-    var q = _client.from(table).select().inFilter('household_id', householdIds);
-    if (since != null) {
-      q = q.gt('updated_at', since.toUtc().toIso8601String());
-    }
-    final res = await q
-        .order('updated_at', ascending: true)
+    final since = sinceSeq ?? 0;
+    final res = await _client
+        .from(table)
+        .select()
+        .inFilter('household_id', householdIds)
+        .gt('pulled_seq', since)
+        .order('pulled_seq', ascending: true)
         .limit(limit + 1);
     final rows =
         (res as List).cast<Map<String, dynamic>>().toList(growable: false);

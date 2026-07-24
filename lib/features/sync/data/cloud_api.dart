@@ -21,22 +21,24 @@ abstract class CloudApi {
     required Map<String, dynamic> payload,
   });
 
-  /// Delta-pull: fetch rows from [table] that changed after [since],
-  /// scoped to [householdIds]. Result rows are in cloud shape
-  /// (snake_case columns, ISO-8601 datetimes). The pull engine
-  /// translates them back to local shape and applies.
+  /// Delta-pull: fetch rows from [table] whose `pulled_seq` is
+  /// strictly greater than [sinceSeq], scoped to [householdIds].
+  /// Result rows are in cloud shape (snake_case columns, ISO-8601
+  /// datetimes). The pull engine translates them back to local shape
+  /// and applies.
   ///
-  /// [since] null = "everything I can see" — used for the very first
-  /// pull on a fresh install / after a cursor reset.
+  /// [sinceSeq] null (or 0) = "everything I can see" — used for the
+  /// very first pull on a fresh install / after a cursor reset.
   ///
-  /// Ordering: ascending `updated_at`. The pull engine advances the
-  /// per-table cursor to the max `updated_at` of the returned page.
-  /// A [limit] guard bounds a page (default 500) so a very large
-  /// household doesn't blow up the response — the pull engine loops
-  /// until fewer than [limit] rows come back.
+  /// The cursor axis is a server-generated bigserial (`pulled_seq`,
+  /// added by migration 0011 + trigger). It's monotonic across all
+  /// writes regardless of client clock, so a cursor advanced past N
+  /// really has seen every row created up to sequence N — no
+  /// clock-skew race like `updated_at`-cursoring had. Ordering:
+  /// ascending `pulled_seq`. A [limit] bounds a page.
   Future<CloudFetchResult> fetchChangesSince({
     required String table,
-    required DateTime? since,
+    required int? sinceSeq,
     required List<String> householdIds,
     int limit = 500,
   });

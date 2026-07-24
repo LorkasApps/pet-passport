@@ -10,18 +10,18 @@ class SyncCursorsDao extends DatabaseAccessor<AppDatabase>
     with _$SyncCursorsDaoMixin {
   SyncCursorsDao(super.db);
 
-  Future<DateTime?> get(String entity) async {
+  Future<int?> get(String entity) async {
     final row = await (select(syncCursors)
           ..where((c) => c.entity.equals(entity)))
         .getSingleOrNull();
-    return row?.lastPulledAt;
+    return row?.lastPulledSeq;
   }
 
-  Future<void> set(String entity, DateTime lastPulledAt) async {
+  Future<void> set(String entity, int lastPulledSeq) async {
     await into(syncCursors).insertOnConflictUpdate(
       SyncCursorsCompanion.insert(
         entity: entity,
-        lastPulledAt: lastPulledAt,
+        lastPulledSeq: lastPulledSeq,
       ),
     );
   }
@@ -33,7 +33,7 @@ class SyncCursorsDao extends DatabaseAccessor<AppDatabase>
 
   /// Blow away every per-table cursor. Used when the household
   /// membership set grows (joined a new household) — the newly-visible
-  /// pre-existing rows have updated_at values older than every current
+  /// pre-existing rows have pulled_seq values older than every current
   /// cursor, so a delta pull would never see them. A full resync
   /// scoped by the fresh membership catches them.
   Future<int> resetAll() {

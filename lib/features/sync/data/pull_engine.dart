@@ -10,31 +10,16 @@ import '../../protocol/domain/event_enums.dart';
 import 'cloud_api.dart';
 import 'supabase_cloud_api.dart' show fromCloudShape;
 
-/// Known cursor-race limitation of this v1 pull:
-///
-/// Device A pulls and advances its cursor to max(updated_at seen) = T.
-/// Device B is offline; pushes a row later with a client-stamped
-/// updated_at = T' where T' < T (clock skew, or B's write happened
-/// BEFORE A's last write chronologically but B was late to push).
-/// Row lands in the cloud with updated_at = T' < T. On A's next
-/// pull, `updated_at > T` never matches it — A never sees B's row.
-///
-/// Real fix: server-side monotonic sequence column
-/// (`pulled_seq bigserial`, or `clock_timestamp()` on write via
-/// trigger) that clients cursor on instead of client-writable
-/// `updated_at`. Deferred until M4 Realtime lands — realtime push
-/// makes this race window shrink to essentially zero and covers the
-/// main "did I miss anything" concern without a schema change.
-///
 /// Delta-pull engine. For every top-level table it:
 ///
-///   1. reads the persisted cursor (`sync_cursors`),
-///   2. fetches rows with `updated_at > cursor` from the cloud in
+///   1. reads the persisted cursor (`sync_cursors.last_pulled_seq`,
+///      a bigint tracking the highest cloud `pulled_seq` seen),
+///   2. fetches rows with `pulled_seq > cursor` from the cloud in
 ///      pages of 500,
 ///   3. for each row: reverse-shape to local Drift keys, resolve
 ///      incoming uuid FKs to local int ids, LWW-check against the
 ///      existing local row, insert-or-update via the DAO,
-///   4. advances the cursor to the max updated_at seen in the page.
+///   4. advances the cursor to the max pulled_seq seen in the page.
 ///
 /// Applies changes via the DAOs, NOT via the repos — repo writes go
 /// through the outbox and would re-enqueue pulled rows into an
@@ -104,7 +89,7 @@ class PullEngine {
     while (true) {
       final page = await _cloud.fetchChangesSince(
         table: table,
-        since: since,
+        sinceSeq: since,
         householdIds: householdIds,
       );
       if (page.rows.isEmpty) break;
@@ -121,15 +106,15 @@ class PullEngine {
         }
       }
 
-      // Advance the cursor to the max updated_at we've now processed.
-      // Comparing via DateTime.parse handles ISO-8601 exactly; we
-      // could compare strings lexicographically too, but going
-      // through DateTime keeps this readable.
-      final maxUa = page.rows
-          .map((r) => DateTime.parse(r['updated_at'] as String))
-          .reduce((a, b) => a.isAfter(b) ? a : b);
-      await _db.syncCursorsDao.set(table, maxUa);
-      since = maxUa;
+      // Advance the cursor to the max pulled_seq we've now seen.
+      // Server-side monotonic sequence — no clock skew to worry
+      // about — so once we've observed seq N we're safe to skip
+      // everything ≤ N next round.
+      final maxSeq = page.rows
+          .map((r) => (r['pulled_seq'] as num).toInt())
+          .reduce((a, b) => a > b ? a : b);
+      await _db.syncCursorsDao.set(table, maxSeq);
+      since = maxSeq;
 
       if (!page.maybeMore) break;
     }

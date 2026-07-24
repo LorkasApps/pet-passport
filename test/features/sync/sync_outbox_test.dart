@@ -72,14 +72,12 @@ void main() {
       final cursors = db.syncCursorsDao;
 
       expect(await cursors.get('pets'), isNull);
-      final at = DateTime(2026, 7, 23, 14);
-      await cursors.set('pets', at);
-      expect(await cursors.get('pets'), at);
+      await cursors.set('pets', 42);
+      expect(await cursors.get('pets'), 42);
 
       // Overwrite semantics — no separate history row.
-      final later = DateTime(2026, 7, 24, 9);
-      await cursors.set('pets', later);
-      expect(await cursors.get('pets'), later);
+      await cursors.set('pets', 99);
+      expect(await cursors.get('pets'), 99);
 
       await cursors.reset('pets');
       expect(await cursors.get('pets'), isNull);

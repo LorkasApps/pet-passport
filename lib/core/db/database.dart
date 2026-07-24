@@ -112,7 +112,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -319,6 +319,17 @@ class AppDatabase extends _$AppDatabase {
             await customStatement('ALTER TABLE pets DROP COLUMN markings');
             await customStatement(
                 'ALTER TABLE pets DROP COLUMN tasso_registered_at');
+          }
+          if (from < 23 && to >= 23) {
+            // Cursor axis: swap the sync_cursors schema from
+            // `last_pulled_at datetime` to `last_pulled_seq integer` so
+            // the pull cursor rides a server-monotonic sequence instead
+            // of client-writable updated_at. Wipes existing cursors
+            // (they're device-local bookkeeping) so the next pull is a
+            // full resync — that's exactly the right recovery for the
+            // cursor-race window that motivated this migration.
+            await customStatement('DROP TABLE IF EXISTS sync_cursors');
+            await m.createTable(syncCursors);
           }
         },
         beforeOpen: (details) async {

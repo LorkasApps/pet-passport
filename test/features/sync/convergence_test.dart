@@ -137,18 +137,13 @@ class _Device {
   }
 }
 
-/// One push then one pull for the given device.
-///
-/// We reset the pull cursor before pulling so this test exercises
-/// the convergence invariant, not the cursor-based delta optimization.
-/// A known race window (see PullEngine's header comment) prevents
-/// a plain cursor pull from converging in ALL orderings — a fix
-/// requires a server-side monotonic sequence column and is deferred
-/// to M4. The invariant this test protects — "both devices converge
-/// given full sync attempts" — is what matters for correctness.
+/// One push then one pull for the given device. The cursor axis is
+/// now server-monotonic `pulled_seq` (Fake mirrors real Supabase's
+/// nextval trigger), so plain delta pulls converge in every op
+/// ordering — no more resetAll dance the earlier `updated_at`-based
+/// cursor needed.
 Future<void> _fullSync(_Device d) async {
   await d.push.drainOnce();
-  await d.db.syncCursorsDao.resetAll();
   await d.pull.pullOnce(householdIds: ['h-conv']);
 }
 

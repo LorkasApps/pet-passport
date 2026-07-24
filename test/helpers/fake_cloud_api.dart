@@ -2,11 +2,13 @@ import 'package:pet_passport/features/sync/data/cloud_api.dart';
 import 'package:pet_passport/features/sync/data/supabase_cloud_api.dart'
     show toCloudShape;
 
-/// In-memory [CloudApi] double for push-worker tests.
+/// In-memory [CloudApi] double for sync tests.
 ///
 /// - Stores rows keyed by (table, uuid) so tests can assert on cloud state
 ///   directly.
-/// - Applies LWW on `updatedAt` so tests can drive conflict scenarios:
+/// - Assigns a monotonic `pulled_seq` on every upsert / seed to mimic the
+///   server-side bigserial that migration 0011 puts on every synced table.
+/// - Applies LWW on `updated_at` so tests can drive conflict scenarios:
 ///   a stale payload silently loses without a retryable error.
 /// - Programmable failure modes via [queueRetryable] and [queueTerminal]
 ///   for driving the worker down its non-happy paths.
@@ -14,6 +16,7 @@ class FakeCloudApi implements CloudApi {
   final Map<String, Map<String, Map<String, dynamic>>> rows = {};
   final List<FakeUpsertCall> calls = [];
   final List<CloudUpsertResult> _forced = [];
+  int _seq = 0;
 
   /// Force the next N calls to return the given result, in order. Runs
   /// out → we fall back to the normal LWW-store behaviour.
@@ -51,6 +54,9 @@ class FakeCloudApi implements CloudApi {
         return const CloudUpsertOk(); // silent loser, don't overwrite
       }
     }
+    // Server-side sequence: every write bumps pulled_seq. Real
+    // Supabase uses a trigger + nextval; here it's a counter.
+    body['pulled_seq'] = ++_seq;
     store[uuid] = body;
     return const CloudUpsertOk();
   }
@@ -60,37 +66,36 @@ class FakeCloudApi implements CloudApi {
 
   /// Direct-seed a row for pull tests — bypasses upsert so tests can
   /// stand up a remote-side state without going through the outbox
-  /// machinery first.
+  /// machinery first. Auto-assigns a fresh pulled_seq unless the row
+  /// already has one.
   void seed(String table, Map<String, dynamic> row) {
-    final id = row['id'] as String;
-    rows.putIfAbsent(table, () => {})[id] = Map.of(row);
+    final copy = Map<String, dynamic>.from(row);
+    copy['pulled_seq'] ??= ++_seq;
+    final id = copy['id'] as String;
+    rows.putIfAbsent(table, () => {})[id] = copy;
   }
 
   @override
   Future<CloudFetchResult> fetchChangesSince({
     required String table,
-    required DateTime? since,
+    required int? sinceSeq,
     required List<String> householdIds,
     int limit = 500,
   }) async {
     final store = rows[table] ?? const {};
-    // ISO string comparison works for `updated_at`: lexicographic
-    // order matches chronological order for canonical ISO-8601.
-    final cutoff = since?.toUtc().toIso8601String();
+    final cutoff = sinceSeq ?? 0;
     final matched = <Map<String, dynamic>>[];
     for (final row in store.values) {
       final hid = row['household_id'] as String?;
       if (hid == null || !householdIds.contains(hid)) continue;
-      if (cutoff != null) {
-        final ua = row['updated_at'] as String?;
-        if (ua == null || ua.compareTo(cutoff) <= 0) continue;
-      }
+      final seq = row['pulled_seq'] as int? ?? 0;
+      if (seq <= cutoff) continue;
       matched.add(Map.of(row));
     }
     matched.sort((a, b) {
-      final ua = a['updated_at'] as String? ?? '';
-      final ub = b['updated_at'] as String? ?? '';
-      return ua.compareTo(ub);
+      final sa = a['pulled_seq'] as int? ?? 0;
+      final sb = b['pulled_seq'] as int? ?? 0;
+      return sa.compareTo(sb);
     });
     final page = matched.take(limit).toList(growable: false);
     return CloudFetchResult(

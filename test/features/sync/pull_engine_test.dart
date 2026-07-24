@@ -36,14 +36,11 @@ void main() {
       expect(row!.name, 'Bello');
       expect(row.householdId, 'h-1');
 
-      // Cursor advanced to the pulled row's updated_at. Compare via
-      // millisSinceEpoch — Drift reads DateTime back as local-tz,
-      // but the underlying instant is what matters.
+      // Cursor advanced to the pulled row's pulled_seq (assigned by
+      // the FakeCloudApi's internal counter on seed).
       final cursor = await db.syncCursorsDao.get('pets');
-      expect(
-        cursor!.millisecondsSinceEpoch,
-        DateTime.utc(2026, 7, 24, 10).millisecondsSinceEpoch,
-      );
+      expect(cursor, isNotNull);
+      expect(cursor! > 0, isTrue);
     });
 
     test('household filter skips rows I do not belong to', () async {
