@@ -13,4 +13,9 @@ class EventPhotos extends Table {
   TextColumn get mimeType => text()();
   IntColumn get sizeBytes => integer().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get householdId => text().nullable()();
+  TextColumn get updatedByUserId => text().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  TextColumn get storageKey => text().nullable()();
 }

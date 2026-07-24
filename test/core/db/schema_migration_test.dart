@@ -59,6 +59,11 @@ void main() {
       'event_tags',
       'pet_weights',
       'pet_documents',
+      'event_photos',
+      'food_photos',
+      'insurance_documents',
+      'vaccination_documents',
+      'pet_passport_documents',
     ];
     for (final table in topLevelTables) {
       final cols =

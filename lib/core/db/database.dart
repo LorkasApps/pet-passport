@@ -102,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -251,6 +251,38 @@ class AppDatabase extends _$AppDatabase {
             // M5 media outbox — parallel to pending_ops. Local-only,
             // never syncs itself.
             await m.createTable(pendingMediaOps);
+          }
+          if (from < 21 && to >= 21) {
+            // Mechanical drift: add M5 sync columns to nested attachment
+            // tables (event_photos, food_photos, insurance_documents,
+            // vaccination_documents, pet_passport_documents). Mirrors the
+            // M2 pattern: household_id, updated_by_user_id, deleted_at
+            // for sync; updated_at and storage_key for media sync.
+            await m.addColumn(eventPhotos, eventPhotos.updatedAt);
+            await m.addColumn(eventPhotos, eventPhotos.householdId);
+            await m.addColumn(eventPhotos, eventPhotos.updatedByUserId);
+            await m.addColumn(eventPhotos, eventPhotos.deletedAt);
+            await m.addColumn(eventPhotos, eventPhotos.storageKey);
+            await m.addColumn(foodPhotos, foodPhotos.updatedAt);
+            await m.addColumn(foodPhotos, foodPhotos.householdId);
+            await m.addColumn(foodPhotos, foodPhotos.updatedByUserId);
+            await m.addColumn(foodPhotos, foodPhotos.deletedAt);
+            await m.addColumn(foodPhotos, foodPhotos.storageKey);
+            await m.addColumn(insuranceDocuments, insuranceDocuments.updatedAt);
+            await m.addColumn(insuranceDocuments, insuranceDocuments.householdId);
+            await m.addColumn(insuranceDocuments, insuranceDocuments.updatedByUserId);
+            await m.addColumn(insuranceDocuments, insuranceDocuments.deletedAt);
+            await m.addColumn(insuranceDocuments, insuranceDocuments.storageKey);
+            await m.addColumn(vaccinationDocuments, vaccinationDocuments.updatedAt);
+            await m.addColumn(vaccinationDocuments, vaccinationDocuments.householdId);
+            await m.addColumn(vaccinationDocuments, vaccinationDocuments.updatedByUserId);
+            await m.addColumn(vaccinationDocuments, vaccinationDocuments.deletedAt);
+            await m.addColumn(vaccinationDocuments, vaccinationDocuments.storageKey);
+            await m.addColumn(petPassportDocuments, petPassportDocuments.updatedAt);
+            await m.addColumn(petPassportDocuments, petPassportDocuments.householdId);
+            await m.addColumn(petPassportDocuments, petPassportDocuments.updatedByUserId);
+            await m.addColumn(petPassportDocuments, petPassportDocuments.deletedAt);
+            await m.addColumn(petPassportDocuments, petPassportDocuments.storageKey);
           }
         },
         beforeOpen: (details) async {
