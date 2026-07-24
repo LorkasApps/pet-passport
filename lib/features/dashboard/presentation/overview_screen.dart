@@ -94,13 +94,19 @@ class _OverviewContent extends ConsumerWidget {
           if (pet.color != null && pet.color!.isNotEmpty)
             _row(l.petFieldColor, pet.color!),
         ]),
-        if (pet.chipNumber != null || pet.tassoNumber != null) ...[
+        if (pet.chipNumber != null ||
+            pet.tassoNumber != null ||
+            (pet.vaccinationPassportNumber != null &&
+                pet.vaccinationPassportNumber!.isNotEmpty)) ...[
           const SizedBox(height: 12),
           _sectionCard(context, children: [
             if (pet.chipNumber != null)
               _row(l.petFieldChipNumber, pet.chipNumber!),
             if (pet.tassoNumber != null)
               _row(l.petFieldTassoNumber, pet.tassoNumber!),
+            if (pet.vaccinationPassportNumber != null &&
+                pet.vaccinationPassportNumber!.isNotEmpty)
+              _row(l.passportNumberLabel, pet.vaccinationPassportNumber!),
           ]),
         ],
         if (pet.notes != null && pet.notes!.isNotEmpty) ...[

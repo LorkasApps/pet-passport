@@ -127,15 +127,19 @@ class PetsRepository {
     String? breed,
     DateTime? dateOfBirth,
     String? color,
-    String? markings,
     String? chipNumber,
     String? tassoNumber,
-    DateTime? tassoRegisteredAt,
-    String? vaccinationPassportNumber,
     String? profilePhotoPath,
     String? allergies,
     String? notes,
   }) async {
+    // `vaccinationPassportNumber`, `markings`, `tassoRegisteredAt`
+    // are deliberately NOT in this signature. Each has (or will have)
+    // its own dedicated update path — the general pet-edit screen
+    // doesn't render them, so accepting them here as optional-null
+    // args caused every save from that screen to clobber the fields
+    // with null. copyWith without these keys leaves the columns
+    // untouched (Drift's `Value.absent()` default).
     final existing = await _dao.getByUuid(uuid);
     if (existing == null) {
       throw StateError('Pet with uuid=$uuid not found');
@@ -148,11 +152,8 @@ class PetsRepository {
       breed: Value(breed),
       dateOfBirth: Value(dateOfBirth),
       color: Value(color),
-      markings: Value(markings),
       chipNumber: Value(chipNumber),
       tassoNumber: Value(tassoNumber),
-      tassoRegisteredAt: Value(tassoRegisteredAt),
-      vaccinationPassportNumber: Value(vaccinationPassportNumber),
       profilePhotoPath: Value(profilePhotoPath),
       allergies: Value(allergies),
       notes: Value(notes),
