@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/db/database.dart';
 import 'storage_api.dart';
+import 'sync_outbox.dart';
 
 /// Media outbox drain loop. Mirrors [PushWorker]'s shape:
 /// FIFO reads, per-op retry with backoff, single-flight.
@@ -19,11 +20,21 @@ import 'storage_api.dart';
 /// tombstone is handled independently by whatever soft-deleted the
 /// owning row.
 class UploadWorker {
-  UploadWorker(this._db, this._storage, {DateTime Function()? now})
-      : _now = now ?? DateTime.now;
+  UploadWorker(
+    this._db,
+    this._storage, {
+    this.syncOutbox,
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final AppDatabase _db;
   final StorageApi _storage;
+
+  /// Row outbox. When present the worker enqueues an upsert on the
+  /// owning entity after writing back a fresh storage_key, so peers
+  /// see the key immediately instead of only on the user's next edit.
+  /// Null in tests that don't care about downstream row-sync.
+  final SyncOutbox? syncOutbox;
   final DateTime Function() _now;
 
   static const bucket = 'media';
@@ -106,42 +117,114 @@ class UploadWorker {
   }
 
   /// After a successful upload, put the storage_key into the owning
-  /// entity row and bump `updated_at`. The row outbox picks up the
-  /// change automatically. Raw customUpdate so we don't loop back
-  /// through the repo's enqueue path.
+  /// entity row and bump `updated_at`. Raw customUpdate so we don't
+  /// loop back through the repo's own media-enqueue path. Then, if a
+  /// [SyncOutbox] was injected, enqueue a row-outbox upsert so peers
+  /// see the fresh storage_key immediately — otherwise the key waits
+  /// for the user's next edit on the row before it propagates.
   Future<void> _writeBackKey(PendingMediaOpRow op) async {
-    final now = _now();
-    final (col, table) = switch (op.entityTable) {
-      'pets' => ('profile_photo_storage_key', 'pets'),
-      'pet_documents' => ('storage_key', 'pet_documents'),
-      _ => (null, null),
-    };
-    if (col == null || table == null) return;
+    final spec = _keyColFor(op.entityTable);
+    if (spec == null) return;
 
-    // The columns list on `updates:` triggers Drift's streams so
-    // the relevant repos re-emit. Without it, watchers would go
-    // stale until the next tick.
+    final now = _now();
     await _db.customUpdate(
-      'UPDATE $table SET $col = ?, updated_at = ? WHERE uuid = ?',
+      // updates: on the correct TableInfo so Drift's stream watchers
+      // re-emit; without it a UI bound to `watchByUuid` would keep
+      // showing the pre-key snapshot until the next tick.
+      'UPDATE ${spec.table} '
+      'SET ${spec.storageKeyColumn} = ?, updated_at = ? '
+      'WHERE uuid = ?',
       variables: [
         Variable<String>(op.storageKey),
         Variable<DateTime>(now),
         Variable<String>(op.entityUuid),
       ],
-      updates: op.entityTable == 'pets' ? {_db.pets} : {_db.petDocuments},
+      updates: {spec.driftTable(_db)},
     );
 
-    // Also enqueue a row-outbox upsert so the freshly-set
-    // storage_key propagates to other devices. We can't reach into
-    // SyncOutbox from here without an import cycle, so a raw insert
-    // into pending_ops mirrors what SyncOutbox.enqueueUpsert does —
-    // minus the FK resolver, which isn't relevant for a straight
-    // storage_key touch. Keeping the wire out simple.
-    //
-    // NOTE: to keep this commit small we skip the row-outbox enqueue
-    // for now. On the next real edit the user makes on the same row
-    // it enqueues (updated_at is bumped, so it wins LWW). Follow-up:
-    // wire this properly once SyncOutbox is stable.
+    final outbox = syncOutbox;
+    if (outbox == null) return;
+    final payload = await spec.fetchPayload(_db, op.entityUuid);
+    if (payload == null) return;
+    final hid = payload['householdId'] as String?;
+    if (hid == null) return;
+    await outbox.enqueueUpsert(
+      entityTable: op.entityTable,
+      entityUuid: op.entityUuid,
+      householdId: hid,
+      payload: payload,
+    );
+  }
+
+  _WriteBackSpec? _keyColFor(String entityTable) {
+    switch (entityTable) {
+      case 'pets':
+        return _WriteBackSpec(
+          table: 'pets',
+          storageKeyColumn: 'profile_photo_storage_key',
+          driftTable: (db) => db.pets,
+          fetchPayload: (db, uuid) async =>
+              (await db.petsDao.getByUuid(uuid))?.toJson(),
+        );
+      case 'pet_documents':
+        return _WriteBackSpec(
+          table: 'pet_documents',
+          storageKeyColumn: 'storage_key',
+          driftTable: (db) => db.petDocuments,
+          fetchPayload: (db, uuid) async =>
+              (await db.petDocumentsDao.getByUuidIncludingDeleted(uuid))
+                  ?.toJson(),
+        );
+      case 'pet_passport_documents':
+        return _WriteBackSpec(
+          table: 'pet_passport_documents',
+          storageKeyColumn: 'storage_key',
+          driftTable: (db) => db.petPassportDocuments,
+          fetchPayload: (db, uuid) async => (await db
+                  .petPassportDocumentsDao
+                  .getByUuidIncludingDeleted(uuid))
+              ?.toJson(),
+        );
+      case 'event_photos':
+        return _WriteBackSpec(
+          table: 'event_photos',
+          storageKeyColumn: 'storage_key',
+          driftTable: (db) => db.eventPhotos,
+          fetchPayload: (db, uuid) async =>
+              (await db.eventPhotosDao.getByUuidIncludingDeleted(uuid))
+                  ?.toJson(),
+        );
+      case 'food_photos':
+        return _WriteBackSpec(
+          table: 'food_photos',
+          storageKeyColumn: 'storage_key',
+          driftTable: (db) => db.foodPhotos,
+          fetchPayload: (db, uuid) async =>
+              (await db.foodPhotosDao.getByUuidIncludingDeleted(uuid))
+                  ?.toJson(),
+        );
+      case 'insurance_documents':
+        return _WriteBackSpec(
+          table: 'insurance_documents',
+          storageKeyColumn: 'storage_key',
+          driftTable: (db) => db.insuranceDocuments,
+          fetchPayload: (db, uuid) async => (await db
+                  .insuranceDocumentsDao
+                  .getByUuidIncludingDeleted(uuid))
+              ?.toJson(),
+        );
+      case 'vaccination_documents':
+        return _WriteBackSpec(
+          table: 'vaccination_documents',
+          storageKeyColumn: 'storage_key',
+          driftTable: (db) => db.vaccinationDocuments,
+          fetchPayload: (db, uuid) async => (await db
+                  .vaccinationDocumentsDao
+                  .getByUuidIncludingDeleted(uuid))
+              ?.toJson(),
+        );
+    }
+    return null;
   }
 
   Future<_Outcome> _translate(
@@ -206,3 +289,23 @@ class UploadDrainResult {
 }
 
 enum _Outcome { wrote, retried, terminal }
+
+/// Per-table config for `_writeBackKey`: the SQL column that carries
+/// the storage key, the Drift table used for stream invalidation,
+/// and a fetcher that returns the row's JSON payload for the
+/// row-outbox enqueue.
+class _WriteBackSpec {
+  const _WriteBackSpec({
+    required this.table,
+    required this.storageKeyColumn,
+    required this.driftTable,
+    required this.fetchPayload,
+  });
+
+  final String table;
+  final String storageKeyColumn;
+  final ResultSetImplementation<dynamic, dynamic> Function(AppDatabase db)
+      driftTable;
+  final Future<Map<String, dynamic>?> Function(AppDatabase db, String uuid)
+      fetchPayload;
+}

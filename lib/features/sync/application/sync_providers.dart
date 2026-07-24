@@ -57,7 +57,11 @@ final uploadWorkerProvider = Provider<UploadWorker?>((ref) {
   final storage = ref.watch(storageApiProvider);
   if (storage == null) return null;
   final db = ref.watch(databaseProvider);
-  return UploadWorker(db, storage);
+  return UploadWorker(
+    db,
+    storage,
+    syncOutbox: ref.watch(syncOutboxProvider),
+  );
 });
 
 /// Live count of pending media ops. Drives the sync tile + wakes the

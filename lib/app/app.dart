@@ -75,6 +75,12 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
       await _rescheduleAll();
       // Prune orphan media once per cold start.
       await _sweepMedia();
+      // Trim the downloaded-media cache to the 200 MB target so it
+      // doesn't grow forever. Best-effort; failure is silent.
+      final fetcher = ref.read(mediaFetcherProvider);
+      if (fetcher != null) {
+        unawaited(fetcher.sweep());
+      }
     });
 
     // React to reminder-lead changes: user picks 3 days instead of 7, all

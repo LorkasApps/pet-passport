@@ -83,4 +83,92 @@ class MediaFetcher {
     }
     return dir;
   }
+
+  /// Runs the LRU eviction sweep. Sums the cache size; if over
+  /// [maxBytes] deletes the least-recently-modified files (Android
+  /// tends to not track atime reliably, so we use mtime which the OS
+  /// bumps on read via download-and-write anyway) until the total is
+  /// back under cap.
+  ///
+  /// Best-effort — a filesystem hiccup deletes what it can and
+  /// swallows the rest. Called once on cold start; skipping it is
+  /// only a size problem, never a correctness one.
+  ///
+  /// Default 200 MB matches the plan's Free-Tier storage target.
+  Future<CacheSweepResult> sweep({
+    int maxBytes = 200 * 1024 * 1024,
+  }) async {
+    final root = await _cacheRoot();
+    final files = <File>[];
+    var total = 0;
+    try {
+      await for (final entity in root.list(recursive: true)) {
+        if (entity is! File) continue;
+        try {
+          final stat = await entity.stat();
+          total += stat.size;
+          files.add(entity);
+        } catch (_) {
+          // Racy: file might vanish mid-list. Skip.
+        }
+      }
+    } catch (_) {
+      // Cache dir gone or unreadable — nothing to sweep.
+      return const CacheSweepResult(
+          totalBytesBefore: 0, deletedFiles: 0, totalBytesAfter: 0);
+    }
+
+    if (total <= maxBytes) {
+      return CacheSweepResult(
+        totalBytesBefore: total,
+        deletedFiles: 0,
+        totalBytesAfter: total,
+      );
+    }
+
+    // Sort oldest-first (smallest mtime = coldest).
+    final withStat = <_FileWithStat>[];
+    for (final f in files) {
+      try {
+        withStat.add(_FileWithStat(f, await f.stat()));
+      } catch (_) {}
+    }
+    withStat.sort((a, b) => a.stat.modified.compareTo(b.stat.modified));
+
+    var deleted = 0;
+    var current = total;
+    for (final entry in withStat) {
+      if (current <= maxBytes) break;
+      try {
+        await entry.file.delete();
+        current -= entry.stat.size;
+        deleted++;
+      } catch (_) {
+        // Someone else grabbed / locked the file. Move on; the next
+        // sweep will retry.
+      }
+    }
+    return CacheSweepResult(
+      totalBytesBefore: total,
+      deletedFiles: deleted,
+      totalBytesAfter: current,
+    );
+  }
+}
+
+class CacheSweepResult {
+  const CacheSweepResult({
+    required this.totalBytesBefore,
+    required this.deletedFiles,
+    required this.totalBytesAfter,
+  });
+  final int totalBytesBefore;
+  final int deletedFiles;
+  final int totalBytesAfter;
+}
+
+class _FileWithStat {
+  const _FileWithStat(this.file, this.stat);
+  final File file;
+  final FileStat stat;
 }
