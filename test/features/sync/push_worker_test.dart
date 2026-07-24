@@ -15,7 +15,7 @@ void main() {
   group('PushWorker.drainOnce — happy path', () {
     test('drains one enqueued upsert and clears the outbox', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
@@ -43,7 +43,7 @@ void main() {
 
     test('drains ops in FIFO order', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
@@ -81,7 +81,7 @@ void main() {
 
     test('tombstone (soft-delete) propagates to the cloud', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
@@ -106,7 +106,7 @@ void main() {
   group('PushWorker.drainOnce — retry semantics', () {
     test('retryable failure keeps the op and bumps attempts', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi()..queueRetryable('net glitch');
       final worker = PushWorker(db.pendingOpsDao, cloud);
@@ -130,7 +130,7 @@ void main() {
     test('backoff skips a freshly-failed op on immediate re-drain',
         () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi()..queueRetryable('first fail');
       // Freeze clock so lastAttemptAt + backoff comparison is
@@ -157,7 +157,7 @@ void main() {
 
     test('after backoff elapses the op is re-attempted', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi()..queueRetryable('first fail');
 
@@ -185,7 +185,7 @@ void main() {
   group('PushWorker.drainOnce — terminal failures', () {
     test('terminal failure parks the op with error, no retry', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi()..queueTerminal('schema mismatch');
       final worker = PushWorker(db.pendingOpsDao, cloud);
@@ -210,7 +210,7 @@ void main() {
     test('overlapping drainOnce calls share the same in-flight future',
         () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);

@@ -9,7 +9,7 @@ void main() {
   group('SyncOutbox', () {
     test('enqueue writes one pending op with the given payload', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
 
       await outbox.enqueueUpsert(
         entityTable: 'pets',
@@ -31,7 +31,7 @@ void main() {
 
     test('markSuccess removes the op from the queue', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
 
       await outbox.enqueueUpsert(
         entityTable: 'pets',
@@ -46,7 +46,7 @@ void main() {
 
     test('markFailure keeps the op and bumps attempts', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
 
       await outbox.enqueueUpsert(
         entityTable: 'pets',

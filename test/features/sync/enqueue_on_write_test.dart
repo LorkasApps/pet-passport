@@ -20,7 +20,7 @@ void main() {
   group('SyncOutbox enqueue-on-write — parent (pets)', () {
     test('createPet with householdId enqueues one upsert', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final repo = PetsRepository(db.petsDao, outbox: outbox);
 
       final uuid = await repo.createPet(
@@ -45,7 +45,7 @@ void main() {
 
     test('createPet WITHOUT householdId does not enqueue', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final repo = PetsRepository(db.petsDao, outbox: outbox);
 
       await repo.createPet(
@@ -59,7 +59,7 @@ void main() {
 
     test('updatePet on cloud pet enqueues a fresh upsert', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final repo = PetsRepository(db.petsDao, outbox: outbox);
 
       final uuid = await repo.createPet(
@@ -87,7 +87,7 @@ void main() {
     test('softDelete on cloud pet enqueues an upsert with tombstone',
         () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final repo = PetsRepository(db.petsDao, outbox: outbox);
 
       final uuid = await repo.createPet(
@@ -108,7 +108,7 @@ void main() {
 
     test('updatePet on local-only pet does not enqueue', () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final repo = PetsRepository(db.petsDao, outbox: outbox);
 
       final uuid = await repo.createPet(
@@ -131,7 +131,7 @@ void main() {
     test('createVet inherits householdId from the pet and enqueues',
         () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
@@ -159,7 +159,7 @@ void main() {
     test('softDelete of a child row enqueues a tombstone upsert',
         () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
@@ -189,7 +189,7 @@ void main() {
     test('createVet on local-only pet stays local — no enqueue',
         () async {
       final db = newInMemoryDatabase();
-      final outbox = SyncOutbox(db.pendingOpsDao);
+      final outbox = SyncOutbox(db);
       final pets = PetsRepository(db.petsDao, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
@@ -201,6 +201,33 @@ void main() {
       await vets.createVet(petUuid: petUuid, name: 'Dr. Klein');
 
       expect(await outbox.pendingCount(), 0);
+    });
+  });
+
+  group('SyncOutbox FK resolution', () {
+    test('vets enqueue rewrites petId (int) to the parent uuid string',
+        () async {
+      final db = newInMemoryDatabase();
+      final outbox = SyncOutbox(db);
+      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
+
+      final petUuid = await pets.createPet(
+        name: 'Bello',
+        species: Species.dog,
+        sex: Sex.male,
+        householdId: 'h-1',
+      );
+      await vets.createVet(petUuid: petUuid, name: 'Dr. Klein');
+
+      final ops = await db.pendingOpsDao.head();
+      final vetOp = ops.firstWhere((o) => o.entityTable == 'vets');
+      final payload = jsonDecode(vetOp.payloadJson) as Map<String, dynamic>;
+      // FK column keeps its key name — only the value type changes.
+      // The push-side translator will rename to snake_case (`pet_id`).
+      expect(payload['petId'], petUuid,
+          reason: 'petId must be the parent pet\'s uuid, not local int');
+      expect(payload['petId'], isA<String>());
     });
   });
 
