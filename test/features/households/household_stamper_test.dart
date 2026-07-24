@@ -13,7 +13,7 @@ void main() {
   group('HouseholdStamper', () {
     test('stamps null household_id on every top-level table', () async {
       final db = newInMemoryDatabase();
-      final pets = PetsRepository(db.petsDao);
+      final pets = PetsRepository(db.petsDao, db);
       final vets = VetsRepository(db.vetsDao, db.petsDao);
 
       final petUuid = await pets.createPet(
@@ -48,7 +48,7 @@ void main() {
         'with an outbox: enqueues each stamped top-level row for its '
         'first push', () async {
       final db = newInMemoryDatabase();
-      final pets = PetsRepository(db.petsDao);
+      final pets = PetsRepository(db.petsDao, db);
       final vets = VetsRepository(db.vetsDao, db.petsDao);
 
       // Pre-cloud rows: no household_id, no enqueue at write time.
@@ -88,7 +88,7 @@ void main() {
     test('second call does not double-enqueue already-stamped rows',
         () async {
       final db = newInMemoryDatabase();
-      final pets = PetsRepository(db.petsDao);
+      final pets = PetsRepository(db.petsDao, db);
       await pets.createPet(
         name: 'Bello',
         species: Species.dog,
@@ -113,7 +113,7 @@ void main() {
 
     test('leaves rows with an existing household_id untouched', () async {
       final db = newInMemoryDatabase();
-      final pets = PetsRepository(db.petsDao);
+      final pets = PetsRepository(db.petsDao, db);
 
       final petUuid = await pets.createPet(
         name: 'Bello',

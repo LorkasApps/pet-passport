@@ -13,7 +13,7 @@ void main() {
 
     setUp(() {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       // notifications=null → repo skips scheduling, keeps CRUD tests fast.
       foods = FoodsRepository(db.foodsDao, db.petsDao);
     });

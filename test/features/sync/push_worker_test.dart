@@ -16,7 +16,7 @@ void main() {
     test('drains one enqueued upsert and clears the outbox', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
 
@@ -46,7 +46,7 @@ void main() {
     test('drains ops in FIFO order', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
 
@@ -84,7 +84,7 @@ void main() {
     test('tombstone (soft-delete) propagates to the cloud', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
 
@@ -109,7 +109,7 @@ void main() {
     test('retryable failure keeps the op and bumps attempts', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi()..queueRetryable('net glitch');
       final worker = PushWorker(db.pendingOpsDao, cloud);
 
@@ -133,7 +133,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi()..queueRetryable('first fail');
       // Freeze clock so lastAttemptAt + backoff comparison is
       // deterministic.
@@ -160,7 +160,7 @@ void main() {
     test('after backoff elapses the op is re-attempted', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi()..queueRetryable('first fail');
 
       var now = DateTime(2026, 7, 24, 12);
@@ -188,7 +188,7 @@ void main() {
     test('terminal failure parks the op with error, no retry', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi()..queueTerminal('schema mismatch');
       final worker = PushWorker(db.pendingOpsDao, cloud);
 
@@ -213,7 +213,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final cloud = FakeCloudApi();
       final worker = PushWorker(db.pendingOpsDao, cloud);
 

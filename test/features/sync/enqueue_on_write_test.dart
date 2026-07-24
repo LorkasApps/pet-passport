@@ -21,7 +21,7 @@ void main() {
     test('createPet with householdId enqueues one upsert', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final repo = PetsRepository(db.petsDao, outbox: outbox);
+      final repo = PetsRepository(db.petsDao, db, outbox: outbox);
 
       final uuid = await repo.createPet(
         name: 'Bello',
@@ -46,7 +46,7 @@ void main() {
     test('createPet WITHOUT householdId does not enqueue', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final repo = PetsRepository(db.petsDao, outbox: outbox);
+      final repo = PetsRepository(db.petsDao, db, outbox: outbox);
 
       await repo.createPet(
         name: 'Solo',
@@ -60,7 +60,7 @@ void main() {
     test('updatePet on cloud pet enqueues a fresh upsert', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final repo = PetsRepository(db.petsDao, outbox: outbox);
+      final repo = PetsRepository(db.petsDao, db, outbox: outbox);
 
       final uuid = await repo.createPet(
         name: 'Bello',
@@ -88,7 +88,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final repo = PetsRepository(db.petsDao, outbox: outbox);
+      final repo = PetsRepository(db.petsDao, db, outbox: outbox);
 
       final uuid = await repo.createPet(
         name: 'Bello',
@@ -109,7 +109,7 @@ void main() {
     test('updatePet on local-only pet does not enqueue', () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final repo = PetsRepository(db.petsDao, outbox: outbox);
+      final repo = PetsRepository(db.petsDao, db, outbox: outbox);
 
       final uuid = await repo.createPet(
         name: 'Solo',
@@ -132,7 +132,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
       final petUuid = await pets.createPet(
@@ -160,7 +160,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
       final petUuid = await pets.createPet(
@@ -190,7 +190,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
       final petUuid = await pets.createPet(
@@ -209,7 +209,7 @@ void main() {
         () async {
       final db = newInMemoryDatabase();
       final outbox = SyncOutbox(db);
-      final pets = PetsRepository(db.petsDao, outbox: outbox);
+      final pets = PetsRepository(db.petsDao, db, outbox: outbox);
       final vets = VetsRepository(db.vetsDao, db.petsDao, outbox: outbox);
 
       final petUuid = await pets.createPet(
@@ -234,7 +234,7 @@ void main() {
   group('Backward compat', () {
     test('repos without outbox never touch pending_ops', () async {
       final db = newInMemoryDatabase();
-      final repo = PetsRepository(db.petsDao); // no outbox
+      final repo = PetsRepository(db.petsDao, db); // no outbox
 
       final uuid = await repo.createPet(
         name: 'Bello',

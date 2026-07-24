@@ -31,7 +31,7 @@ void main() {
     setUp(() {
       final db = newInMemoryDatabase();
       final mediaService = MockMediaService();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       vets = VetsRepository(db.vetsDao, db.petsDao);
       insurances = InsurancesRepository(db.insurancesDao, db.petsDao, mediaService);
       vaccinations = VaccinationsRepository(

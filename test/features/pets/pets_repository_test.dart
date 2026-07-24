@@ -10,7 +10,7 @@ void main() {
 
     setUp(() {
       final db = newInMemoryDatabase();
-      repo = PetsRepository(db.petsDao);
+      repo = PetsRepository(db.petsDao, db);
     });
 
     test('creates and lists an active pet', () async {

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/pets_dao.dart';
@@ -10,6 +11,7 @@ import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/media_outbox.dart';
 import '../../sync/data/sync_outbox.dart';
 import '../domain/vaccination.dart';
 
@@ -21,6 +23,7 @@ class VaccinationsRepository {
     this.notifications,
     this.media,
     this.outbox,
+    this.mediaOutbox,
     this.reminderLead = const Duration(days: 7),
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
@@ -31,6 +34,7 @@ class VaccinationsRepository {
   final NotificationService? notifications;
   final MediaService? media;
   final SyncOutbox? outbox;
+  final MediaOutbox? mediaOutbox;
   final Duration reminderLead;
   final Uuid _uuid;
 
@@ -204,6 +208,21 @@ class VaccinationsRepository {
     await _enqueue(uuid);
   }
 
+  /// Enqueue an upsert op for vaccination_document [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the parent vaccination has `householdId == null`.
+  Future<void> _enqueueVaccinationDocument(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _vacDao.getDocumentByUuidIncludingDeleted(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'vaccination_documents',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
+
   Future<void> _rescheduleReminder({
     required String uuid,
     required String petName,
@@ -276,6 +295,7 @@ class VaccinationsRepository {
       throw StateError('Vaccination not found: $vaccinationUuid');
     }
     final docUuid = _uuid.v4();
+    final now = DateTime.now();
     final relative = await mediaService.saveVaccinationDocument(
       vaccinationUuid: vaccinationUuid,
       docUuid: docUuid,
@@ -288,8 +308,23 @@ class VaccinationsRepository {
       mimeType: mimeType,
       originalFilename: Value(originalFilename),
       sizeBytes: Value(sizeBytes),
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedByUserId: Value(currentUserId()),
+      householdId: Value(vac.householdId),
     ));
+    await _enqueueVaccinationDocument(docUuid);
+    final mo = mediaOutbox;
+    if (mo != null && vac.householdId != null) {
+      final ext = p.extension(relative);
+      await mo.enqueueUpload(
+        entityTable: 'vaccination_documents',
+        entityUuid: docUuid,
+        localPath: await mediaService.resolve(relative),
+        storageKey:
+            'household/${vac.householdId}/vaccination_documents/$docUuid$ext',
+        mimeType: mimeType,
+      );
+    }
     return docUuid;
   }
 
@@ -297,6 +332,16 @@ class VaccinationsRepository {
     final row = await _vacDao.getDocumentByUuid(docUuid);
     if (row == null) return;
     await _vacDao.softDeleteDocumentByUuid(docUuid, DateTime.now());
+    await _enqueueVaccinationDocument(docUuid);
+    final mo = mediaOutbox;
+    final key = row.storageKey;
+    if (mo != null && key != null) {
+      await mo.enqueueDelete(
+        entityTable: 'vaccination_documents',
+        entityUuid: docUuid,
+        storageKey: key,
+      );
+    }
     await media?.deleteFile(row.filePath);
   }
 

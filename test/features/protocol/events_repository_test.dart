@@ -25,7 +25,7 @@ void main() {
 
     setUp(() {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       mediaService = MockMediaService();
       events = EventsRepository(db, db.eventsDao, db.petsDao, mediaService);
     });
@@ -60,7 +60,7 @@ void main() {
 
     test('createEvent for weight writes both event and pet_weights row', () async {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       events = EventsRepository(db, db.eventsDao, db.petsDao, mediaService);
 
       final petUuid = await pets.createPet(
@@ -99,7 +99,7 @@ void main() {
 
     test('updateEvent on a weight event updates pet_weights row (not duplicate)', () async {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       events = EventsRepository(db, db.eventsDao, db.petsDao, mediaService);
 
       final petUuid = await pets.createPet(
@@ -140,7 +140,7 @@ void main() {
 
     test('updateEvent changing type FROM weight TO generic deletes pet_weights row', () async {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       events = EventsRepository(db, db.eventsDao, db.petsDao, mediaService);
 
       final petUuid = await pets.createPet(
@@ -179,7 +179,7 @@ void main() {
 
     test('deleteByUuid on a weight event deletes both event and pet_weights row', () async {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       events = EventsRepository(db, db.eventsDao, db.petsDao, mediaService);
 
       final petUuid = await pets.createPet(

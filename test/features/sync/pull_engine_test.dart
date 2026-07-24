@@ -70,7 +70,7 @@ void main() {
   group('PullEngine — LWW', () {
     test('skips a pulled row when local is fresher', () async {
       final db = newInMemoryDatabase();
-      final pets = PetsRepository(db.petsDao);
+      final pets = PetsRepository(db.petsDao, db);
       final uuid = await pets.createPet(
         name: 'LocalFresh',
         species: Species.dog,
@@ -105,7 +105,7 @@ void main() {
 
     test('overwrites the local row when incoming is fresher', () async {
       final db = newInMemoryDatabase();
-      final pets = PetsRepository(db.petsDao);
+      final pets = PetsRepository(db.petsDao, db);
       final uuid = await pets.createPet(
         name: 'LocalStale',
         species: Species.dog,

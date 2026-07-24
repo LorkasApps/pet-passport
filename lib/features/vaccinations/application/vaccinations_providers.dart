@@ -13,6 +13,7 @@ final vaccinationsRepositoryProvider =
   final media = ref.watch(mediaServiceProvider);
   final leadDays = ref.watch(reminderLeadDaysProvider);
   final outbox = ref.watch(syncOutboxProvider);
+  final mediaOutbox = ref.watch(mediaOutboxProvider);
   return VaccinationsRepository(
     db.vaccinationsDao,
     db.petsDao,
@@ -20,6 +21,7 @@ final vaccinationsRepositoryProvider =
     notifications: notif,
     media: media,
     outbox: outbox,
+    mediaOutbox: mediaOutbox,
     reminderLead: Duration(days: leadDays),
   );
 });

@@ -18,6 +18,7 @@ final petsRepositoryProvider = Provider<PetsRepository>((ref) {
   final mediaOutbox = ref.watch(mediaOutboxProvider);
   return PetsRepository(
     db.petsDao,
+    db,
     media: media,
     outbox: outbox,
     mediaOutbox: mediaOutbox,

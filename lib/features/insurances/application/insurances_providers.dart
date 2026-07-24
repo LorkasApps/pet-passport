@@ -11,7 +11,14 @@ final insurancesRepositoryProvider =
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
   final outbox = ref.watch(syncOutboxProvider);
-  return InsurancesRepository(db.insurancesDao, db.petsDao, media, outbox: outbox);
+  final mediaOutbox = ref.watch(mediaOutboxProvider);
+  return InsurancesRepository(
+    db.insurancesDao,
+    db.petsDao,
+    media,
+    outbox: outbox,
+    mediaOutbox: mediaOutbox,
+  );
 });
 
 final insurancesForPetProvider =

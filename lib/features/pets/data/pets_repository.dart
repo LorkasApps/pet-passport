@@ -15,11 +15,17 @@ import '../domain/pet_enums.dart';
 import '../domain/pet_passport_document.dart';
 
 class PetsRepository {
-  PetsRepository(this._dao,
-      {this.media, this.outbox, this.mediaOutbox, Uuid? uuid})
-      : _uuid = uuid ?? const Uuid();
+  PetsRepository(
+    this._dao,
+    this._db, {
+    this.media,
+    this.outbox,
+    this.mediaOutbox,
+    Uuid? uuid,
+  }) : _uuid = uuid ?? const Uuid();
 
   final PetsDao _dao;
+  final AppDatabase _db;
   final MediaService? media;
   final SyncOutbox? outbox;
   final MediaOutbox? mediaOutbox;
@@ -233,6 +239,21 @@ class PetsRepository {
         );
   }
 
+  /// Enqueue an upsert op for pet_passport_document [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the parent pet has `householdId == null`.
+  Future<void> _enqueuePassportDoc(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _db.petPassportDocumentsDao.getByUuidIncludingDeleted(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'pet_passport_documents',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
+
   Future<String> attachPassportDoc({
     required String petUuid,
     required File source,
@@ -247,6 +268,7 @@ class PetsRepository {
     final row = await _dao.getByUuid(petUuid);
     if (row == null) throw StateError('Pet with uuid=$petUuid not found');
     final docUuid = _uuid.v4();
+    final now = DateTime.now();
     final relative = await m.savePassportDocument(
       petUuid: petUuid,
       docUuid: docUuid,
@@ -259,16 +281,41 @@ class PetsRepository {
       mimeType: mimeType,
       originalFilename: Value(originalFilename),
       sizeBytes: Value(sizeBytes),
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedByUserId: Value(currentUserId()),
+      householdId: Value(row.householdId),
     ));
+    await _enqueuePassportDoc(docUuid);
+    final mo = mediaOutbox;
+    if (mo != null && row.householdId != null) {
+      final ext = p.extension(relative);
+      await mo.enqueueUpload(
+        entityTable: 'pet_passport_documents',
+        entityUuid: docUuid,
+        localPath: await m.resolve(relative),
+        storageKey:
+            'household/${row.householdId}/pet_passport_documents/$docUuid$ext',
+        mimeType: mimeType,
+      );
+    }
     return docUuid;
   }
 
   Future<void> removePassportDoc(String docUuid) async {
     final row = await _dao.getPassportDocByUuid(docUuid);
     if (row == null) return;
-    await media?.deleteFile(row.filePath);
     await _dao.softDeletePassportDocByUuid(docUuid, DateTime.now());
+    await _enqueuePassportDoc(docUuid);
+    final mo = mediaOutbox;
+    final key = row.storageKey;
+    if (mo != null && key != null) {
+      await mo.enqueueDelete(
+        entityTable: 'pet_passport_documents',
+        entityUuid: docUuid,
+        storageKey: key,
+      );
+    }
+    await media?.deleteFile(row.filePath);
   }
 
   /// Rename a passport document — only the [title] column changes; the

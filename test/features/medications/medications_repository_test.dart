@@ -13,7 +13,7 @@ void main() {
 
     setUp(() {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       meds = MedicationsRepository(db.medicationsDao, db.petsDao, db.vetsDao);
     });
 

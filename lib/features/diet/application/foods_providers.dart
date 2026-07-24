@@ -11,12 +11,14 @@ final foodsRepositoryProvider = Provider<FoodsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final notif = ref.watch(notificationServiceProvider);
   final outbox = ref.watch(syncOutboxProvider);
+  final mediaOutbox = ref.watch(mediaOutboxProvider);
   return FoodsRepository(
     db.foodsDao,
     db.petsDao,
     notifications: notif,
     media: ref.watch(mediaServiceProvider),
     outbox: outbox,
+    mediaOutbox: mediaOutbox,
   );
 });
 

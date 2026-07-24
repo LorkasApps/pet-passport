@@ -33,7 +33,7 @@ void main() {
         () async {
       // ---- Source DB: populate it, export a snapshot. ----
       final sourceDb = newInMemoryDatabase();
-      final sourcePets = PetsRepository(sourceDb.petsDao);
+      final sourcePets = PetsRepository(sourceDb.petsDao, sourceDb);
       final sourceVets = VetsRepository(sourceDb.vetsDao, sourceDb.petsDao);
       final sourceVacs = VaccinationsRepository(
         sourceDb.vaccinationsDao,
@@ -175,7 +175,7 @@ void main() {
       expect(summary.foodsInserted, 1);
       expect(summary.documentsInserted, 1);
 
-      final targetPets = PetsRepository(targetDb.petsDao);
+      final targetPets = PetsRepository(targetDb.petsDao, targetDb);
       final imported = await targetPets.getByUuid(petUuid);
       expect(imported, isNotNull);
       expect(imported!.name, 'Bello');
@@ -259,7 +259,7 @@ void main() {
       // user's responsibility (see media sweep). We inject a photo row
       // directly to avoid depending on a real filesystem.
       final sourceDb = newInMemoryDatabase();
-      final sourcePets = PetsRepository(sourceDb.petsDao);
+      final sourcePets = PetsRepository(sourceDb.petsDao, sourceDb);
       final sourceFoods =
           FoodsRepository(sourceDb.foodsDao, sourceDb.petsDao);
 

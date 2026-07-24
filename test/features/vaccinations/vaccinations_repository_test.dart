@@ -14,7 +14,7 @@ void main() {
 
     setUp(() {
       final db = newInMemoryDatabase();
-      pets = PetsRepository(db.petsDao);
+      pets = PetsRepository(db.petsDao, db);
       vets = VetsRepository(db.vetsDao, db.petsDao);
       vacs = VaccinationsRepository(db.vaccinationsDao, db.petsDao, db.vetsDao);
     });

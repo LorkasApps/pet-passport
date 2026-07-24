@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/foods_dao.dart';
@@ -11,6 +12,7 @@ import '../../../core/notifications/notification_ids.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/supabase/current_user.dart';
 import '../../../core/time/time_of_day_json.dart';
+import '../../sync/data/media_outbox.dart';
 import '../../sync/data/sync_outbox.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
@@ -23,6 +25,7 @@ class FoodsRepository {
     this.notifications,
     this.media,
     this.outbox,
+    this.mediaOutbox,
     Uuid? uuid,
     this.expansionHorizon = const Duration(days: 30),
     this.maxOccurrencesPerFood = 90,
@@ -33,6 +36,7 @@ class FoodsRepository {
   final NotificationService? notifications;
   final MediaService? media;
   final SyncOutbox? outbox;
+  final MediaOutbox? mediaOutbox;
   final Uuid _uuid;
   final Duration expansionHorizon;
   final int maxOccurrencesPerFood;
@@ -184,6 +188,21 @@ class FoodsRepository {
     await _enqueue(uuid);
   }
 
+  /// Enqueue an upsert op for food_photo [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the parent food has `householdId == null`.
+  Future<void> _enqueueFoodPhoto(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _foodsDao.getPhotoByUuidIncludingDeleted(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'food_photos',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
+
   // --- photos ---
 
   Stream<List<FoodPhoto>> watchPhotos(String foodUuid) async* {
@@ -211,6 +230,7 @@ class FoodsRepository {
     final row = await _foodsDao.getByUuid(foodUuid);
     if (row == null) throw StateError('Food with uuid=$foodUuid not found');
     final photoUuid = _uuid.v4();
+    final now = DateTime.now();
     final relative = await m.saveFoodPhoto(
       foodUuid: foodUuid,
       photoUuid: photoUuid,
@@ -223,16 +243,41 @@ class FoodsRepository {
       mimeType: mimeType,
       originalFilename: Value(originalFilename),
       sizeBytes: Value(sizeBytes),
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedByUserId: Value(currentUserId()),
+      householdId: Value(row.householdId),
     ));
+    await _enqueueFoodPhoto(photoUuid);
+    final mo = mediaOutbox;
+    if (mo != null && row.householdId != null) {
+      final ext = p.extension(relative);
+      await mo.enqueueUpload(
+        entityTable: 'food_photos',
+        entityUuid: photoUuid,
+        localPath: await m.resolve(relative),
+        storageKey:
+            'household/${row.householdId}/food_photos/$photoUuid$ext',
+        mimeType: mimeType,
+      );
+    }
     return photoUuid;
   }
 
   Future<void> removePhoto(String photoUuid) async {
     final row = await _foodsDao.getPhotoByUuid(photoUuid);
     if (row == null) return;
-    await media?.deleteFile(row.filePath);
     await _foodsDao.softDeletePhotoByUuid(photoUuid, DateTime.now());
+    await _enqueueFoodPhoto(photoUuid);
+    final mo = mediaOutbox;
+    final key = row.storageKey;
+    if (mo != null && key != null) {
+      await mo.enqueueDelete(
+        entityTable: 'food_photos',
+        entityUuid: photoUuid,
+        storageKey: key,
+      );
+    }
+    await media?.deleteFile(row.filePath);
   }
 
   /// Rename a food photo. Only the [title] column changes — the physical

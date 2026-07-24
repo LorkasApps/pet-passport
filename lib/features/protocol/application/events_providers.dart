@@ -40,7 +40,15 @@ final eventsRepositoryProvider = Provider<EventsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
   final outbox = ref.watch(syncOutboxProvider);
-  return EventsRepository(db, db.eventsDao, db.petsDao, media, outbox: outbox);
+  final mediaOutbox = ref.watch(mediaOutboxProvider);
+  return EventsRepository(
+    db,
+    db.eventsDao,
+    db.petsDao,
+    media,
+    outbox: outbox,
+    mediaOutbox: mediaOutbox,
+  );
 });
 
 final eventsForPetProvider =

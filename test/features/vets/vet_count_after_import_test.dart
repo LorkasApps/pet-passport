@@ -69,7 +69,7 @@ void main() {
   /// Verifies updateVet actually persists isActive=false.
   test('manually archiving a vet drops it from the active count', () async {
     final db = newInMemoryDatabase();
-    final pets = PetsRepository(db.petsDao);
+    final pets = PetsRepository(db.petsDao, db);
     final vets = VetsRepository(db.vetsDao, db.petsDao);
 
     final petUuid = await pets.createPet(

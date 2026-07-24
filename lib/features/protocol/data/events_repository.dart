@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/events_dao.dart';
@@ -9,6 +10,7 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/media_outbox.dart';
 import '../../sync/data/sync_outbox.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
@@ -23,6 +25,7 @@ class EventsRepository {
     this._petsDao,
     this._media, {
     this.outbox,
+    this.mediaOutbox,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
@@ -31,6 +34,7 @@ class EventsRepository {
   final PetsDao _petsDao;
   final MediaService _media;
   final SyncOutbox? outbox;
+  final MediaOutbox? mediaOutbox;
   final Uuid _uuid;
 
   /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
@@ -198,6 +202,21 @@ class EventsRepository {
     await _enqueue(uuid);
   }
 
+  /// Enqueue an upsert op for event_photo [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the parent event has `householdId == null`.
+  Future<void> _enqueueEventPhoto(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _db.eventPhotosDao.getByUuidIncludingDeleted(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'event_photos',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
+
   // ── Photos ──────────────────────────────────────────────────────────
   Future<String> attachPhoto({
     required String eventUuid,
@@ -208,6 +227,7 @@ class EventsRepository {
     final row = await _eventsDao.getByUuid(eventUuid);
     if (row == null) throw StateError('Event not found: $eventUuid');
     final photoUuid = _uuid.v4();
+    final now = DateTime.now();
     final relative = await _media.saveEventPhoto(
       eventUuid: eventUuid,
       photoUuid: photoUuid,
@@ -219,8 +239,23 @@ class EventsRepository {
       filePath: relative,
       mimeType: mimeType,
       sizeBytes: Value(sizeBytes),
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedByUserId: Value(currentUserId()),
+      householdId: Value(row.householdId),
     ));
+    await _enqueueEventPhoto(photoUuid);
+    final mo = mediaOutbox;
+    if (mo != null && row.householdId != null) {
+      final ext = p.extension(relative);
+      await mo.enqueueUpload(
+        entityTable: 'event_photos',
+        entityUuid: photoUuid,
+        localPath: await _media.resolve(relative),
+        storageKey:
+            'household/${row.householdId}/event_photos/$photoUuid$ext',
+        mimeType: mimeType,
+      );
+    }
     return photoUuid;
   }
 
@@ -228,6 +263,16 @@ class EventsRepository {
     final row = await _eventsDao.getPhotoByUuid(photoUuid);
     if (row == null) return;
     await _eventsDao.softDeletePhotoByUuid(photoUuid, DateTime.now());
+    await _enqueueEventPhoto(photoUuid);
+    final mo = mediaOutbox;
+    final key = row.storageKey;
+    if (mo != null && key != null) {
+      await mo.enqueueDelete(
+        entityTable: 'event_photos',
+        entityUuid: photoUuid,
+        storageKey: key,
+      );
+    }
     await _media.deleteFile(row.filePath);
   }
 

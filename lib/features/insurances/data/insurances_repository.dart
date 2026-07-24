@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/insurances_dao.dart';
@@ -8,6 +9,7 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/media_outbox.dart';
 import '../../sync/data/sync_outbox.dart';
 import '../domain/insurance.dart';
 
@@ -17,6 +19,7 @@ class InsurancesRepository {
     this._petsDao,
     this._media, {
     this.outbox,
+    this.mediaOutbox,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
@@ -24,6 +27,7 @@ class InsurancesRepository {
   final PetsDao _petsDao;
   final MediaService _media;
   final SyncOutbox? outbox;
+  final MediaOutbox? mediaOutbox;
   final Uuid _uuid;
 
   /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
@@ -140,6 +144,21 @@ class InsurancesRepository {
     await _enqueue(uuid);
   }
 
+  /// Enqueue an upsert op for insurance_document [uuid] after a write. No-op if there is no
+  /// outbox (local-only tests) or the parent insurance has `householdId == null`.
+  Future<void> _enqueueInsuranceDocument(String uuid) async {
+    final ob = outbox;
+    if (ob == null) return;
+    final row = await _insurancesDao.getDocumentByUuidIncludingDeleted(uuid);
+    if (row == null || row.householdId == null) return;
+    await ob.enqueueUpsert(
+      entityTable: 'insurance_documents',
+      entityUuid: row.uuid,
+      householdId: row.householdId,
+      payload: row.toJson(),
+    );
+  }
+
   Future<String> attachDocument({
     required String insuranceUuid,
     required File source,
@@ -150,6 +169,7 @@ class InsurancesRepository {
     final ins = await _insurancesDao.getByUuid(insuranceUuid);
     if (ins == null) throw StateError('Insurance not found: $insuranceUuid');
     final docUuid = _uuid.v4();
+    final now = DateTime.now();
     final relative = await _media.saveInsuranceDocument(
       insuranceUuid: insuranceUuid,
       docUuid: docUuid,
@@ -162,8 +182,23 @@ class InsurancesRepository {
       mimeType: mimeType,
       originalFilename: Value(originalFilename),
       sizeBytes: Value(sizeBytes),
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedByUserId: Value(currentUserId()),
+      householdId: Value(ins.householdId),
     ));
+    await _enqueueInsuranceDocument(docUuid);
+    final mo = mediaOutbox;
+    if (mo != null && ins.householdId != null) {
+      final ext = p.extension(relative);
+      await mo.enqueueUpload(
+        entityTable: 'insurance_documents',
+        entityUuid: docUuid,
+        localPath: await _media.resolve(relative),
+        storageKey:
+            'household/${ins.householdId}/insurance_documents/$docUuid$ext',
+        mimeType: mimeType,
+      );
+    }
     return docUuid;
   }
 
@@ -171,6 +206,16 @@ class InsurancesRepository {
     final row = await _insurancesDao.getDocumentByUuid(docUuid);
     if (row == null) return;
     await _insurancesDao.softDeleteDocumentByUuid(docUuid, DateTime.now());
+    await _enqueueInsuranceDocument(docUuid);
+    final mo = mediaOutbox;
+    final key = row.storageKey;
+    if (mo != null && key != null) {
+      await mo.enqueueDelete(
+        entityTable: 'insurance_documents',
+        entityUuid: docUuid,
+        storageKey: key,
+      );
+    }
     await _media.deleteFile(row.filePath);
   }
 

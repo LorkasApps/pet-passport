@@ -92,7 +92,7 @@ class _Device {
   _Device(this.name, this._cloud) {
     db = newInMemoryDatabase();
     outbox = SyncOutbox(db);
-    pets = PetsRepository(db.petsDao, outbox: outbox);
+    pets = PetsRepository(db.petsDao, db, outbox: outbox);
     push = PushWorker(db.pendingOpsDao, _cloud);
     pull = PullEngine(db, _cloud);
   }
