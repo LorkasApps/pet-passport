@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/pet_documents_dao.dart';
@@ -8,6 +9,7 @@ import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/media_outbox.dart';
 import '../../sync/data/sync_outbox.dart';
 import '../domain/pet_document.dart';
 
@@ -17,6 +19,7 @@ class DocumentsRepository {
     this._petsDao,
     this._media, {
     this.outbox,
+    this.mediaOutbox,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
 
@@ -24,6 +27,7 @@ class DocumentsRepository {
   final PetsDao _petsDao;
   final MediaService _media;
   final SyncOutbox? outbox;
+  final MediaOutbox? mediaOutbox;
   final Uuid _uuid;
 
   /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
@@ -94,6 +98,22 @@ class DocumentsRepository {
       updatedByUserId: Value(currentUserId()),
     ));
     await _enqueue(docUuid);
+    // Enqueue an upload once the row exists — guarded on the pet
+    // having a household id (cloud opt-out matches the row-outbox
+    // guard). The storage key layout puts the entity_uuid at the
+    // leaf so the media fetcher can round-trip via the row alone.
+    final mo = mediaOutbox;
+    if (mo != null && pet.householdId != null) {
+      final ext = p.extension(relative);
+      await mo.enqueueUpload(
+        entityTable: 'pet_documents',
+        entityUuid: docUuid,
+        localPath: await _media.resolve(relative),
+        storageKey:
+            'household/${pet.householdId}/pet_documents/$docUuid$ext',
+        mimeType: mimeType,
+      );
+    }
     return docUuid;
   }
 
@@ -125,6 +145,18 @@ class DocumentsRepository {
     // pull on the other device.
     await _docsDao.softDeleteByUuid(docUuid, DateTime.now());
     await _enqueue(docUuid);
+    // If a storage_key was set (upload had completed), enqueue a
+    // delete on the cloud side too. Rows that never uploaded (still
+    // pending or opt-out) skip cleanly.
+    final mo = mediaOutbox;
+    final key = row.storageKey;
+    if (mo != null && key != null) {
+      await mo.enqueueDelete(
+        entityTable: 'pet_documents',
+        entityUuid: docUuid,
+        storageKey: key,
+      );
+    }
   }
 
   PetDocument _toDomain(PetDocumentRow row, String petUuid) {

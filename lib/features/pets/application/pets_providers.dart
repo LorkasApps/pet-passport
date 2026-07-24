@@ -15,7 +15,13 @@ final petsRepositoryProvider = Provider<PetsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
   final outbox = ref.watch(syncOutboxProvider);
-  return PetsRepository(db.petsDao, media: media, outbox: outbox);
+  final mediaOutbox = ref.watch(mediaOutboxProvider);
+  return PetsRepository(
+    db.petsDao,
+    media: media,
+    outbox: outbox,
+    mediaOutbox: mediaOutbox,
+  );
 });
 
 final activePetsProvider = StreamProvider<List<Pet>>((ref) {

@@ -10,8 +10,14 @@ final documentsRepositoryProvider = Provider<DocumentsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final media = ref.watch(mediaServiceProvider);
   final outbox = ref.watch(syncOutboxProvider);
-  return DocumentsRepository(db.petDocumentsDao, db.petsDao, media,
-      outbox: outbox);
+  final mediaOutbox = ref.watch(mediaOutboxProvider);
+  return DocumentsRepository(
+    db.petDocumentsDao,
+    db.petsDao,
+    media,
+    outbox: outbox,
+    mediaOutbox: mediaOutbox,
+  );
 });
 
 final petDocumentsProvider =

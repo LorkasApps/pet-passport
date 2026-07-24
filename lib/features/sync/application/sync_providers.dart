@@ -4,6 +4,7 @@ import '../../../core/supabase/supabase_config.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../settings/application/settings_providers.dart';
 import '../data/cloud_api.dart';
+import '../data/media_outbox.dart';
 import '../data/pull_engine.dart';
 import '../data/push_worker.dart';
 import '../data/realtime_engine.dart';
@@ -15,6 +16,15 @@ import '../data/sync_outbox.dart';
 final syncOutboxProvider = Provider<SyncOutbox>((ref) {
   final db = ref.watch(databaseProvider);
   return SyncOutbox(db);
+});
+
+/// Parallel outbox for binary media (uploads to Supabase Storage).
+/// Always non-null — the enqueue calls guard on cloud-configured +
+/// household-set at the repo level, so a pure-local install just
+/// never enqueues.
+final mediaOutboxProvider = Provider<MediaOutbox>((ref) {
+  final db = ref.watch(databaseProvider);
+  return MediaOutbox(db);
 });
 
 /// The concrete cloud endpoint the push worker talks to. `null` in

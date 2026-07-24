@@ -1,24 +1,28 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/daos/pets_dao.dart';
 import '../../../core/db/database.dart';
 import '../../../core/media/media_service.dart';
 import '../../../core/supabase/current_user.dart';
+import '../../sync/data/media_outbox.dart';
 import '../../sync/data/sync_outbox.dart';
 import '../domain/pet.dart';
 import '../domain/pet_enums.dart';
 import '../domain/pet_passport_document.dart';
 
 class PetsRepository {
-  PetsRepository(this._dao, {this.media, this.outbox, Uuid? uuid})
+  PetsRepository(this._dao,
+      {this.media, this.outbox, this.mediaOutbox, Uuid? uuid})
       : _uuid = uuid ?? const Uuid();
 
   final PetsDao _dao;
   final MediaService? media;
   final SyncOutbox? outbox;
+  final MediaOutbox? mediaOutbox;
   final Uuid _uuid;
 
   /// Enqueue an upsert op for [uuid] after a write. No-op if there is no
@@ -151,6 +155,55 @@ class PetsRepository {
     );
     await _dao.updatePet(updated);
     await _enqueue(uuid);
+    // Enqueue an upload if the profile photo landed at a new local
+    // path. Nulling out the field (photo removed) enqueues a delete
+    // when a storage_key was previously set — otherwise no-op.
+    await _handleProfilePhotoChange(
+      existing: existing,
+      newPath: profilePhotoPath,
+      pet: updated,
+    );
+  }
+
+  Future<void> _handleProfilePhotoChange({
+    required PetRow existing,
+    required String? newPath,
+    required PetRow pet,
+  }) async {
+    final mo = mediaOutbox;
+    final m = media;
+    if (mo == null || m == null) return;
+    if (pet.householdId == null) return;
+    if (newPath == existing.profilePhotoPath) return;
+    if (newPath != null) {
+      final ext = p.extension(newPath);
+      await mo.enqueueUpload(
+        entityTable: 'pets',
+        entityUuid: pet.uuid,
+        localPath: await m.resolve(newPath),
+        storageKey: 'household/${pet.householdId}/pets/${pet.uuid}/profile$ext',
+        mimeType: _guessMime(ext),
+      );
+    } else if (existing.profilePhotoStorageKey != null) {
+      await mo.enqueueDelete(
+        entityTable: 'pets',
+        entityUuid: pet.uuid,
+        storageKey: existing.profilePhotoStorageKey!,
+      );
+    }
+  }
+
+  String? _guessMime(String ext) {
+    switch (ext.toLowerCase()) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.webp':
+        return 'image/webp';
+    }
+    return null;
   }
 
   /// Update only the vaccination passport number without touching other
