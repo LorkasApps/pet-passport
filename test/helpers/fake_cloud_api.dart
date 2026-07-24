@@ -34,13 +34,17 @@ class FakeCloudApi implements CloudApi {
     final store = rows.putIfAbsent(table, () => {});
     final existing = store[uuid];
     if (existing != null) {
-      // LWW: whichever payload has the larger `updatedAt` wins. Payload
-      // shape mirrors the local outbox (camelCase, ISO-8601 strings).
-      final incoming = payload['updatedAt'] as String?;
-      final current = existing['updatedAt'] as String?;
-      if (incoming != null &&
+      // LWW: whichever payload has the larger `updatedAt` wins. Drift's
+      // default serializer emits DateTime as an int (millisSinceEpoch);
+      // if a caller ever hands us ISO-8601 strings that lexicographic
+      // order also matches chronological order, so a Comparable dyn
+      // works for both.
+      final incoming = existing['updatedAt'];
+      final current = payload['updatedAt'];
+      if (incoming is Comparable &&
           current != null &&
-          incoming.compareTo(current) < 0) {
+          incoming.runtimeType == current.runtimeType &&
+          (current as Comparable).compareTo(incoming) < 0) {
         return const CloudUpsertOk(); // silent loser, don't overwrite
       }
     }
