@@ -309,6 +309,11 @@
   "householdMembersEmpty": "No members.",
   "householdPetsHeader": "Pets",
   "householdPetsEmpty": "No pets in this household.",
+  "syncStatusTitle": "Cloud sync",
+  "syncStatusIdle": "Everything synced",
+  "syncStatusPending": "{count, plural, =1{1 change waiting to upload} other{{count} changes waiting to upload}}",
+  "syncNowAction": "Sync now",
+  "syncNowDone": "Sync started",
   "householdMemberSelfSuffix": "{name} (you)",
   "@householdMemberSelfSuffix": {
     "placeholders": { "name": { "type": "String" } }

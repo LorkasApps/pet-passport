@@ -1477,6 +1477,36 @@ abstract class AppL10n {
   /// **'No pets in this household.'**
   String get householdPetsEmpty;
 
+  /// No description provided for @syncStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync'**
+  String get syncStatusTitle;
+
+  /// No description provided for @syncStatusIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything synced'**
+  String get syncStatusIdle;
+
+  /// No description provided for @syncStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change waiting to upload} other{{count} changes waiting to upload}}'**
+  String syncStatusPending(num count);
+
+  /// No description provided for @syncNowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNowAction;
+
+  /// No description provided for @syncNowDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync started'**
+  String get syncNowDone;
+
   /// No description provided for @householdMemberSelfSuffix.
   ///
   /// In en, this message translates to:

@@ -80,14 +80,42 @@ class SupabaseCloudApi implements CloudApi {
   }
 }
 
+/// Every DateTime-shaped column across the top-level tables. Drift's
+/// default serializer emits DateTime as an int (millisSinceEpoch); the
+/// cloud columns are `timestamptz`, and PostgREST won't implicitly
+/// cast a bigint into one — a missing entry here silently ships as
+/// int and comes back as a terminal 4xx.
+///
+/// The set is intentionally the union of every top-level table's
+/// datetime columns rather than per-table, since the translator runs
+/// per-payload without knowing which table it belongs to. A stray key
+/// that never appears on a given row is harmless.
 const _dateTimeKeys = <String>{
+  // Every table
   'createdAt',
   'updatedAt',
   'deletedAt',
-  'occurredAt',
+  // pets
   'dateOfBirth',
   'tassoRegisteredAt',
+  // events
+  'occurredAt',
+  // pet_weights (not synced yet but harmless to list)
   'measuredAt',
+  // appointments
+  'startsAt',
+  'recurrenceUntil',
+  // medications + foods
+  'endsAt',
+  // (starts_at shared with appointments already covered above)
+  // vaccinations
+  'administeredAt',
+  'nextDueAt',
+  // insurances
+  'contractStart',
+  'contractEnd',
+  // pending_ops — device-local, never pushed. Left here so the
+  // translator stays defensive if a stray payload ever includes them.
   'lastAttemptAt',
   'queuedAt',
 };

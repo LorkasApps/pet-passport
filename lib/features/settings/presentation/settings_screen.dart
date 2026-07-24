@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../auth/application/auth_providers.dart';
 import '../../households/application/households_providers.dart';
 import '../../households/domain/household.dart';
 import '../../security/application/app_lock_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../application/settings_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -49,6 +52,7 @@ class SettingsScreen extends ConsumerWidget {
             _SectionHeader(text: l.settingsCloudSection),
             const _CloudTile(),
             const _HouseholdsSection(),
+            const _SyncTile(),
           ],
           _SectionHeader(text: l.privacyNoticeTitle),
           ListTile(
@@ -385,6 +389,45 @@ class _SectionHeader extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
+      ),
+    );
+  }
+}
+
+/// Debug/status entry for cloud-sync. Shows the outbox count and lets
+/// the user force a re-drain — which also re-arms terminal-parked ops
+/// (attempts reset, error cleared) so a fixed contract mismatch can
+/// clear the queue without a reinstall.
+class _SyncTile extends ConsumerWidget {
+  const _SyncTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppL10n.of(context);
+    final countAsync = ref.watch(pendingOpsCountProvider);
+    final count = countAsync.valueOrNull ?? 0;
+    final subtitle = count == 0
+        ? l.syncStatusIdle
+        : l.syncStatusPending(count);
+    return ListTile(
+      leading: Icon(
+        count == 0 ? Icons.cloud_done_outlined : Icons.cloud_upload_outlined,
+      ),
+      title: Text(l.syncStatusTitle),
+      subtitle: Text(subtitle),
+      trailing: TextButton(
+        onPressed: () async {
+          final messenger = ScaffoldMessenger.of(context);
+          final db = ref.read(databaseProvider);
+          await db.pendingOpsDao.resetAllForRetry();
+          final drain = ref.read(pushWorkerProvider)?.drainOnce();
+          if (drain != null) unawaited(drain);
+          if (!context.mounted) return;
+          messenger.showSnackBar(
+            SnackBar(content: Text(l.syncNowDone)),
+          );
+        },
+        child: Text(l.syncNowAction),
       ),
     );
   }

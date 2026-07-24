@@ -786,6 +786,29 @@ class AppL10nDe extends AppL10n {
   String get householdPetsEmpty => 'Keine Tiere in diesem Haushalt.';
 
   @override
+  String get syncStatusTitle => 'Cloud-Sync';
+
+  @override
+  String get syncStatusIdle => 'Alles synchronisiert';
+
+  @override
+  String syncStatusPending(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Änderungen warten auf Upload',
+      one: '1 Änderung wartet auf Upload',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNowAction => 'Jetzt synchronisieren';
+
+  @override
+  String get syncNowDone => 'Sync gestartet';
+
+  @override
   String householdMemberSelfSuffix(String name) {
     return '$name (du)';
   }

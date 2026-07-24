@@ -54,6 +54,19 @@ class PendingOpsDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
+  /// Re-arm every parked op for another drain pass: zero out
+  /// `attempts` (so backoff bypasses), clear `last_error`, forget the
+  /// last attempt timestamp. Triggered by the manual "sync now" action
+  /// in Settings, and by any recovery flow that wants to break out of
+  /// the terminal-error park.
+  Future<int> resetAllForRetry() {
+    return customUpdate(
+      'UPDATE pending_ops '
+      'SET attempts = 0, last_error = NULL, last_attempt_at = NULL',
+      updates: {pendingOps},
+    );
+  }
+
   Stream<int> watchCount() {
     final q = selectOnly(pendingOps)..addColumns([pendingOps.id.count()]);
     return q.watchSingle().map((r) => r.read(pendingOps.id.count()) ?? 0);

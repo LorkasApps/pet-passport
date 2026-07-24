@@ -53,6 +53,49 @@ void main() {
       expect(out['deleted_at'], isNull);
     });
 
+    test('every top-level table datetime column gets ISO-converted', () {
+      // Guards the specific bug that broke foods, insurances, and
+      // vaccinations pushes: their datetime columns weren't in
+      // `_dateTimeKeys`, so int-millis payloads hit PostgREST and came
+      // back as terminal 4xx. If a new datetime column lands on a
+      // synced table, this test forces a matching entry.
+      final at = DateTime.utc(2026, 7, 24, 12);
+      final ms = at.millisecondsSinceEpoch;
+      final out = toCloudShape({
+        // pets
+        'dateOfBirth': ms,
+        'tassoRegisteredAt': ms,
+        // events
+        'occurredAt': ms,
+        // appointments
+        'startsAt': ms,
+        'recurrenceUntil': ms,
+        // medications + foods
+        'endsAt': ms,
+        // vaccinations
+        'administeredAt': ms,
+        'nextDueAt': ms,
+        // insurances
+        'contractStart': ms,
+        'contractEnd': ms,
+      });
+      final iso = at.toIso8601String();
+      for (final k in [
+        'date_of_birth',
+        'tasso_registered_at',
+        'occurred_at',
+        'starts_at',
+        'recurrence_until',
+        'ends_at',
+        'administered_at',
+        'next_due_at',
+        'contract_start',
+        'contract_end',
+      ]) {
+        expect(out[k], iso, reason: '$k must be ISO-8601');
+      }
+    });
+
     test('non-datetime ints are left alone', () {
       final out = toCloudShape({
         'uuid': 'abc',
