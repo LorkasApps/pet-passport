@@ -815,6 +815,29 @@ class AppL10nEn extends AppL10n {
   String get syncNowDone => 'Sync started';
 
   @override
+  String get syncForceTitle => 'Reload from cloud';
+
+  @override
+  String get syncForceSubtitle =>
+      'Pulls all data and assets from the server. Handy when something is missing.';
+
+  @override
+  String get syncForceAction => 'Reload';
+
+  @override
+  String get syncForceRunning => 'Reloading from cloud…';
+
+  @override
+  String syncForceDone(int applied, int skipped) {
+    return '$applied changes applied, $skipped skipped';
+  }
+
+  @override
+  String syncForceFailed(String error) {
+    return 'Reload failed: $error';
+  }
+
+  @override
   String get syncBadgeSynced => 'Everything synced';
 
   @override

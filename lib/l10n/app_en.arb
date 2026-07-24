@@ -317,6 +317,23 @@
   "syncStatusPending": "{count, plural, =1{1 change waiting to upload} other{{count} changes waiting to upload}}",
   "syncNowAction": "Sync now",
   "syncNowDone": "Sync started",
+  "syncForceTitle": "Reload from cloud",
+  "syncForceSubtitle": "Pulls all data and assets from the server. Handy when something is missing.",
+  "syncForceAction": "Reload",
+  "syncForceRunning": "Reloading from cloud…",
+  "syncForceDone": "{applied} changes applied, {skipped} skipped",
+  "@syncForceDone": {
+    "placeholders": {
+      "applied": {"type": "int"},
+      "skipped": {"type": "int"}
+    }
+  },
+  "syncForceFailed": "Reload failed: {error}",
+  "@syncForceFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
   "syncBadgeSynced": "Everything synced",
   "syncBadgeSyncing": "Syncing…",
   "syncBadgeOffline": "Offline — will catch up on next connection",

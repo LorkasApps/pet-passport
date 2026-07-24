@@ -1525,6 +1525,42 @@ abstract class AppL10n {
   /// **'Sync started'**
   String get syncNowDone;
 
+  /// No description provided for @syncForceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload from cloud'**
+  String get syncForceTitle;
+
+  /// No description provided for @syncForceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pulls all data and assets from the server. Handy when something is missing.'**
+  String get syncForceSubtitle;
+
+  /// No description provided for @syncForceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get syncForceAction;
+
+  /// No description provided for @syncForceRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Reloading from cloud…'**
+  String get syncForceRunning;
+
+  /// No description provided for @syncForceDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{applied} changes applied, {skipped} skipped'**
+  String syncForceDone(int applied, int skipped);
+
+  /// No description provided for @syncForceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload failed: {error}'**
+  String syncForceFailed(String error);
+
   /// No description provided for @syncBadgeSynced.
   ///
   /// In en, this message translates to:

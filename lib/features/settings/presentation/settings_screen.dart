@@ -53,6 +53,7 @@ class SettingsScreen extends ConsumerWidget {
             const _CloudTile(),
             const _HouseholdsSection(),
             const _SyncTile(),
+            const _ForceSyncTile(),
           ],
           _SectionHeader(text: l.privacyNoticeTitle),
           ListTile(
@@ -444,6 +445,87 @@ class _SyncTile extends ConsumerWidget {
         },
         child: Text(l.syncNowAction),
       ),
+    );
+  }
+}
+
+/// "Reload from cloud" — the counterpart to Sync-Now. Push-Now
+/// drains the outbox; this one wipes every pull cursor and runs a
+/// full pullOnce so a device that missed some realtime events (or a
+/// join that came through in a bad window) catches up completely.
+///
+/// Cursor reset uses the same SyncCursorsDao.resetAll that the
+/// household-membership-grew hook already relies on — a full-fetch
+/// scan is expected and normal.
+class _ForceSyncTile extends ConsumerStatefulWidget {
+  const _ForceSyncTile();
+
+  @override
+  ConsumerState<_ForceSyncTile> createState() => _ForceSyncTileState();
+}
+
+class _ForceSyncTileState extends ConsumerState<_ForceSyncTile> {
+  bool _running = false;
+
+  Future<void> _run() async {
+    if (_running) return;
+    final l = AppL10n.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final households =
+        ref.read(myHouseholdsProvider).valueOrNull ?? const [];
+    if (households.isEmpty) return;
+    final engine = ref.read(pullEngineProvider);
+    if (engine == null) return;
+
+    setState(() => _running = true);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l.syncForceRunning),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    try {
+      await ref.read(databaseProvider).syncCursorsDao.resetAll();
+      final result = await engine.pullOnce(
+        householdIds:
+            households.map((h) => h.id).toList(growable: false),
+      );
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l.syncForceDone(result.applied, result.lwwSkipped),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.syncForceFailed(e.toString()))),
+      );
+    } finally {
+      if (mounted) setState(() => _running = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppL10n.of(context);
+    return ListTile(
+      leading: const Icon(Icons.cloud_download_outlined),
+      title: Text(l.syncForceTitle),
+      subtitle: Text(l.syncForceSubtitle),
+      isThreeLine: true,
+      trailing: _running
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : TextButton(
+              onPressed: _run,
+              child: Text(l.syncForceAction),
+            ),
     );
   }
 }

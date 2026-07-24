@@ -270,6 +270,23 @@
   "syncStatusPending": "{count, plural, =1{1 Änderung wartet auf Upload} other{{count} Änderungen warten auf Upload}}",
   "syncNowAction": "Jetzt synchronisieren",
   "syncNowDone": "Sync gestartet",
+  "syncForceTitle": "Aus Cloud neu laden",
+  "syncForceSubtitle": "Zieht alle Daten und Assets vom Server. Nützlich wenn was fehlt.",
+  "syncForceAction": "Neu laden",
+  "syncForceRunning": "Wird aus Cloud geladen…",
+  "syncForceDone": "{applied} Änderungen übernommen, {skipped} übersprungen",
+  "@syncForceDone": {
+    "placeholders": {
+      "applied": {"type": "int"},
+      "skipped": {"type": "int"}
+    }
+  },
+  "syncForceFailed": "Neuladen fehlgeschlagen: {error}",
+  "@syncForceFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
   "syncBadgeSynced": "Alles synchronisiert",
   "syncBadgeSyncing": "Synchronisiert…",
   "syncBadgeOffline": "Offline — bei Netzverbindung wird nachgesynct",
