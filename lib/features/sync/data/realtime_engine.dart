@@ -36,6 +36,12 @@ class RealtimeEngine {
     'vaccinations',
     'medications',
     'appointments',
+    // Nested attachment surfaces (M5 phase 3+).
+    'event_photos',
+    'food_photos',
+    'insurance_documents',
+    'vaccination_documents',
+    'pet_passport_documents',
   ];
 
   Stream<RealtimeStatus> get status => _status.stream;

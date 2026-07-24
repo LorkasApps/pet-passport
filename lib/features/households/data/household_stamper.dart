@@ -39,6 +39,13 @@ class HouseholdStamper {
     'event_tags',
     'pet_weights',
     'pet_documents',
+    // M5 phase 1: nested attachment surfaces gained the M2 sync
+    // columns and need the same first-login backfill treatment.
+    'event_photos',
+    'food_photos',
+    'insurance_documents',
+    'vaccination_documents',
+    'pet_passport_documents',
   };
 
   /// Top-level entities the SyncOutbox pushes. Bootstrap-enqueue only
@@ -56,6 +63,11 @@ class HouseholdStamper {
     'insurances',
     'events',
     'pet_documents',
+    'event_photos',
+    'food_photos',
+    'insurance_documents',
+    'vaccination_documents',
+    'pet_passport_documents',
   ];
 
   /// Runs the null-household stamp and, if an outbox is supplied,
@@ -186,6 +198,24 @@ class HouseholdStamper {
             ?.toJson();
       case 'pet_documents':
         return (await _db.petDocumentsDao.getByUuidIncludingDeleted(t.uuid))
+            ?.toJson();
+      case 'event_photos':
+        return (await _db.eventPhotosDao.getByUuidIncludingDeleted(t.uuid))
+            ?.toJson();
+      case 'food_photos':
+        return (await _db.foodPhotosDao.getByUuidIncludingDeleted(t.uuid))
+            ?.toJson();
+      case 'insurance_documents':
+        return (await _db.insuranceDocumentsDao
+                .getByUuidIncludingDeleted(t.uuid))
+            ?.toJson();
+      case 'vaccination_documents':
+        return (await _db.vaccinationDocumentsDao
+                .getByUuidIncludingDeleted(t.uuid))
+            ?.toJson();
+      case 'pet_passport_documents':
+        return (await _db.petPassportDocumentsDao
+                .getByUuidIncludingDeleted(t.uuid))
             ?.toJson();
     }
     return null;

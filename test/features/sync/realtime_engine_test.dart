@@ -24,9 +24,10 @@ void main() {
 
       await engine.start(householdIds: ['h-1']);
 
-      // Ten top-level tables (see RealtimeEngine._tables).
-      expect(source.activeCount, 10);
-      expect(engine.activeSubscriptionCount, 10);
+      // 15 sync tables — 10 top-level + 5 nested attachment
+      // surfaces (see RealtimeEngine._tables).
+      expect(source.activeCount, 15);
+      expect(engine.activeSubscriptionCount, 15);
     });
 
     test('start with an empty household set stays idle', () async {
@@ -131,7 +132,7 @@ void main() {
       final engine = RealtimeEngine(source, pull);
 
       await engine.start(householdIds: ['h-1']);
-      expect(source.activeCount, 10);
+      expect(source.activeCount, 15);
 
       engine.stop();
       expect(source.activeCount, 0);
