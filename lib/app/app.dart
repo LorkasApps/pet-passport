@@ -125,6 +125,36 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
       },
       fireImmediately: true,
     );
+
+    // Pull-sync driver: every time the households list resolves to
+    // non-empty (which is the point at which we have something to
+    // filter the RLS scope on), kick a pull. Also runs at sign-in
+    // transitions because the households list rebuilds then.
+    ref.listenManual<AsyncValue<List<Household>>>(
+      myHouseholdsProvider,
+      (_, next) {
+        final list = next.value;
+        if (list == null || list.isEmpty) return;
+        if (!ref.read(isSignedInProvider)) return;
+        _kickPull(list);
+      },
+      fireImmediately: true,
+    );
+  }
+
+  Future<void> _kickPull(List<Household> households) async {
+    final engine = ref.read(pullEngineProvider);
+    if (engine == null) return;
+    try {
+      await engine.pullOnce(
+        householdIds: households.map((h) => h.id).toList(growable: false),
+      );
+    } catch (_) {
+      // Best-effort background pull — a transient network hiccup
+      // shouldn't kill the app. The cursor is only advanced on
+      // successful pages inside the engine, so the next kick picks
+      // up where we left off.
+    }
   }
 
   @override
@@ -140,12 +170,18 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
     // Deterministic IDs keep this idempotent — no duplicate notifications.
     if (state == AppLifecycleState.resumed) {
       unawaited(_rescheduleAll());
-      // Also drain any ops that piled up while backgrounded. Guard on
-      // sign-in — pure-local users have nothing to drain anyway.
+      // Also drain any ops that piled up while backgrounded AND pull
+      // any changes other devices made in the meantime. Guard on
+      // sign-in — pure-local users have nothing to sync anyway.
       if (ref.read(isSignedInProvider)) {
         unawaited(
           ref.read(pushWorkerProvider)?.drainOnce() ?? Future.value(),
         );
+        final households =
+            ref.read(myHouseholdsProvider).valueOrNull ?? const [];
+        if (households.isNotEmpty) {
+          unawaited(_kickPull(households));
+        }
       }
     }
   }

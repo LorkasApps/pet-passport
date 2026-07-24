@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../settings/application/settings_providers.dart';
 import '../data/cloud_api.dart';
+import '../data/pull_engine.dart';
 import '../data/push_worker.dart';
 import '../data/supabase_cloud_api.dart';
 import '../data/sync_outbox.dart';
@@ -34,4 +35,13 @@ final pushWorkerProvider = Provider<PushWorker?>((ref) {
 final pendingOpsCountProvider = StreamProvider<int>((ref) {
   final outbox = ref.watch(syncOutboxProvider);
   return outbox.watchPendingCount();
+});
+
+/// The delta-pull engine. `null` if cloud isn't configured — mirrors
+/// the pushWorkerProvider guard.
+final pullEngineProvider = Provider<PullEngine?>((ref) {
+  final api = ref.watch(cloudApiProvider);
+  if (api == null) return null;
+  final db = ref.watch(databaseProvider);
+  return PullEngine(db, api);
 });
