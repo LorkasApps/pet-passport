@@ -5,12 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../features/appointments/application/appointments_providers.dart';
+import '../features/auth/application/auth_providers.dart';
 import '../features/diet/application/foods_providers.dart';
 import '../features/medications/application/medications_providers.dart';
 import '../features/pets/application/current_pet_provider.dart';
 import '../features/pets/application/pets_providers.dart';
 import '../features/security/presentation/app_lock_gate.dart';
 import '../features/settings/application/settings_providers.dart';
+import '../features/sync/application/sync_providers.dart';
 import '../features/vaccinations/application/vaccinations_providers.dart';
 import 'router.dart';
 import 'theme.dart';
@@ -79,6 +81,22 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
           .read(vaccinationsRepositoryProvider)
           .rescheduleAllUpcomingReminders();
     });
+
+    // Push-sync driver: every time the outbox grows, kick a drain.
+    // Single-flight inside the worker collapses bursts; guarded on
+    // sign-in so we don't burn retries against a 401 while offline of
+    // Supabase. When cloud isn't configured, pushWorkerProvider is
+    // null and this listener is a no-op.
+    ref.listenManual<AsyncValue<int>>(
+      pendingOpsCountProvider,
+      (_, next) {
+        final count = next.value ?? 0;
+        if (count == 0) return;
+        if (!ref.read(isSignedInProvider)) return;
+        unawaited(ref.read(pushWorkerProvider)?.drainOnce() ?? Future.value());
+      },
+      fireImmediately: true,
+    );
   }
 
   @override
@@ -94,6 +112,13 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
     // Deterministic IDs keep this idempotent — no duplicate notifications.
     if (state == AppLifecycleState.resumed) {
       unawaited(_rescheduleAll());
+      // Also drain any ops that piled up while backgrounded. Guard on
+      // sign-in — pure-local users have nothing to drain anyway.
+      if (ref.read(isSignedInProvider)) {
+        unawaited(
+          ref.read(pushWorkerProvider)?.drainOnce() ?? Future.value(),
+        );
+      }
     }
   }
 
