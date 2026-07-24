@@ -92,11 +92,20 @@ const _dateTimeKeys = <String>{
   'queuedAt',
 };
 
+/// Semantic key renames applied before the camelCase → snake_case
+/// pass. Client Drift row.toJson emits `uuid`, but the cloud schema
+/// (migration 0004) uses Postgres-idiomatic `id uuid PK` — pure
+/// camel→snake wouldn't catch that.
+const _semanticRenames = <String, String>{
+  'uuid': 'id',
+};
+
 /// Pure payload translator. Kept top-level so tests can exercise it
 /// without spinning up a SupabaseClient.
 ///
 /// Turns the outbox payload into a body PostgREST can accept:
-///   * key names: camelCase → snake_case (`updatedAt` → `updated_at`)
+///   * semantic renames first: `uuid` → `id` (cloud PK name)
+///   * then key names: camelCase → snake_case (`updatedAt` → `updated_at`)
 ///   * datetimes: int millis → ISO-8601 (`.toUtc().toIso8601String()`)
 ///
 /// The datetime-key list is deliberately hand-maintained instead of
@@ -105,7 +114,7 @@ const _dateTimeKeys = <String>{
 Map<String, dynamic> toCloudShape(Map<String, dynamic> payload) {
   final out = <String, dynamic>{};
   payload.forEach((k, v) {
-    final key = camelToSnake(k);
+    final key = camelToSnake(_semanticRenames[k] ?? k);
     if (v == null) {
       out[key] = null;
       return;

@@ -10,16 +10,25 @@ void main() {
   group('toCloudShape', () {
     test('renames camelCase keys to snake_case', () {
       final out = toCloudShape({
-        'uuid': 'abc',
         'name': 'Bello',
         'updatedByUserId': 'user-1',
       });
       expect(out.keys.toSet(), {
-        'uuid',
         'name',
         'updated_by_user_id',
       });
       expect(out['updated_by_user_id'], 'user-1');
+    });
+
+    test('renames `uuid` to `id` (cloud PK name)', () {
+      final out = toCloudShape({
+        'uuid': 'abc-123',
+        'name': 'Bello',
+      });
+      expect(out.containsKey('id'), isTrue);
+      expect(out['id'], 'abc-123');
+      expect(out.containsKey('uuid'), isFalse,
+          reason: 'client field renamed, not duplicated');
     });
 
     test('converts known datetime keys from millis-int to ISO-8601', () {
