@@ -13,6 +13,11 @@ class PetDocuments extends Table {
       integer().references(Pets, #id, onDelete: KeyAction.cascade)();
   TextColumn get title => text().nullable()();
   TextColumn get filePath => text()();
+  /// Cloud Storage object key for the file, filled once the media
+  /// outbox has uploaded it. Rows without a `storage_key` haven't
+  /// been sent yet; `file_path` remains a device-local hint that
+  /// never gets synced.
+  TextColumn get storageKey => text().nullable()();
   TextColumn get mimeType => text().withLength(min: 1, max: 128)();
   TextColumn get originalFilename => text().nullable()();
   IntColumn get sizeBytes => integer().nullable()();

@@ -19,6 +19,11 @@ class Pets extends Table {
   DateTimeColumn get tassoRegisteredAt => dateTime().nullable()();
   TextColumn get vaccinationPassportNumber => text().nullable()();
   TextColumn get profilePhotoPath => text().nullable()();
+  /// Cloud Storage object key for the profile photo, filled once the
+  /// media outbox has uploaded the local file. Rows without a
+  /// `storage_key` are still local-only from the media perspective —
+  /// `profilePhotoPath` is a device-local hint and never gets synced.
+  TextColumn get profilePhotoStorageKey => text().nullable()();
   TextColumn get allergies => text().nullable()();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();

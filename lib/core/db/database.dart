@@ -98,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -234,6 +234,14 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(petDocuments, petDocuments.householdId);
             await m.addColumn(petDocuments, petDocuments.updatedByUserId);
             await m.addColumn(petDocuments, petDocuments.deletedAt);
+          }
+          if (from < 19 && to >= 19) {
+            // M5 media sync: cloud-side storage object key column on
+            // every table with a file/photo. `file_path` /
+            // `profile_photo_path` remain device-local hints; the
+            // `*_storage_key` values ride through row-sync.
+            await m.addColumn(pets, pets.profilePhotoStorageKey);
+            await m.addColumn(petDocuments, petDocuments.storageKey);
           }
         },
         beforeOpen: (details) async {

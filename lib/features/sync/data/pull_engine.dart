@@ -258,6 +258,8 @@ class PullEngine {
       vaccinationPassportNumber:
           Value(row['vaccinationPassportNumber'] as String?),
       profilePhotoPath: Value(row['profilePhotoPath'] as String?),
+      profilePhotoStorageKey:
+          Value(row['profilePhotoStorageKey'] as String?),
       allergies: Value(row['allergies'] as String?),
       notes: Value(row['notes'] as String?),
       createdAt: Value(_toDateTime(row['createdAt'])!),
@@ -443,11 +445,17 @@ class PullEngine {
       return _ApplyOutcome.lwwSkipped;
     }
 
+    // `filePath` is a device-local hint (path on the sender's disk).
+    // We keep whatever the cloud row happens to carry so a fresh
+    // INSERT satisfies the NOT NULL constraint; the MediaFetcher
+    // resolves via `storageKey` at read time so the nonsense-path
+    // on other devices never gets opened.
     final companion = PetDocumentsCompanion(
       uuid: Value(uuid),
       petId: Value(row['petId'] as int),
       title: Value(row['title'] as String?),
-      filePath: Value(row['filePath'] as String),
+      filePath: Value((row['filePath'] as String?) ?? ''),
+      storageKey: Value(row['storageKey'] as String?),
       mimeType: Value(row['mimeType'] as String),
       originalFilename: Value(row['originalFilename'] as String?),
       sizeBytes: Value(row['sizeBytes'] as int?),
