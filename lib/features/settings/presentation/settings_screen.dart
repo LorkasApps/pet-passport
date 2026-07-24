@@ -405,11 +405,14 @@ class _SyncTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppL10n.of(context);
     final countAsync = ref.watch(pendingOpsCountProvider);
+    final mediaCountAsync = ref.watch(pendingMediaOpsCountProvider);
     final count = countAsync.valueOrNull ?? 0;
+    final mediaCount = mediaCountAsync.valueOrNull ?? 0;
+    final totalPending = count + mediaCount;
     final lastError = ref.watch(pendingOpsLastErrorProvider).valueOrNull;
-    final base = count == 0
+    final base = totalPending == 0
         ? l.syncStatusIdle
-        : l.syncStatusPending(count);
+        : l.syncStatusPending(totalPending);
     final subtitle = lastError == null
         ? base
         : '$base\n${l.syncLastErrorLabel}: $lastError';
@@ -418,7 +421,7 @@ class _SyncTile extends ConsumerWidget {
       leading: Icon(
         lastError != null
             ? Icons.cloud_off_outlined
-            : (count == 0
+            : (totalPending == 0
                 ? Icons.cloud_done_outlined
                 : Icons.cloud_upload_outlined),
       ),
@@ -429,8 +432,11 @@ class _SyncTile extends ConsumerWidget {
           final messenger = ScaffoldMessenger.of(context);
           final db = ref.read(databaseProvider);
           await db.pendingOpsDao.resetAllForRetry();
-          final drain = ref.read(pushWorkerProvider)?.drainOnce();
-          if (drain != null) unawaited(drain);
+          await db.pendingMediaOpsDao.resetAllForRetry();
+          final rowDrain = ref.read(pushWorkerProvider)?.drainOnce();
+          if (rowDrain != null) unawaited(rowDrain);
+          final mediaDrain = ref.read(uploadWorkerProvider)?.drainOnce();
+          if (mediaDrain != null) unawaited(mediaDrain);
           if (!context.mounted) return;
           messenger.showSnackBar(
             SnackBar(content: Text(l.syncNowDone)),

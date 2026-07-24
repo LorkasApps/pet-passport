@@ -4,9 +4,13 @@ import '../../../core/supabase/supabase_config.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../settings/application/settings_providers.dart';
 import '../data/cloud_api.dart';
+import '../data/media_fetcher.dart';
 import '../data/media_outbox.dart';
 import '../data/pull_engine.dart';
 import '../data/push_worker.dart';
+import '../data/storage_api.dart';
+import '../data/supabase_storage_api.dart';
+import '../data/upload_worker.dart';
 import '../data/realtime_engine.dart';
 import '../data/realtime_source.dart';
 import '../data/supabase_cloud_api.dart';
@@ -25,6 +29,38 @@ final syncOutboxProvider = Provider<SyncOutbox>((ref) {
 final mediaOutboxProvider = Provider<MediaOutbox>((ref) {
   final db = ref.watch(databaseProvider);
   return MediaOutbox(db);
+});
+
+/// Storage seam. `null` in pure-local mode; production uses the
+/// Supabase Storage client.
+final storageApiProvider = Provider<StorageApi?>((ref) {
+  if (!SupabaseConfig.isConfigured) return null;
+  return SupabaseStorageApi();
+});
+
+/// Media upload worker. `null` when cloud isn't configured — the
+/// media outbox still accepts writes, they just stay parked locally
+/// (mirrors PushWorker).
+final uploadWorkerProvider = Provider<UploadWorker?>((ref) {
+  final storage = ref.watch(storageApiProvider);
+  if (storage == null) return null;
+  final db = ref.watch(databaseProvider);
+  return UploadWorker(db, storage);
+});
+
+/// Live count of pending media ops. Drives the sync tile + wakes the
+/// upload worker on increment.
+final pendingMediaOpsCountProvider = StreamProvider<int>((ref) {
+  final outbox = ref.watch(mediaOutboxProvider);
+  return outbox.watchPendingCount();
+});
+
+/// Shared media fetcher for the download-on-demand path. `null` in
+/// pure-local mode — every consumer guards.
+final mediaFetcherProvider = Provider<MediaFetcher?>((ref) {
+  final storage = ref.watch(storageApiProvider);
+  if (storage == null) return null;
+  return MediaFetcher(storage);
 });
 
 /// The concrete cloud endpoint the push worker talks to. `null` in
@@ -104,7 +140,10 @@ final pendingOpsLastErrorProvider = StreamProvider<String?>((ref) {
 final syncStatusProvider = Provider<SyncStatus>((ref) {
   if (!SupabaseConfig.isConfigured) return SyncStatus.localOnly;
   if (!ref.watch(isSignedInProvider)) return SyncStatus.signedOut;
-  final pending = ref.watch(pendingOpsCountProvider).valueOrNull ?? 0;
+  final rowPending = ref.watch(pendingOpsCountProvider).valueOrNull ?? 0;
+  final mediaPending =
+      ref.watch(pendingMediaOpsCountProvider).valueOrNull ?? 0;
+  final pending = rowPending + mediaPending;
   final err = ref.watch(pendingOpsLastErrorProvider).valueOrNull;
   final rt = ref.watch(realtimeStatusProvider).valueOrNull ??
       RealtimeStatus.idle;

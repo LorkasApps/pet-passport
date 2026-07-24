@@ -127,6 +127,21 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
       fireImmediately: true,
     );
 
+    // Media upload driver: mirror of the row-outbox driver but on
+    // the media queue. Uploads run in parallel with row pushes since
+    // they touch different backends (Storage vs PostgREST).
+    ref.listenManual<AsyncValue<int>>(
+      pendingMediaOpsCountProvider,
+      (_, next) {
+        final count = next.value ?? 0;
+        if (count == 0) return;
+        if (!ref.read(isSignedInProvider)) return;
+        final drain = ref.read(uploadWorkerProvider)?.drainOnce();
+        if (drain != null) unawaited(drain);
+      },
+      fireImmediately: true,
+    );
+
     // Pull-sync driver: every time the households list resolves to
     // non-empty (which is the point at which we have something to
     // filter the RLS scope on), kick a pull. Also runs at sign-in
@@ -227,6 +242,8 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
         unawaited(
           ref.read(pushWorkerProvider)?.drainOnce() ?? Future.value(),
         );
+        final uploadDrain = ref.read(uploadWorkerProvider)?.drainOnce();
+        if (uploadDrain != null) unawaited(uploadDrain);
         final households =
             ref.read(myHouseholdsProvider).valueOrNull ?? const [];
         if (households.isNotEmpty) {
