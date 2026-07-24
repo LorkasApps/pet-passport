@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/supabase/supabase_config.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../pets/application/pets_providers.dart' show mediaServiceProvider;
 import '../../settings/application/settings_providers.dart';
 import '../data/cloud_api.dart';
+import '../data/media_backfiller.dart';
 import '../data/media_fetcher.dart';
 import '../data/media_outbox.dart';
 import '../data/pull_engine.dart';
@@ -29,6 +31,16 @@ final syncOutboxProvider = Provider<SyncOutbox>((ref) {
 final mediaOutboxProvider = Provider<MediaOutbox>((ref) {
   final db = ref.watch(databaseProvider);
   return MediaOutbox(db);
+});
+
+/// One-shot start-up scanner that pushes pre-M5 rows (path set,
+/// storage_key null) into the media outbox. Idempotent — subsequent
+/// calls find nothing.
+final mediaBackfillerProvider = Provider<MediaBackfiller>((ref) {
+  final db = ref.watch(databaseProvider);
+  final media = ref.watch(mediaServiceProvider);
+  final outbox = ref.watch(mediaOutboxProvider);
+  return MediaBackfiller(db, media, outbox);
 });
 
 /// Storage seam. `null` in pure-local mode; production uses the

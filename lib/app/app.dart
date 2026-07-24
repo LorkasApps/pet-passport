@@ -107,6 +107,11 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
           primary,
           outbox: ref.read(syncOutboxProvider),
         );
+        // Backfill uploads for pre-M5 media rows (path set,
+        // storage_key still null). Idempotent — once every eligible
+        // row has been uploaded and stamped, subsequent runs return
+        // zero enqueues.
+        await ref.read(mediaBackfillerProvider).backfill();
       },
       fireImmediately: true,
     );
