@@ -10,6 +10,7 @@ import '../../features/protocol/domain/event_enums.dart';
 import 'daos/appointments_dao.dart';
 import 'daos/contacts_dao.dart';
 import 'daos/events_dao.dart';
+import 'daos/pending_media_ops_dao.dart';
 import 'daos/pending_ops_dao.dart';
 import 'daos/pet_documents_dao.dart';
 import 'daos/foods_dao.dart';
@@ -36,6 +37,7 @@ import 'tables/insurances_table.dart';
 import 'tables/medication_intakes_table.dart';
 import 'tables/medication_reminders_table.dart';
 import 'tables/medications_table.dart';
+import 'tables/pending_media_ops_table.dart';
 import 'tables/pending_ops_table.dart';
 import 'tables/pet_documents_table.dart';
 import 'tables/pet_passport_documents_table.dart';
@@ -74,6 +76,7 @@ part 'database.g.dart';
     Contacts,
     PetDocuments,
     PendingOps,
+    PendingMediaOps,
     SyncCursors,
   ],
   daos: [
@@ -89,6 +92,7 @@ part 'database.g.dart';
     ContactsDao,
     PetDocumentsDao,
     PendingOpsDao,
+    PendingMediaOpsDao,
     SyncCursorsDao,
   ],
 )
@@ -98,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -242,6 +246,11 @@ class AppDatabase extends _$AppDatabase {
             // `*_storage_key` values ride through row-sync.
             await m.addColumn(pets, pets.profilePhotoStorageKey);
             await m.addColumn(petDocuments, petDocuments.storageKey);
+          }
+          if (from < 20 && to >= 20) {
+            // M5 media outbox — parallel to pending_ops. Local-only,
+            // never syncs itself.
+            await m.createTable(pendingMediaOps);
           }
         },
         beforeOpen: (details) async {
