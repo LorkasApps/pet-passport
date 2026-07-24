@@ -58,7 +58,7 @@ class SyncStatusBadge extends ConsumerWidget {
     return IconButton(
       icon: Icon(icon, color: color),
       tooltip: tip,
-      onPressed: () => context.push('/more/settings'),
+      onPressed: () => context.push('/settings'),
     );
   }
 }
