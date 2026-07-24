@@ -65,7 +65,7 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
   Stream<List<InsuranceDocumentRow>> watchDocumentsForInsurance(
       int insuranceId) {
     return (select(insuranceDocuments)
-          ..where((d) => d.insuranceId.equals(insuranceId))
+          ..where((d) => d.insuranceId.equals(insuranceId) & d.deletedAt.isNull())
           ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
         .watch();
   }
@@ -74,19 +74,31 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
     return into(insuranceDocuments).insert(companion);
   }
 
-  Future<int> deleteDocumentByUuid(String uuid) {
-    return (delete(insuranceDocuments)..where((d) => d.uuid.equals(uuid)))
-        .go();
+  Future<InsuranceDocumentRow?> getDocumentByUuid(String uuid) {
+    return (select(insuranceDocuments)..where((d) => d.uuid.equals(uuid) & d.deletedAt.isNull()))
+        .getSingleOrNull();
+  }
+
+  /// Same as [getDocumentByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<InsuranceDocumentRow?> getDocumentByUuidIncludingDeleted(String uuid) {
+    return (select(insuranceDocuments)..where((d) => d.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
+  Future<int> softDeleteDocumentByUuid(String uuid, DateTime deletedAt) {
+    return (update(insuranceDocuments)..where((d) => d.uuid.equals(uuid)))
+        .write(InsuranceDocumentsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   Future<int> renameDocument(String uuid, String? title) {
     return (update(insuranceDocuments)
           ..where((d) => d.uuid.equals(uuid)))
         .write(InsuranceDocumentsCompanion(title: Value(title)));
-  }
-
-  Future<InsuranceDocumentRow?> getDocumentByUuid(String uuid) {
-    return (select(insuranceDocuments)..where((d) => d.uuid.equals(uuid)))
-        .getSingleOrNull();
   }
 }

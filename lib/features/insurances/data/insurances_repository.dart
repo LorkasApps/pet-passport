@@ -170,7 +170,7 @@ class InsurancesRepository {
   Future<void> removeDocument(String docUuid) async {
     final row = await _insurancesDao.getDocumentByUuid(docUuid);
     if (row == null) return;
-    await _insurancesDao.deleteDocumentByUuid(docUuid);
+    await _insurancesDao.softDeleteDocumentByUuid(docUuid, DateTime.now());
     await _media.deleteFile(row.filePath);
   }
 

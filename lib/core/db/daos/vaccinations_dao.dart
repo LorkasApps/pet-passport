@@ -90,7 +90,7 @@ class VaccinationsDao extends DatabaseAccessor<AppDatabase>
   Stream<List<VaccinationDocumentRow>> watchDocumentsForVaccination(
       int vaccinationId) {
     return (select(vaccinationDocuments)
-          ..where((d) => d.vaccinationId.equals(vaccinationId))
+          ..where((d) => d.vaccinationId.equals(vaccinationId) & d.deletedAt.isNull())
           ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
         .watch();
   }
@@ -99,20 +99,32 @@ class VaccinationsDao extends DatabaseAccessor<AppDatabase>
     return into(vaccinationDocuments).insert(companion);
   }
 
-  Future<int> deleteDocumentByUuid(String uuid) {
-    return (delete(vaccinationDocuments)..where((d) => d.uuid.equals(uuid)))
-        .go();
+  Future<VaccinationDocumentRow?> getDocumentByUuid(String uuid) {
+    return (select(vaccinationDocuments)..where((d) => d.uuid.equals(uuid) & d.deletedAt.isNull()))
+        .getSingleOrNull();
+  }
+
+  /// Same as [getDocumentByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<VaccinationDocumentRow?> getDocumentByUuidIncludingDeleted(String uuid) {
+    return (select(vaccinationDocuments)..where((d) => d.uuid.equals(uuid)))
+        .getSingleOrNull();
+  }
+
+  Future<int> softDeleteDocumentByUuid(String uuid, DateTime deletedAt) {
+    return (update(vaccinationDocuments)..where((d) => d.uuid.equals(uuid)))
+        .write(VaccinationDocumentsCompanion(
+          deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 
   Future<int> renameDocument(String uuid, String? title) {
     return (update(vaccinationDocuments)
           ..where((d) => d.uuid.equals(uuid)))
         .write(VaccinationDocumentsCompanion(title: Value(title)));
-  }
-
-  Future<VaccinationDocumentRow?> getDocumentByUuid(String uuid) {
-    return (select(vaccinationDocuments)..where((d) => d.uuid.equals(uuid)))
-        .getSingleOrNull();
   }
 
   /// Returns all future upcoming vaccinations across all pets — used by the

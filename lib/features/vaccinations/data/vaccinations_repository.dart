@@ -296,7 +296,7 @@ class VaccinationsRepository {
   Future<void> removeDocument(String docUuid) async {
     final row = await _vacDao.getDocumentByUuid(docUuid);
     if (row == null) return;
-    await _vacDao.deleteDocumentByUuid(docUuid);
+    await _vacDao.softDeleteDocumentByUuid(docUuid, DateTime.now());
     await media?.deleteFile(row.filePath);
   }
 

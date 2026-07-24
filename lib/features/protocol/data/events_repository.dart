@@ -227,7 +227,7 @@ class EventsRepository {
   Future<void> removePhoto(String photoUuid) async {
     final row = await _eventsDao.getPhotoByUuid(photoUuid);
     if (row == null) return;
-    await _eventsDao.deletePhotoByUuid(photoUuid);
+    await _eventsDao.softDeletePhotoByUuid(photoUuid, DateTime.now());
     await _media.deleteFile(row.filePath);
   }
 

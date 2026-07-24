@@ -232,7 +232,7 @@ class FoodsRepository {
     final row = await _foodsDao.getPhotoByUuid(photoUuid);
     if (row == null) return;
     await media?.deleteFile(row.filePath);
-    await _foodsDao.deletePhotoByUuid(photoUuid);
+    await _foodsDao.softDeletePhotoByUuid(photoUuid, DateTime.now());
   }
 
   /// Rename a food photo. Only the [title] column changes — the physical

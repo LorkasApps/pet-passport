@@ -141,7 +141,7 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
   // ── Photos ────────────────────────────────────────────────────────────
   Stream<List<EventPhotoRow>> watchPhotosForEvent(int eventId) {
     return (select(eventPhotos)
-          ..where((p) => p.eventId.equals(eventId))
+          ..where((p) => p.eventId.equals(eventId) & p.deletedAt.isNull())
           ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))
         .watch();
   }
@@ -151,11 +151,24 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
   }
 
   Future<EventPhotoRow?> getPhotoByUuid(String uuid) {
+    return (select(eventPhotos)..where((p) => p.uuid.equals(uuid) & p.deletedAt.isNull()))
+        .getSingleOrNull();
+  }
+
+  /// Same as [getPhotoByUuid] but does NOT hide soft-deleted rows. Used by
+  /// sync-outbox enqueue paths that need the tombstone payload right
+  /// after a soft-delete.
+  Future<EventPhotoRow?> getPhotoByUuidIncludingDeleted(String uuid) {
     return (select(eventPhotos)..where((p) => p.uuid.equals(uuid)))
         .getSingleOrNull();
   }
 
-  Future<int> deletePhotoByUuid(String uuid) {
-    return (delete(eventPhotos)..where((p) => p.uuid.equals(uuid))).go();
+  Future<int> softDeletePhotoByUuid(String uuid, DateTime deletedAt) {
+    return (update(eventPhotos)..where((p) => p.uuid.equals(uuid)))
+        .write(EventPhotosCompanion(
+          deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
+          updatedByUserId: Value(currentUserId()),
+        ));
   }
 }

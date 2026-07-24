@@ -268,7 +268,7 @@ class PetsRepository {
     final row = await _dao.getPassportDocByUuid(docUuid);
     if (row == null) return;
     await media?.deleteFile(row.filePath);
-    await _dao.deletePassportDocByUuid(docUuid);
+    await _dao.softDeletePassportDocByUuid(docUuid, DateTime.now());
   }
 
   /// Rename a passport document — only the [title] column changes; the
