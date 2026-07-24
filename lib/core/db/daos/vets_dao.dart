@@ -61,6 +61,7 @@ class VetsDao extends DatabaseAccessor<AppDatabase> with _$VetsDaoMixin {
     return (update(vets)..where((v) => v.uuid.equals(uuid)))
         .write(VetsCompanion(
           deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
           updatedByUserId: Value(currentUserId()),
         ));
   }

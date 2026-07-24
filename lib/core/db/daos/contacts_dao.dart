@@ -64,6 +64,7 @@ class ContactsDao extends DatabaseAccessor<AppDatabase>
     return (update(contacts)..where((c) => c.uuid.equals(uuid)))
         .write(ContactsCompanion(
           deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
           updatedByUserId: Value(currentUserId()),
         ));
   }

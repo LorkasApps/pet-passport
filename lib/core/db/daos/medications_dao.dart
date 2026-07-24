@@ -60,6 +60,7 @@ class MedicationsDao extends DatabaseAccessor<AppDatabase>
     return (update(medications)..where((m) => m.uuid.equals(uuid)))
         .write(MedicationsCompanion(
           deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
           updatedByUserId: Value(currentUserId()),
         ));
   }

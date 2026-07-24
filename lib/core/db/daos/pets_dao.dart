@@ -41,8 +41,14 @@ class PetsDao extends DatabaseAccessor<AppDatabase> with _$PetsDaoMixin {
   }
 
   Future<int> softDeleteByUuid(String uuid, DateTime deletedAt) {
+    // `updated_at` is what LWW conflict resolution keys on — leaving
+    // it stale would let a plain update pushed from another device
+    // after the tombstone silently "revive" the row.
     return (update(pets)..where((p) => p.uuid.equals(uuid)))
-        .write(PetsCompanion(deletedAt: Value(deletedAt)));
+        .write(PetsCompanion(
+      deletedAt: Value(deletedAt),
+      updatedAt: Value(deletedAt),
+    ));
   }
 
   Future<int> countActive() async {

@@ -72,6 +72,7 @@ class AppointmentsDao extends DatabaseAccessor<AppDatabase>
     return (update(appointments)..where((a) => a.uuid.equals(uuid)))
         .write(AppointmentsCompanion(
           deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
           updatedByUserId: Value(currentUserId()),
         ));
   }

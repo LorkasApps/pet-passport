@@ -74,6 +74,7 @@ class VaccinationsDao extends DatabaseAccessor<AppDatabase>
     return (update(vaccinations)..where((v) => v.uuid.equals(uuid)))
         .write(VaccinationsCompanion(
           deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
           updatedByUserId: Value(currentUserId()),
         ));
   }

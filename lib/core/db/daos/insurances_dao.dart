@@ -49,6 +49,7 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
     return (update(insurances)..where((i) => i.uuid.equals(uuid)))
         .write(InsurancesCompanion(
           deletedAt: Value(deletedAt),
+          updatedAt: Value(deletedAt),
           updatedByUserId: Value(currentUserId()),
         ));
   }
