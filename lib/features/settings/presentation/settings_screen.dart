@@ -229,33 +229,64 @@ class _HouseholdsSection extends ConsumerWidget {
     WidgetRef ref,
     AppL10n l,
   ) async {
-    final ctrl = TextEditingController();
     final name = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l.householdsCreate),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(hintText: l.householdsCreateHint),
-          onSubmitted: (_) => Navigator.pop(ctx, ctrl.text.trim()),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(l.actionSave),
-          ),
-        ],
-      ),
+      builder: (ctx) => _CreateHouseholdDialog(l: l),
     );
-    ctrl.dispose();
     if (name == null || name.isEmpty) return;
     await ref.read(myHouseholdsProvider.notifier).create(name);
+  }
+}
+
+/// StatefulWidget so the TextEditingController is owned by an element
+/// with a proper lifecycle. The previous pattern created the controller
+/// in the caller and disposed it after `showDialog` completed — that
+/// disposal races the dialog's own teardown and trips the framework
+/// assertion `_dependents.isEmpty` on the InheritedElement chain.
+class _CreateHouseholdDialog extends StatefulWidget {
+  const _CreateHouseholdDialog({required this.l});
+
+  final AppL10n l;
+
+  @override
+  State<_CreateHouseholdDialog> createState() =>
+      _CreateHouseholdDialogState();
+}
+
+class _CreateHouseholdDialogState extends State<_CreateHouseholdDialog> {
+  final _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.pop(context, _ctrl.text.trim());
+
+  @override
+  Widget build(BuildContext context) {
+    final l = widget.l;
+    return AlertDialog(
+      title: Text(l.householdsCreate),
+      content: TextField(
+        controller: _ctrl,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(hintText: l.householdsCreateHint),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l.actionCancel),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(l.actionSave),
+        ),
+      ],
+    );
   }
 }
 
