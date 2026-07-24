@@ -10,6 +10,7 @@ import '../features/diet/application/foods_providers.dart';
 import '../features/households/application/households_providers.dart';
 import '../features/households/data/household_stamper.dart';
 import '../features/households/domain/household.dart';
+import '../features/sync/data/realtime_source.dart';
 import '../features/medications/application/medications_providers.dart';
 import '../features/pets/application/current_pet_provider.dart';
 import '../features/pets/application/pets_providers.dart';
@@ -30,6 +31,14 @@ class PetPassportApp extends ConsumerStatefulWidget {
 
 class _PetPassportAppState extends ConsumerState<PetPassportApp>
     with WidgetsBindingObserver {
+  /// One realtime subscription on `household_members`, kept alive as
+  /// long as we're signed in with at least one household. Reconfigured
+  /// when the scope changes (join / leave). Distinct from the feature-
+  /// table subscriptions RealtimeEngine owns because member events
+  /// don't apply row-side — they invalidate Riverpod providers instead.
+  RealtimeSubscription? _householdMembersSub;
+  List<String> _householdMembersScope = const [];
+
   @override
   void initState() {
     super.initState();
@@ -171,6 +180,7 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
               householdIds: list.map((h) => h.id).toList(),
             ) ??
             Future.value());
+        _rewireHouseholdMembersSubscription(list);
       },
       fireImmediately: true,
     );
@@ -188,6 +198,47 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
         _kickPull(list);
       });
     }
+  }
+
+  /// Subscribe to `household_members` postgres_changes for the
+  /// current scope. On any event (join, leave, role change) we don't
+  /// try to reconcile the row — we just invalidate the two providers
+  /// that render the members list, which re-fetch via PostgREST.
+  /// Simpler than teaching PullEngine.applyRow about a cloud-only
+  /// table.
+  void _rewireHouseholdMembersSubscription(List<Household> households) {
+    final source = ref.read(realtimeSourceProvider);
+    if (source == null) return;
+    final ids = households.map((h) => h.id).toList()..sort();
+    // Only reconfigure when the scope actually changed, otherwise a
+    // households-list re-emit with same members thrashes the sub.
+    if (_sameScope(ids, _householdMembersScope)) return;
+    _householdMembersSub?.dispose();
+    _householdMembersSub = source.subscribeChanges(
+      table: 'household_members',
+      householdIds: ids,
+      onChange: (_) {
+        // A member changed — refresh the households list (member
+        // counts) and every per-household members query in scope.
+        // ref.invalidate on an uninvalidated family key is a no-op so
+        // we can just spray.
+        ref.invalidate(myHouseholdsProvider);
+        for (final hid in ids) {
+          ref.invalidate(householdMembersProvider(hid));
+        }
+      },
+    );
+    _householdMembersScope = ids;
+  }
+
+  /// Cheap same-list check for two sorted lists — enough for the
+  /// household-scope compare above without pulling in `collection`.
+  bool _sameScope(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   Future<void> _kickPull(List<Household> households) async {
@@ -236,6 +287,7 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _householdMembersSub?.dispose();
     super.dispose();
   }
 
