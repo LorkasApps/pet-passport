@@ -357,6 +357,7 @@ class EventsRepository {
                 uuid: p.uuid,
                 title: p.title,
                 filePath: p.filePath,
+                storageKey: p.storageKey,
                 mimeType: p.mimeType,
                 sizeBytes: p.sizeBytes,
                 createdAt: p.createdAt,

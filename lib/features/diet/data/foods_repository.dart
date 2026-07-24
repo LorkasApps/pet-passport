@@ -297,6 +297,7 @@ class FoodsRepository {
       uuid: row.uuid,
       title: row.title,
       filePath: row.filePath,
+      storageKey: row.storageKey,
       mimeType: row.mimeType,
       originalFilename: row.originalFilename,
       sizeBytes: row.sizeBytes,

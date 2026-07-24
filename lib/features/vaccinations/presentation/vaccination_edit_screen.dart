@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../../core/widgets/rename_dialog.dart';
-import '../../pets/application/pets_providers.dart';
 import '../../vets/application/vets_providers.dart';
 import '../../vets/domain/vet.dart';
+import '../../sync/presentation/media_resolver.dart';
 import '../application/vaccinations_providers.dart';
 import '../domain/vaccination.dart';
 
@@ -192,7 +191,7 @@ class _VaccinationEditScreenState
                 subtitle: doc.sizeBytes == null
                     ? null
                     : Text(_formatSize(doc.sizeBytes!)),
-                onTap: () => _openDoc(context, doc.filePath),
+                onTap: () => openMedia(context, ref, relativePath: doc.filePath, storageKey: doc.storageKey),
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) async {
                     switch (v) {
@@ -295,17 +294,6 @@ class _VaccinationEditScreenState
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  Future<void> _openDoc(BuildContext context, String relativePath) async {
-    final l = AppL10n.of(context);
-    final absolute =
-        await ref.read(mediaServiceProvider).resolve(relativePath);
-    final result = await OpenFilex.open(absolute);
-    if (result.type != ResultType.done && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.launchFailed)),
-      );
-    }
-  }
 
   Future<void> _confirmDelete(AppL10n l) async {
     final confirmed = await showDialog<bool>(

@@ -270,6 +270,7 @@ class VaccinationsRepository {
                 uuid: d.uuid,
                 title: d.title,
                 filePath: d.filePath,
+                storageKey: d.storageKey,
                 mimeType: d.mimeType,
                 originalFilename: d.originalFilename,
                 sizeBytes: d.sizeBytes,

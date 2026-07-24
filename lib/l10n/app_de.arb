@@ -160,6 +160,8 @@
   "overviewVetsTile": "Tierärzte",
   "overviewInsurancesTile": "Versicherungen",
   "launchFailed": "Keine App für diese Aktion verfügbar.",
+  "mediaDownloading": "Wird geladen…",
+  "mediaUnavailable": "Datei nicht verfügbar",
   "copiedToClipboard": "In Zwischenablage kopiert",
 
   "vaccinationsListTitle": "Impfungen",

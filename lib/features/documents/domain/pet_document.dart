@@ -7,6 +7,7 @@ class PetDocument {
     required this.petUuid,
     this.title,
     required this.filePath,
+    this.storageKey,
     required this.mimeType,
     this.originalFilename,
     this.sizeBytes,
@@ -19,6 +20,7 @@ class PetDocument {
   final String petUuid;
   final String? title;
   final String filePath;
+  final String? storageKey;
   final String mimeType;
   final String? originalFilename;
   final int? sizeBytes;

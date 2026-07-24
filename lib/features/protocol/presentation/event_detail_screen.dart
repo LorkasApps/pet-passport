@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
-import '../../pets/application/pets_providers.dart';
+import '../../sync/presentation/media_resolver.dart';
 import '../application/events_providers.dart';
 import '../domain/event.dart';
 import '../domain/event_enums.dart';
@@ -133,7 +132,7 @@ class EventDetailScreen extends ConsumerWidget {
                   ActionChip(
                     avatar: const Icon(Icons.image_outlined, size: 18),
                     label: Text(p.uuid.substring(0, 6)),
-                    onPressed: () => _openPhoto(context, ref, p.filePath, l),
+                    onPressed: () => openMedia(context, ref, relativePath: p.filePath, storageKey: p.storageKey),
                   ),
               ],
             ),
@@ -197,20 +196,6 @@ class EventDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openPhoto(
-    BuildContext context,
-    WidgetRef ref,
-    String relativePath,
-    AppL10n l,
-  ) async {
-    final absolute =
-        await ref.read(mediaServiceProvider).resolve(relativePath);
-    final result = await OpenFilex.open(absolute);
-    if (result.type != ResultType.done && context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l.launchFailed)));
-    }
-  }
 
   Future<void> _confirmDelete(
     BuildContext context,

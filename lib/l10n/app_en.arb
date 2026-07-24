@@ -174,6 +174,8 @@
   "overviewVetsTile": "Vets",
   "overviewInsurancesTile": "Insurances",
   "launchFailed": "No app available for this action.",
+  "mediaDownloading": "Downloading…",
+  "mediaUnavailable": "File unavailable",
   "copiedToClipboard": "Copied to clipboard",
 
   "vaccinationsListTitle": "Vaccinations",

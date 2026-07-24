@@ -466,6 +466,12 @@ class AppL10nEn extends AppL10n {
   String get launchFailed => 'No app available for this action.';
 
   @override
+  String get mediaDownloading => 'Downloading…';
+
+  @override
+  String get mediaUnavailable => 'File unavailable';
+
+  @override
   String get copiedToClipboard => 'Copied to clipboard';
 
   @override

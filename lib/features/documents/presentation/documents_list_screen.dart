@@ -4,12 +4,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../../core/widgets/empty_state.dart';
 import '../../pets/application/current_pet_provider.dart';
-import '../../pets/application/pets_providers.dart';
+import '../../sync/presentation/media_resolver.dart';
 import '../application/documents_providers.dart';
 import '../domain/pet_document.dart';
 
@@ -145,7 +144,7 @@ class _DocTile extends ConsumerWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
-      onTap: () => _open(context, ref, doc.filePath),
+      onTap: () => openMedia(context, ref, relativePath: doc.filePath, storageKey: doc.storageKey),
       trailing: PopupMenuButton<String>(
         onSelected: (v) async {
           switch (v) {
@@ -168,17 +167,6 @@ class _DocTile extends ConsumerWidget {
   }
 }
 
-Future<void> _open(
-    BuildContext context, WidgetRef ref, String relativePath) async {
-  final absolute = await ref.read(mediaServiceProvider).resolve(relativePath);
-  final result = await OpenFilex.open(absolute);
-  if (result.type != ResultType.done && context.mounted) {
-    final l = AppL10n.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l.launchFailed)),
-    );
-  }
-}
 
 Future<void> _editDialog(
     BuildContext context, WidgetRef ref, PetDocument doc) async {

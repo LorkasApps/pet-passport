@@ -949,6 +949,18 @@ abstract class AppL10n {
   /// **'No app available for this action.'**
   String get launchFailed;
 
+  /// No description provided for @mediaDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get mediaDownloading;
+
+  /// No description provided for @mediaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'File unavailable'**
+  String get mediaUnavailable;
+
   /// No description provided for @copiedToClipboard.
   ///
   /// In en, this message translates to:

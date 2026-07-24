@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../application/pets_providers.dart';
+import '../../../sync/presentation/media_resolver.dart';
 import '../../domain/pet.dart';
 import '../../domain/pet_enums.dart';
 
@@ -17,45 +15,47 @@ class PetAvatar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final path = pet.profilePhotoPath;
+    final storageKey = pet.profilePhotoStorageKey;
     return Semantics(
       image: true,
       label: pet.name,
-      child: _buildAvatar(context, ref, scheme, path),
+      child: _buildAvatar(scheme, path, storageKey),
     );
   }
 
   Widget _buildAvatar(
-    BuildContext context,
-    WidgetRef ref,
     ColorScheme scheme,
     String? path,
+    String? storageKey,
   ) {
-    if (path == null || path.isEmpty) {
-      return CircleAvatar(
+    // Nothing at all → show the species-icon fallback.
+    if ((path == null || path.isEmpty) &&
+        (storageKey == null || storageKey.isEmpty)) {
+      return _placeholder(scheme, withIcon: true);
+    }
+    return MediaAsset(
+      relativePath: path,
+      storageKey: storageKey,
+      placeholder: _placeholder(scheme),
+      builder: (context, file) => CircleAvatar(
         radius: radius,
         backgroundColor: scheme.secondaryContainer,
-        child: Icon(
-          _fallbackIcon(pet.species),
-          size: radius,
-          color: scheme.onSecondaryContainer,
-        ),
-      );
-    }
-    return FutureBuilder<String>(
-      future: ref.read(mediaServiceProvider).resolve(path),
-      builder: (context, snap) {
-        if (!snap.hasData) {
-          return CircleAvatar(
-            radius: radius,
-            backgroundColor: scheme.secondaryContainer,
-          );
-        }
-        return CircleAvatar(
-          radius: radius,
-          backgroundColor: scheme.secondaryContainer,
-          backgroundImage: FileImage(File(snap.data!)),
-        );
-      },
+        backgroundImage: FileImage(file),
+      ),
+    );
+  }
+
+  Widget _placeholder(ColorScheme scheme, {bool withIcon = false}) {
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: scheme.secondaryContainer,
+      child: withIcon
+          ? Icon(
+              _fallbackIcon(pet.species),
+              size: radius,
+              color: scheme.onSecondaryContainer,
+            )
+          : null,
     );
   }
 

@@ -6,6 +6,7 @@ class PetPassportDocument {
     required this.uuid,
     this.title,
     required this.filePath,
+    this.storageKey,
     required this.mimeType,
     this.originalFilename,
     this.sizeBytes,
@@ -15,6 +16,7 @@ class PetPassportDocument {
   final String uuid;
   final String? title;
   final String filePath;
+  final String? storageKey;
   final String mimeType;
   final String? originalFilename;
   final int? sizeBytes;

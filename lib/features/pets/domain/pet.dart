@@ -19,6 +19,7 @@ class Pet {
     this.tassoRegisteredAt,
     this.vaccinationPassportNumber,
     this.profilePhotoPath,
+    this.profilePhotoStorageKey,
     this.allergies,
     this.notes,
     required this.createdAt,
@@ -42,6 +43,7 @@ class Pet {
   final DateTime? tassoRegisteredAt;
   final String? vaccinationPassportNumber;
   final String? profilePhotoPath;
+  final String? profilePhotoStorageKey;
   final String? allergies;
   final String? notes;
   final DateTime createdAt;
@@ -64,6 +66,7 @@ class Pet {
     DateTime? Function()? tassoRegisteredAt,
     String? Function()? vaccinationPassportNumber,
     String? Function()? profilePhotoPath,
+    String? Function()? profilePhotoStorageKey,
     String? Function()? allergies,
     String? Function()? notes,
     DateTime? updatedAt,
@@ -92,6 +95,9 @@ class Pet {
       profilePhotoPath: profilePhotoPath != null
           ? profilePhotoPath()
           : this.profilePhotoPath,
+      profilePhotoStorageKey: profilePhotoStorageKey != null
+          ? profilePhotoStorageKey()
+          : this.profilePhotoStorageKey,
       allergies: allergies != null ? allergies() : this.allergies,
       notes: notes != null ? notes() : this.notes,
       createdAt: createdAt,

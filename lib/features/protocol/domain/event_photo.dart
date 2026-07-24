@@ -6,6 +6,7 @@ class EventPhoto {
     required this.uuid,
     this.title,
     required this.filePath,
+    this.storageKey,
     required this.mimeType,
     this.sizeBytes,
     required this.createdAt,
@@ -14,6 +15,7 @@ class EventPhoto {
   final String uuid;
   final String? title;
   final String filePath;
+  final String? storageKey;
   final String mimeType;
   final int? sizeBytes;
   final DateTime createdAt;

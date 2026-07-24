@@ -468,6 +468,12 @@ class AppL10nDe extends AppL10n {
   String get launchFailed => 'Keine App für diese Aktion verfügbar.';
 
   @override
+  String get mediaDownloading => 'Wird geladen…';
+
+  @override
+  String get mediaUnavailable => 'Datei nicht verfügbar';
+
+  @override
   String get copiedToClipboard => 'In Zwischenablage kopiert';
 
   @override

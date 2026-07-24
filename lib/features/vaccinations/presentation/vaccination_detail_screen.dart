@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
-import '../../pets/application/pets_providers.dart';
 import '../../vets/application/vets_providers.dart';
+import '../../sync/presentation/media_resolver.dart';
 import '../application/vaccinations_providers.dart';
 import '../domain/vaccination.dart';
 
@@ -177,7 +176,7 @@ class _Content extends ConsumerWidget {
                         ),
                         trailing: const Icon(Icons.open_in_new, size: 18),
                         onTap: () =>
-                            _openDoc(context, ref, doc.filePath),
+                            openMedia(context, ref, relativePath: doc.filePath, storageKey: doc.storageKey),
                       ),
                   ],
                 ),
@@ -189,16 +188,4 @@ class _Content extends ConsumerWidget {
     );
   }
 
-  Future<void> _openDoc(
-      BuildContext context, WidgetRef ref, String relativePath) async {
-    final l = AppL10n.of(context);
-    final absolute =
-        await ref.read(mediaServiceProvider).resolve(relativePath);
-    final result = await OpenFilex.open(absolute);
-    if (result.type != ResultType.done && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.launchFailed)),
-      );
-    }
-  }
 }

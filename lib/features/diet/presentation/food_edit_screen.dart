@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../../core/widgets/rename_dialog.dart';
-import '../../pets/application/pets_providers.dart';
+import '../../sync/presentation/media_resolver.dart';
 import '../application/foods_providers.dart';
 import '../domain/food.dart';
 import '../domain/food_enums.dart';
@@ -240,15 +239,8 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
     }
   }
 
-  Future<void> _openPhoto(String relativePath) async {
-    final absolute = await ref.read(mediaServiceProvider).resolve(relativePath);
-    final result = await OpenFilex.open(absolute);
-    if (result.type != ResultType.done && mounted) {
-      final l = AppL10n.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.launchFailed)),
-      );
-    }
+  Future<void> _openPhoto(String relativePath, String? storageKey) async {
+    await openMedia(context, ref, relativePath: relativePath, storageKey: storageKey);
   }
 
   String _mimeFor(String? ext) {
@@ -418,7 +410,7 @@ class _FoodEditScreenState extends ConsumerState<FoodEditScreen> {
                   : const [],
               pending: _pendingPhotos,
               onAdd: _attachPhoto,
-              onOpenSaved: _openPhoto,
+              onOpenSaved: (p) => _openPhoto(p.filePath, p.storageKey),
               onRenameSaved: _renameSavedPhoto,
               onRemoveSaved: (uuid) =>
                   ref.read(foodsRepositoryProvider).removePhoto(uuid),
@@ -466,7 +458,7 @@ class _PhotoSection extends StatelessWidget {
   final List<FoodPhoto> savedPhotos;
   final List<_PendingPhoto> pending;
   final VoidCallback onAdd;
-  final ValueChanged<String> onOpenSaved;
+  final ValueChanged<FoodPhoto> onOpenSaved;
   final ValueChanged<FoodPhoto> onRenameSaved;
   final ValueChanged<String> onRemoveSaved;
   final ValueChanged<int> onRemovePending;
@@ -485,7 +477,7 @@ class _PhotoSection extends StatelessWidget {
               p.displayName(),
               style: const TextStyle(fontSize: 12),
             ),
-            onPressed: () => onOpenSaved(p.filePath),
+            onPressed: () => onOpenSaved(p),
             onDeleted: () => onRemoveSaved(p.uuid),
             deleteIcon: const Icon(Icons.close, size: 18),
           ),

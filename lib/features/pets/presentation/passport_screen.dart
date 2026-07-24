@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../../core/widgets/rename_dialog.dart';
 import '../application/current_pet_provider.dart';
 import '../application/pets_providers.dart';
+import '../../sync/presentation/media_resolver.dart';
 import '../domain/pet.dart';
 import '../domain/pet_passport_document.dart';
 
@@ -76,15 +76,13 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
         );
   }
 
-  Future<void> _openDoc(String relativePath) async {
-    final absolute = await ref.read(mediaServiceProvider).resolve(relativePath);
-    final result = await OpenFilex.open(absolute);
-    if (result.type != ResultType.done && mounted) {
-      final l = AppL10n.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.launchFailed)),
-      );
-    }
+  Future<void> _openDoc(
+    BuildContext context,
+    WidgetRef ref,
+    String relativePath,
+    String? storageKey,
+  ) async {
+    await openMedia(context, ref, relativePath: relativePath, storageKey: storageKey);
   }
 
   String _mimeFor(String? ext) {
@@ -222,7 +220,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen> {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: d.sizeBytes == null ? null : Text(_formatSize(d.sizeBytes!)),
-      onTap: () => _openDoc(d.filePath),
+      onTap: () => _openDoc(context, ref, d.filePath, d.storageKey),
       trailing: PopupMenuButton<String>(
         onSelected: (v) async {
           switch (v) {
