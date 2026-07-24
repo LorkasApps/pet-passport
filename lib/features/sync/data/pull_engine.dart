@@ -65,6 +65,12 @@ class PullEngine {
     'medications',
     // appointments reference pets + vets + contacts → after all three.
     'appointments',
+    // Nested attachment tables — must come after their respective parents.
+    'event_photos',       // after events
+    'food_photos',        // after foods
+    'insurance_documents',
+    'vaccination_documents',
+    'pet_passport_documents',
   ];
 
   Future<PullResult> pullOnce({required List<String> householdIds}) async {
@@ -200,6 +206,14 @@ class PullEngine {
         return (await _db.vetsDao.getByUuidIncludingDeleted(uuid))?.id;
       case 'contacts':
         return (await _db.contactsDao.getByUuidIncludingDeleted(uuid))?.id;
+      case 'events':
+        return (await _db.eventsDao.getByUuidIncludingDeleted(uuid))?.id;
+      case 'foods':
+        return (await _db.foodsDao.getByUuidIncludingDeleted(uuid))?.id;
+      case 'insurances':
+        return (await _db.insurancesDao.getByUuidIncludingDeleted(uuid))?.id;
+      case 'vaccinations':
+        return (await _db.vaccinationsDao.getByUuidIncludingDeleted(uuid))?.id;
     }
     return null;
   }
@@ -229,6 +243,16 @@ class PullEngine {
         return _applyMedications(row);
       case 'appointments':
         return _applyAppointments(row);
+      case 'event_photos':
+        return _applyEventPhotos(row);
+      case 'food_photos':
+        return _applyFoodPhotos(row);
+      case 'insurance_documents':
+        return _applyInsuranceDocuments(row);
+      case 'vaccination_documents':
+        return _applyVaccinationDocuments(row);
+      case 'pet_passport_documents':
+        return _applyPetPassportDocuments(row);
     }
     throw UnimplementedError('pull apply for $table not wired yet');
   }
@@ -579,6 +603,160 @@ class PullEngine {
     return _ApplyOutcome.wrote;
   }
 
+  Future<_ApplyOutcome> _applyEventPhotos(Map<String, dynamic> row) async {
+    final uuid = row['uuid'] as String;
+    final incomingUa = row['updatedAt'] as int;
+    final existing = await _db.eventPhotosDao.getByUuidIncludingDeleted(uuid);
+    if (existing != null &&
+        existing.updatedAt.millisecondsSinceEpoch >= incomingUa) {
+      return _ApplyOutcome.lwwSkipped;
+    }
+
+    final companion = EventPhotosCompanion(
+      uuid: Value(uuid),
+      eventId: Value(row['eventId'] as int),
+      title: Value(row['title'] as String?),
+      filePath: Value((row['filePath'] as String?) ?? ''),
+      storageKey: Value(row['storageKey'] as String?),
+      mimeType: Value(row['mimeType'] as String),
+      sizeBytes: Value(row['sizeBytes'] as int?),
+      createdAt: Value(_toDateTime(row['createdAt'])!),
+      updatedAt: Value(_toDateTime(row['updatedAt'])!),
+      householdId: Value(row['householdId'] as String?),
+      updatedByUserId: Value(row['updatedByUserId'] as String?),
+      deletedAt: Value(_toDateTime(row['deletedAt'])),
+    );
+
+    await _db
+        .into(_db.eventPhotos)
+        .insert(companion, onConflict: DoUpdate((_) => companion, target: [_db.eventPhotos.uuid]));
+    return _ApplyOutcome.wrote;
+  }
+
+  Future<_ApplyOutcome> _applyFoodPhotos(Map<String, dynamic> row) async {
+    final uuid = row['uuid'] as String;
+    final incomingUa = row['updatedAt'] as int;
+    final existing = await _db.foodPhotosDao.getByUuidIncludingDeleted(uuid);
+    if (existing != null &&
+        existing.updatedAt.millisecondsSinceEpoch >= incomingUa) {
+      return _ApplyOutcome.lwwSkipped;
+    }
+
+    final companion = FoodPhotosCompanion(
+      uuid: Value(uuid),
+      foodId: Value(row['foodId'] as int),
+      title: Value(row['title'] as String?),
+      filePath: Value((row['filePath'] as String?) ?? ''),
+      storageKey: Value(row['storageKey'] as String?),
+      mimeType: Value(row['mimeType'] as String),
+      originalFilename: Value(row['originalFilename'] as String?),
+      sizeBytes: Value(row['sizeBytes'] as int?),
+      createdAt: Value(_toDateTime(row['createdAt'])!),
+      updatedAt: Value(_toDateTime(row['updatedAt'])!),
+      householdId: Value(row['householdId'] as String?),
+      updatedByUserId: Value(row['updatedByUserId'] as String?),
+      deletedAt: Value(_toDateTime(row['deletedAt'])),
+    );
+
+    await _db
+        .into(_db.foodPhotos)
+        .insert(companion, onConflict: DoUpdate((_) => companion, target: [_db.foodPhotos.uuid]));
+    return _ApplyOutcome.wrote;
+  }
+
+  Future<_ApplyOutcome> _applyInsuranceDocuments(Map<String, dynamic> row) async {
+    final uuid = row['uuid'] as String;
+    final incomingUa = row['updatedAt'] as int;
+    final existing = await _db.insuranceDocumentsDao.getByUuidIncludingDeleted(uuid);
+    if (existing != null &&
+        existing.updatedAt.millisecondsSinceEpoch >= incomingUa) {
+      return _ApplyOutcome.lwwSkipped;
+    }
+
+    final companion = InsuranceDocumentsCompanion(
+      uuid: Value(uuid),
+      insuranceId: Value(row['insuranceId'] as int),
+      title: Value(row['title'] as String?),
+      filePath: Value((row['filePath'] as String?) ?? ''),
+      storageKey: Value(row['storageKey'] as String?),
+      mimeType: Value(row['mimeType'] as String),
+      originalFilename: Value(row['originalFilename'] as String?),
+      sizeBytes: Value(row['sizeBytes'] as int?),
+      createdAt: Value(_toDateTime(row['createdAt'])!),
+      updatedAt: Value(_toDateTime(row['updatedAt'])!),
+      householdId: Value(row['householdId'] as String?),
+      updatedByUserId: Value(row['updatedByUserId'] as String?),
+      deletedAt: Value(_toDateTime(row['deletedAt'])),
+    );
+
+    await _db
+        .into(_db.insuranceDocuments)
+        .insert(companion, onConflict: DoUpdate((_) => companion, target: [_db.insuranceDocuments.uuid]));
+    return _ApplyOutcome.wrote;
+  }
+
+  Future<_ApplyOutcome> _applyVaccinationDocuments(Map<String, dynamic> row) async {
+    final uuid = row['uuid'] as String;
+    final incomingUa = row['updatedAt'] as int;
+    final existing = await _db.vaccinationDocumentsDao.getByUuidIncludingDeleted(uuid);
+    if (existing != null &&
+        existing.updatedAt.millisecondsSinceEpoch >= incomingUa) {
+      return _ApplyOutcome.lwwSkipped;
+    }
+
+    final companion = VaccinationDocumentsCompanion(
+      uuid: Value(uuid),
+      vaccinationId: Value(row['vaccinationId'] as int),
+      title: Value(row['title'] as String?),
+      filePath: Value((row['filePath'] as String?) ?? ''),
+      storageKey: Value(row['storageKey'] as String?),
+      mimeType: Value(row['mimeType'] as String),
+      originalFilename: Value(row['originalFilename'] as String?),
+      sizeBytes: Value(row['sizeBytes'] as int?),
+      createdAt: Value(_toDateTime(row['createdAt'])!),
+      updatedAt: Value(_toDateTime(row['updatedAt'])!),
+      householdId: Value(row['householdId'] as String?),
+      updatedByUserId: Value(row['updatedByUserId'] as String?),
+      deletedAt: Value(_toDateTime(row['deletedAt'])),
+    );
+
+    await _db
+        .into(_db.vaccinationDocuments)
+        .insert(companion, onConflict: DoUpdate((_) => companion, target: [_db.vaccinationDocuments.uuid]));
+    return _ApplyOutcome.wrote;
+  }
+
+  Future<_ApplyOutcome> _applyPetPassportDocuments(Map<String, dynamic> row) async {
+    final uuid = row['uuid'] as String;
+    final incomingUa = row['updatedAt'] as int;
+    final existing = await _db.petPassportDocumentsDao.getByUuidIncludingDeleted(uuid);
+    if (existing != null &&
+        existing.updatedAt.millisecondsSinceEpoch >= incomingUa) {
+      return _ApplyOutcome.lwwSkipped;
+    }
+
+    final companion = PetPassportDocumentsCompanion(
+      uuid: Value(uuid),
+      petId: Value(row['petId'] as int),
+      title: Value(row['title'] as String?),
+      filePath: Value((row['filePath'] as String?) ?? ''),
+      storageKey: Value(row['storageKey'] as String?),
+      mimeType: Value(row['mimeType'] as String),
+      originalFilename: Value(row['originalFilename'] as String?),
+      sizeBytes: Value(row['sizeBytes'] as int?),
+      createdAt: Value(_toDateTime(row['createdAt'])!),
+      updatedAt: Value(_toDateTime(row['updatedAt'])!),
+      householdId: Value(row['householdId'] as String?),
+      updatedByUserId: Value(row['updatedByUserId'] as String?),
+      deletedAt: Value(_toDateTime(row['deletedAt'])),
+    );
+
+    await _db
+        .into(_db.petPassportDocuments)
+        .insert(companion, onConflict: DoUpdate((_) => companion, target: [_db.petPassportDocuments.uuid]));
+    return _ApplyOutcome.wrote;
+  }
+
   DateTime? _toDateTime(dynamic v) {
     if (v == null) return null;
     if (v is int) return DateTime.fromMillisecondsSinceEpoch(v, isUtc: true);
@@ -607,6 +785,11 @@ const _incomingFkMap = <String, List<_IncomingFk>>{
   'insurances': [_IncomingFk('petId', 'pets', required: true)],
   'events': [_IncomingFk('petId', 'pets', required: true)],
   'pet_documents': [_IncomingFk('petId', 'pets', required: true)],
+  'event_photos': [_IncomingFk('eventId', 'events', required: true)],
+  'food_photos': [_IncomingFk('foodId', 'foods', required: true)],
+  'insurance_documents': [_IncomingFk('insuranceId', 'insurances', required: true)],
+  'vaccination_documents': [_IncomingFk('vaccinationId', 'vaccinations', required: true)],
+  'pet_passport_documents': [_IncomingFk('petId', 'pets', required: true)],
 };
 
 class _IncomingFk {

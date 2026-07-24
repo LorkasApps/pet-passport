@@ -32,6 +32,11 @@ class InsurancesDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  Future<InsuranceRow?> getById(int id) {
+    return (select(insurances)..where((i) => i.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   Stream<InsuranceRow?> watchByUuid(String uuid) {
     return (select(insurances)..where((i) => i.uuid.equals(uuid) & i.deletedAt.isNull()))
         .watchSingleOrNull();

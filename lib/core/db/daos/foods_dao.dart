@@ -41,6 +41,11 @@ class FoodsDao extends DatabaseAccessor<AppDatabase> with _$FoodsDaoMixin {
         .getSingleOrNull();
   }
 
+  Future<FoodRow?> getById(int id) {
+    return (select(foods)..where((f) => f.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   Stream<FoodRow?> watchByUuid(String uuid) {
     return (select(foods)..where((f) => f.uuid.equals(uuid) & f.deletedAt.isNull()))
         .watchSingleOrNull();

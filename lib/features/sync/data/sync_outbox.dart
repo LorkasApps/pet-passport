@@ -86,6 +86,14 @@ class SyncOutbox {
         return (await _db.vetsDao.getById(id))?.uuid;
       case 'contacts':
         return (await _db.contactsDao.getById(id))?.uuid;
+      case 'events':
+        return (await _db.eventsDao.getById(id))?.uuid;
+      case 'foods':
+        return (await _db.foodsDao.getById(id))?.uuid;
+      case 'insurances':
+        return (await _db.insurancesDao.getById(id))?.uuid;
+      case 'vaccinations':
+        return (await _db.vaccinationsDao.getById(id))?.uuid;
     }
     return null;
   }
@@ -114,6 +122,12 @@ const _fkMap = <String, List<_Fk>>{
   'insurances': [_Fk('petId', 'pets')],
   'events': [_Fk('petId', 'pets')],
   'pet_documents': [_Fk('petId', 'pets')],
+  // Nested attachment surfaces — FK points at their respective parent.
+  'event_photos': [_Fk('eventId', 'events')],
+  'food_photos': [_Fk('foodId', 'foods')],
+  'insurance_documents': [_Fk('insuranceId', 'insurances')],
+  'vaccination_documents': [_Fk('vaccinationId', 'vaccinations')],
+  'pet_passport_documents': [_Fk('petId', 'pets')],
 };
 
 class _Fk {

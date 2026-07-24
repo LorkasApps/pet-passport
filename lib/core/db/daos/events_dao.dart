@@ -60,6 +60,13 @@ class EventsDao extends DatabaseAccessor<AppDatabase> with _$EventsDaoMixin {
         .getSingleOrNull();
   }
 
+  /// Local-id lookup used by the sync-outbox FK resolver to translate
+  /// a child row's parent int-FK into the parent's uuid.
+  Future<EventRow?> getById(int id) {
+    return (select(events)..where((e) => e.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   Stream<EventRow?> watchByUuid(String uuid) {
     return (select(events)..where((e) => e.uuid.equals(uuid) & e.deletedAt.isNull()))
         .watchSingleOrNull();

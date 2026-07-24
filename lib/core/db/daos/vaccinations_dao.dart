@@ -57,6 +57,11 @@ class VaccinationsDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  Future<VaccinationRow?> getById(int id) {
+    return (select(vaccinations)..where((v) => v.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   Stream<VaccinationRow?> watchByUuid(String uuid) {
     return (select(vaccinations)..where((v) => v.uuid.equals(uuid) & v.deletedAt.isNull()))
         .watchSingleOrNull();

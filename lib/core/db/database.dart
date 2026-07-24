@@ -9,16 +9,21 @@ import '../../features/pets/domain/pet_enums.dart';
 import '../../features/protocol/domain/event_enums.dart';
 import 'daos/appointments_dao.dart';
 import 'daos/contacts_dao.dart';
+import 'daos/event_photos_dao.dart';
 import 'daos/events_dao.dart';
+import 'daos/food_photos_dao.dart';
+import 'daos/insurance_documents_dao.dart';
 import 'daos/pending_media_ops_dao.dart';
 import 'daos/pending_ops_dao.dart';
 import 'daos/pet_documents_dao.dart';
+import 'daos/pet_passport_documents_dao.dart';
 import 'daos/foods_dao.dart';
 import 'daos/insurances_dao.dart';
 import 'daos/medications_dao.dart';
 import 'daos/pets_dao.dart';
 import 'daos/settings_dao.dart';
 import 'daos/sync_cursors_dao.dart';
+import 'daos/vaccination_documents_dao.dart';
 import 'daos/vaccinations_dao.dart';
 import 'daos/vets_dao.dart';
 import 'tables/app_settings_table.dart';
@@ -91,6 +96,11 @@ part 'database.g.dart';
     FoodsDao,
     ContactsDao,
     PetDocumentsDao,
+    EventPhotosDao,
+    FoodPhotosDao,
+    InsuranceDocumentsDao,
+    VaccinationDocumentsDao,
+    PetPassportDocumentsDao,
     PendingOpsDao,
     PendingMediaOpsDao,
     SyncCursorsDao,
