@@ -20,6 +20,26 @@ abstract class CloudApi {
     required String uuid,
     required Map<String, dynamic> payload,
   });
+
+  /// Delta-pull: fetch rows from [table] that changed after [since],
+  /// scoped to [householdIds]. Result rows are in cloud shape
+  /// (snake_case columns, ISO-8601 datetimes). The pull engine
+  /// translates them back to local shape and applies.
+  ///
+  /// [since] null = "everything I can see" — used for the very first
+  /// pull on a fresh install / after a cursor reset.
+  ///
+  /// Ordering: ascending `updated_at`. The pull engine advances the
+  /// per-table cursor to the max `updated_at` of the returned page.
+  /// A [limit] guard bounds a page (default 500) so a very large
+  /// household doesn't blow up the response — the pull engine loops
+  /// until fewer than [limit] rows come back.
+  Future<CloudFetchResult> fetchChangesSince({
+    required String table,
+    required DateTime? since,
+    required List<String> householdIds,
+    int limit = 500,
+  });
 }
 
 /// Outcome of a single upsert attempt. The push worker branches on this
@@ -48,4 +68,17 @@ class CloudUpsertRetryable extends CloudUpsertResult {
 class CloudUpsertTerminal extends CloudUpsertResult {
   const CloudUpsertTerminal(this.reason);
   final String reason;
+}
+
+/// One page of pulled rows plus a hint about whether more might be
+/// waiting behind them. The pull engine calls fetchChangesSince in a
+/// loop until [maybeMore] is false.
+class CloudFetchResult {
+  const CloudFetchResult({
+    required this.rows,
+    required this.maybeMore,
+  });
+
+  final List<Map<String, dynamic>> rows;
+  final bool maybeMore;
 }

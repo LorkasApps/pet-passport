@@ -54,6 +54,47 @@ class FakeCloudApi implements CloudApi {
 
   Map<String, dynamic>? find(String table, String uuid) =>
       rows[table]?[uuid];
+
+  /// Direct-seed a row for pull tests — bypasses upsert so tests can
+  /// stand up a remote-side state without going through the outbox
+  /// machinery first.
+  void seed(String table, Map<String, dynamic> row) {
+    final id = row['id'] as String;
+    rows.putIfAbsent(table, () => {})[id] = Map.of(row);
+  }
+
+  @override
+  Future<CloudFetchResult> fetchChangesSince({
+    required String table,
+    required DateTime? since,
+    required List<String> householdIds,
+    int limit = 500,
+  }) async {
+    final store = rows[table] ?? const {};
+    // ISO string comparison works for `updated_at`: lexicographic
+    // order matches chronological order for canonical ISO-8601.
+    final cutoff = since?.toUtc().toIso8601String();
+    final matched = <Map<String, dynamic>>[];
+    for (final row in store.values) {
+      final hid = row['household_id'] as String?;
+      if (hid == null || !householdIds.contains(hid)) continue;
+      if (cutoff != null) {
+        final ua = row['updated_at'] as String?;
+        if (ua == null || ua.compareTo(cutoff) <= 0) continue;
+      }
+      matched.add(Map.of(row));
+    }
+    matched.sort((a, b) {
+      final ua = a['updated_at'] as String? ?? '';
+      final ub = b['updated_at'] as String? ?? '';
+      return ua.compareTo(ub);
+    });
+    final page = matched.take(limit).toList(growable: false);
+    return CloudFetchResult(
+      rows: page,
+      maybeMore: matched.length > limit,
+    );
+  }
 }
 
 class FakeUpsertCall {

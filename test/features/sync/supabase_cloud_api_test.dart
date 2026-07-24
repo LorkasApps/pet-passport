@@ -119,6 +119,66 @@ void main() {
     });
   });
 
+  group('fromCloudShape', () {
+    test('renames `id` back to `uuid` (local PK name)', () {
+      final out = fromCloudShape({
+        'id': 'abc-123',
+        'name': 'Bello',
+      });
+      expect(out.containsKey('uuid'), isTrue);
+      expect(out['uuid'], 'abc-123');
+      expect(out.containsKey('id'), isFalse);
+    });
+
+    test('snake_case keys turn back into camelCase', () {
+      final out = fromCloudShape({
+        'name': 'Bello',
+        'updated_by_user_id': 'user-1',
+      });
+      expect(out.keys.toSet(), {'name', 'updatedByUserId'});
+      expect(out['updatedByUserId'], 'user-1');
+    });
+
+    test('ISO-8601 datetimes turn back into int millis', () {
+      final at = DateTime.utc(2026, 7, 24, 12);
+      final iso = at.toIso8601String();
+      final out = fromCloudShape({
+        'updated_at': iso,
+        'starts_at': iso,
+        'ends_at': null,
+      });
+      expect(out['updatedAt'], at.millisecondsSinceEpoch);
+      expect(out['startsAt'], at.millisecondsSinceEpoch);
+      expect(out['endsAt'], isNull);
+    });
+
+    test('round-trip: toCloudShape → fromCloudShape is identity', () {
+      final at = DateTime.utc(2026, 7, 24, 12);
+      final local = {
+        'uuid': 'abc-123',
+        'name': 'Bello',
+        'updatedAt': at.millisecondsSinceEpoch,
+        'deletedAt': null,
+        'sizeBytes': 1024,
+        'isActive': true,
+      };
+      final roundTripped = fromCloudShape(toCloudShape(local));
+      expect(roundTripped, equals(local));
+    });
+  });
+
+  group('snakeToCamel', () {
+    test('single word passes through', () {
+      expect(snakeToCamel('name'), 'name');
+    });
+    test('multiple segments', () {
+      expect(snakeToCamel('updated_by_user_id'), 'updatedByUserId');
+    });
+    test('two-segment', () {
+      expect(snakeToCamel('pet_id'), 'petId');
+    });
+  });
+
   group('camelToSnake', () {
     test('handles single word', () {
       expect(camelToSnake('name'), 'name');

@@ -78,6 +78,37 @@ class SupabaseCloudApi implements CloudApi {
     } catch (_) {}
     return 500;
   }
+
+  @override
+  Future<CloudFetchResult> fetchChangesSince({
+    required String table,
+    required DateTime? since,
+    required List<String> householdIds,
+    int limit = 500,
+  }) async {
+    // Empty household list ⇒ RLS would drop everything anyway; skip
+    // the round-trip.
+    if (householdIds.isEmpty) {
+      return const CloudFetchResult(rows: [], maybeMore: false);
+    }
+    // PostgREST returns a wide-open resource; we page with
+    // limit(limit+1) so we can tell "more" from "exact fit" without a
+    // second call.
+    var q = _client.from(table).select().inFilter('household_id', householdIds);
+    if (since != null) {
+      q = q.gt('updated_at', since.toUtc().toIso8601String());
+    }
+    final res = await q
+        .order('updated_at', ascending: true)
+        .limit(limit + 1);
+    final rows =
+        (res as List).cast<Map<String, dynamic>>().toList(growable: false);
+    final maybeMore = rows.length > limit;
+    return CloudFetchResult(
+      rows: maybeMore ? rows.take(limit).toList(growable: false) : rows,
+      maybeMore: maybeMore,
+    );
+  }
 }
 
 /// Every DateTime-shaped column across the top-level tables. Drift's
@@ -165,6 +196,65 @@ String camelToSnake(String s) {
     final isUpper = ch == upper && ch != ch.toLowerCase();
     if (isUpper && i > 0) buf.write('_');
     buf.write(ch.toLowerCase());
+  }
+  return buf.toString();
+}
+
+/// Reverse of [_semanticRenames] for pull-side use.
+const _semanticRenamesReverse = <String, String>{
+  'id': 'uuid',
+};
+
+/// Pure translator, cloud shape → local Drift shape. Reverse of
+/// [toCloudShape]:
+///   * `id` → `uuid` (Postgres PK naming → Drift's column name)
+///   * snake_case → camelCase (`updated_at` → `updatedAt`)
+///   * ISO-8601 datetime keys → int millisSinceEpoch (what Drift's
+///     default value serializer emits, so round-trips are lossless)
+///
+/// The datetime-column list is derived from [_dateTimeKeys] — a key
+/// that's a datetime one way is a datetime the other way. Since the
+/// cloud-side keys are snake_case we snake-transform the reference
+/// set once at module scope.
+final _dateTimeKeysSnake = <String>{
+  for (final k in _dateTimeKeys) camelToSnake(k),
+};
+
+Map<String, dynamic> fromCloudShape(Map<String, dynamic> payload) {
+  final out = <String, dynamic>{};
+  payload.forEach((k, v) {
+    // Semantic rename first (id → uuid), then reverse-snake.
+    final camelKey =
+        snakeToCamel(_semanticRenamesReverse[k] ?? k);
+    if (v == null) {
+      out[camelKey] = null;
+      return;
+    }
+    if (_dateTimeKeysSnake.contains(k) && v is String) {
+      out[camelKey] =
+          DateTime.parse(v).millisecondsSinceEpoch;
+      return;
+    }
+    out[camelKey] = v;
+  });
+  return out;
+}
+
+String snakeToCamel(String s) {
+  final buf = StringBuffer();
+  var upperNext = false;
+  for (var i = 0; i < s.length; i++) {
+    final ch = s[i];
+    if (ch == '_') {
+      upperNext = true;
+      continue;
+    }
+    if (upperNext) {
+      buf.write(ch.toUpperCase());
+      upperNext = false;
+    } else {
+      buf.write(ch);
+    }
   }
   return buf.toString();
 }
