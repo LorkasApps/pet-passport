@@ -268,27 +268,47 @@ class AppDatabase extends _$AppDatabase {
             // vaccination_documents, pet_passport_documents). Mirrors the
             // M2 pattern: household_id, updated_by_user_id, deleted_at
             // for sync; updated_at and storage_key for media sync.
-            await m.addColumn(eventPhotos, eventPhotos.updatedAt);
+            //
+            // `updated_at` is added via raw ALTER TABLE with DEFAULT 0
+            // (constant) instead of `m.addColumn(...)`. Drift's table
+            // definition uses `withDefault(currentDateAndTime)` — which
+            // resolves to `strftime('%s','now')` — but SQLite rejects a
+            // non-constant expression as the default in ALTER TABLE ADD
+            // COLUMN. So we drop the column in with `DEFAULT 0`, then
+            // backfill from `created_at` immediately below. Fresh
+            // installs still get the withDefault semantics because
+            // createTable emits the column shape as defined.
+            for (final t in const [
+              'event_photos',
+              'food_photos',
+              'insurance_documents',
+              'vaccination_documents',
+              'pet_passport_documents',
+            ]) {
+              await customStatement(
+                'ALTER TABLE $t ADD COLUMN updated_at INTEGER NOT NULL '
+                'DEFAULT 0',
+              );
+              await customStatement(
+                'UPDATE $t SET updated_at = created_at',
+              );
+            }
             await m.addColumn(eventPhotos, eventPhotos.householdId);
             await m.addColumn(eventPhotos, eventPhotos.updatedByUserId);
             await m.addColumn(eventPhotos, eventPhotos.deletedAt);
             await m.addColumn(eventPhotos, eventPhotos.storageKey);
-            await m.addColumn(foodPhotos, foodPhotos.updatedAt);
             await m.addColumn(foodPhotos, foodPhotos.householdId);
             await m.addColumn(foodPhotos, foodPhotos.updatedByUserId);
             await m.addColumn(foodPhotos, foodPhotos.deletedAt);
             await m.addColumn(foodPhotos, foodPhotos.storageKey);
-            await m.addColumn(insuranceDocuments, insuranceDocuments.updatedAt);
             await m.addColumn(insuranceDocuments, insuranceDocuments.householdId);
             await m.addColumn(insuranceDocuments, insuranceDocuments.updatedByUserId);
             await m.addColumn(insuranceDocuments, insuranceDocuments.deletedAt);
             await m.addColumn(insuranceDocuments, insuranceDocuments.storageKey);
-            await m.addColumn(vaccinationDocuments, vaccinationDocuments.updatedAt);
             await m.addColumn(vaccinationDocuments, vaccinationDocuments.householdId);
             await m.addColumn(vaccinationDocuments, vaccinationDocuments.updatedByUserId);
             await m.addColumn(vaccinationDocuments, vaccinationDocuments.deletedAt);
             await m.addColumn(vaccinationDocuments, vaccinationDocuments.storageKey);
-            await m.addColumn(petPassportDocuments, petPassportDocuments.updatedAt);
             await m.addColumn(petPassportDocuments, petPassportDocuments.householdId);
             await m.addColumn(petPassportDocuments, petPassportDocuments.updatedByUserId);
             await m.addColumn(petPassportDocuments, petPassportDocuments.deletedAt);
