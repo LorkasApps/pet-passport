@@ -275,10 +275,8 @@ class PullEngine {
       breed: Value(row['breed'] as String?),
       dateOfBirth: Value(_toDateTime(row['dateOfBirth'])),
       color: Value(row['color'] as String?),
-      markings: Value(row['markings'] as String?),
       chipNumber: Value(row['chipNumber'] as String?),
       tassoNumber: Value(row['tassoNumber'] as String?),
-      tassoRegisteredAt: Value(_toDateTime(row['tassoRegisteredAt'])),
       vaccinationPassportNumber:
           Value(row['vaccinationPassportNumber'] as String?),
       profilePhotoPath: Value(row['profilePhotoPath'] as String?),

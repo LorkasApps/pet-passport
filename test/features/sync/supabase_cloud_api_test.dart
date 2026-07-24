@@ -64,7 +64,6 @@ void main() {
       final out = toCloudShape({
         // pets
         'dateOfBirth': ms,
-        'tassoRegisteredAt': ms,
         // events
         'occurredAt': ms,
         // appointments
@@ -82,7 +81,6 @@ void main() {
       final iso = at.toIso8601String();
       for (final k in [
         'date_of_birth',
-        'tasso_registered_at',
         'occurred_at',
         'starts_at',
         'recurrence_until',

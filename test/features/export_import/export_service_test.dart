@@ -107,10 +107,8 @@ void main() {
           breed: 'Labrador',
           dateOfBirth: DateTime(2020, 1, 15),
           color: 'Black',
-          markings: 'White paws',
           chipNumber: 'CHIP123456789',
           tassoNumber: 'TASSO987654',
-          tassoRegisteredAt: DateTime(2020, 2, 1),
           allergies: 'Chicken',
           notes: 'Very friendly',
         );
@@ -162,7 +160,6 @@ void main() {
         expect(petJson['is_neutered'], equals(true));
         expect(petJson['breed'], equals('Labrador'));
         expect(petJson['color'], equals('Black'));
-        expect(petJson['markings'], equals('White paws'));
         expect(petJson['chip_number'], equals('CHIP123456789'));
         expect(petJson['tasso_number'], equals('TASSO987654'));
         expect(petJson['allergies'], equals('Chicken'));

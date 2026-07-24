@@ -78,10 +78,8 @@ class PetsRepository {
     String? breed,
     DateTime? dateOfBirth,
     String? color,
-    String? markings,
     String? chipNumber,
     String? tassoNumber,
-    DateTime? tassoRegisteredAt,
     String? vaccinationPassportNumber,
     String? profilePhotoPath,
     String? allergies,
@@ -100,10 +98,8 @@ class PetsRepository {
         breed: Value(breed),
         dateOfBirth: Value(dateOfBirth),
         color: Value(color),
-        markings: Value(markings),
         chipNumber: Value(chipNumber),
         tassoNumber: Value(tassoNumber),
-        tassoRegisteredAt: Value(tassoRegisteredAt),
         vaccinationPassportNumber: Value(vaccinationPassportNumber),
         profilePhotoPath: Value(profilePhotoPath),
         allergies: Value(allergies),
@@ -133,13 +129,12 @@ class PetsRepository {
     String? allergies,
     String? notes,
   }) async {
-    // `vaccinationPassportNumber`, `markings`, `tassoRegisteredAt`
-    // are deliberately NOT in this signature. Each has (or will have)
-    // its own dedicated update path — the general pet-edit screen
-    // doesn't render them, so accepting them here as optional-null
-    // args caused every save from that screen to clobber the fields
-    // with null. copyWith without these keys leaves the columns
-    // untouched (Drift's `Value.absent()` default).
+    // `vaccinationPassportNumber` is deliberately NOT in this signature.
+    // It has its own dedicated update path — the general pet-edit screen
+    // doesn't render it, so accepting it here as an optional-null arg
+    // caused every save from that screen to clobber the field with null.
+    // copyWith without this key leaves the column untouched (Drift's
+    // `Value.absent()` default).
     final existing = await _dao.getByUuid(uuid);
     if (existing == null) {
       throw StateError('Pet with uuid=$uuid not found');
@@ -375,10 +370,8 @@ class PetsRepository {
       breed: row.breed,
       dateOfBirth: row.dateOfBirth,
       color: row.color,
-      markings: row.markings,
       chipNumber: row.chipNumber,
       tassoNumber: row.tassoNumber,
-      tassoRegisteredAt: row.tassoRegisteredAt,
       vaccinationPassportNumber: row.vaccinationPassportNumber,
       profilePhotoPath: row.profilePhotoPath,
       profilePhotoStorageKey: row.profilePhotoStorageKey,

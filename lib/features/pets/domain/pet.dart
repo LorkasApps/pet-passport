@@ -13,10 +13,8 @@ class Pet {
     this.breed,
     this.dateOfBirth,
     this.color,
-    this.markings,
     this.chipNumber,
     this.tassoNumber,
-    this.tassoRegisteredAt,
     this.vaccinationPassportNumber,
     this.profilePhotoPath,
     this.profilePhotoStorageKey,
@@ -37,10 +35,8 @@ class Pet {
   final String? breed;
   final DateTime? dateOfBirth;
   final String? color;
-  final String? markings;
   final String? chipNumber;
   final String? tassoNumber;
-  final DateTime? tassoRegisteredAt;
   final String? vaccinationPassportNumber;
   final String? profilePhotoPath;
   final String? profilePhotoStorageKey;
@@ -60,10 +56,8 @@ class Pet {
     String? Function()? breed,
     DateTime? Function()? dateOfBirth,
     String? Function()? color,
-    String? Function()? markings,
     String? Function()? chipNumber,
     String? Function()? tassoNumber,
-    DateTime? Function()? tassoRegisteredAt,
     String? Function()? vaccinationPassportNumber,
     String? Function()? profilePhotoPath,
     String? Function()? profilePhotoStorageKey,
@@ -83,12 +77,8 @@ class Pet {
       breed: breed != null ? breed() : this.breed,
       dateOfBirth: dateOfBirth != null ? dateOfBirth() : this.dateOfBirth,
       color: color != null ? color() : this.color,
-      markings: markings != null ? markings() : this.markings,
       chipNumber: chipNumber != null ? chipNumber() : this.chipNumber,
       tassoNumber: tassoNumber != null ? tassoNumber() : this.tassoNumber,
-      tassoRegisteredAt: tassoRegisteredAt != null
-          ? tassoRegisteredAt()
-          : this.tassoRegisteredAt,
       vaccinationPassportNumber: vaccinationPassportNumber != null
           ? vaccinationPassportNumber()
           : this.vaccinationPassportNumber,

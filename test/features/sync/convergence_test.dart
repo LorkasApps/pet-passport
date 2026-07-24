@@ -17,9 +17,10 @@ import '../../helpers/fake_cloud_api.dart';
 /// either device, interleaved with push+pull round-trips. At the end
 /// both local DBs must contain the same row set.
 ///
-/// The AC in the plan asks for 100 sequences. Kept small by default
-/// (10 sequences × 40 ops) so this stays under a couple of seconds;
-/// bump `sequences` locally to stress-test.
+/// The plan's AC — 100 seeded sequences × 40 ops each. Runs in ~30s
+/// on a laptop; that's fine for the full test suite budget. If it
+/// ever starts costing more than the value it delivers, dropping to
+/// 25 keeps the coverage broad without pinning every corner.
 ///
 /// Failure modes this pins:
 ///   * LWW on same-field edits keeps the later write on both sides.
@@ -29,7 +30,7 @@ import '../../helpers/fake_cloud_api.dart';
 ///     guard for the fix in the previous commit).
 ///   * FIFO + backoff don't lose ops across many drain cycles.
 void main() {
-  const sequences = 10;
+  const sequences = 100;
   const opsPerSequence = 40;
 
   for (var seed = 0; seed < sequences; seed++) {

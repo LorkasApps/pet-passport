@@ -128,7 +128,6 @@ const _dateTimeKeys = <String>{
   'deletedAt',
   // pets
   'dateOfBirth',
-  'tassoRegisteredAt',
   // events
   'occurredAt',
   // pet_weights (not synced yet but harmless to list)

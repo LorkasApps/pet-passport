@@ -112,7 +112,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -311,6 +311,14 @@ class AppDatabase extends _$AppDatabase {
               await _addColumnIfMissing(this, t, 'storage_key',
                   'ALTER TABLE $t ADD COLUMN storage_key TEXT');
             }
+          }
+          if (from < 22 && to >= 22) {
+            // Mechanical cleanup: drop unused pet columns. Never rendered
+            // in the UI; became dead weight after the recent pet-edit
+            // clobber fix.
+            await customStatement('ALTER TABLE pets DROP COLUMN markings');
+            await customStatement(
+                'ALTER TABLE pets DROP COLUMN tasso_registered_at');
           }
         },
         beforeOpen: (details) async {

@@ -13,10 +13,8 @@ class Pets extends Table {
   BoolColumn get isNeutered => boolean().withDefault(const Constant(false))();
   DateTimeColumn get dateOfBirth => dateTime().nullable()();
   TextColumn get color => text().nullable()();
-  TextColumn get markings => text().nullable()();
   TextColumn get chipNumber => text().nullable()();
   TextColumn get tassoNumber => text().nullable()();
-  DateTimeColumn get tassoRegisteredAt => dateTime().nullable()();
   TextColumn get vaccinationPassportNumber => text().nullable()();
   TextColumn get profilePhotoPath => text().nullable()();
   /// Cloud Storage object key for the profile photo, filled once the

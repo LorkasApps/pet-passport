@@ -521,10 +521,8 @@ class ImportService {
             breed: Value(raw['breed'] as String?),
             dateOfBirth: Value(_parseDt(raw['date_of_birth'])),
             color: Value(raw['color'] as String?),
-            markings: Value(raw['markings'] as String?),
             chipNumber: Value(raw['chip_number'] as String?),
             tassoNumber: Value(raw['tasso_number'] as String?),
-            tassoRegisteredAt: Value(_parseDt(raw['tasso_registered_at'])),
             vaccinationPassportNumber:
                 Value(raw['vaccination_passport_number'] as String?),
             profilePhotoPath: Value(raw['profile_photo_path'] as String?),
@@ -545,10 +543,8 @@ class ImportService {
       breed: Value(raw['breed'] as String?),
       dateOfBirth: Value(_parseDt(raw['date_of_birth'])),
       color: Value(raw['color'] as String?),
-      markings: Value(raw['markings'] as String?),
       chipNumber: Value(raw['chip_number'] as String?),
       tassoNumber: Value(raw['tasso_number'] as String?),
-      tassoRegisteredAt: Value(_parseDt(raw['tasso_registered_at'])),
       vaccinationPassportNumber:
           Value(raw['vaccination_passport_number'] as String?),
       profilePhotoPath: Value(raw['profile_photo_path'] as String?),
