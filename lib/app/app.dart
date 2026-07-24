@@ -7,6 +7,9 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../features/appointments/application/appointments_providers.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/diet/application/foods_providers.dart';
+import '../features/households/application/households_providers.dart';
+import '../features/households/data/household_stamper.dart';
+import '../features/households/domain/household.dart';
 import '../features/medications/application/medications_providers.dart';
 import '../features/pets/application/current_pet_provider.dart';
 import '../features/pets/application/pets_providers.dart';
@@ -81,6 +84,31 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
           .read(vaccinationsRepositoryProvider)
           .rescheduleAllUpcomingReminders();
     });
+
+    // Bootstrap-adopt local pre-cloud rows into the primary household
+    // any time we have a household to bind them to. Runs on every
+    // non-empty myHouseholdsProvider emission, but the stamper's
+    // `WHERE household_id IS NULL` guard makes the second and every
+    // subsequent call a no-op — and the enqueue step is snapshotted
+    // BEFORE the update, so already-stamped rows never re-enqueue.
+    //
+    // This is the safety net for returning users whose display-name
+    // profile already existed cloud-side: the display-name onboarding
+    // screen is skipped for them, so the stamp used to never run.
+    ref.listenManual<AsyncValue<List<Household>>>(
+      myHouseholdsProvider,
+      (_, next) async {
+        final list = next.value;
+        if (list == null || list.isEmpty) return;
+        if (!ref.read(isSignedInProvider)) return;
+        final primary = list.first.id;
+        await HouseholdStamper(ref.read(databaseProvider)).stampNullRows(
+          primary,
+          outbox: ref.read(syncOutboxProvider),
+        );
+      },
+      fireImmediately: true,
+    );
 
     // Push-sync driver: every time the outbox grows, kick a drain.
     // Single-flight inside the worker collapses bursts; guarded on

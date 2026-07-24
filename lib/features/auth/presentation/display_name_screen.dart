@@ -6,6 +6,7 @@ import 'package:pet_passport/l10n/generated/app_l10n.dart';
 import '../../households/application/households_providers.dart';
 import '../../households/data/household_stamper.dart';
 import '../../settings/application/settings_providers.dart';
+import '../../sync/application/sync_providers.dart';
 import '../application/profile_providers.dart';
 
 /// One-time forced screen the router shows after first sign-in until the
@@ -52,10 +53,13 @@ class _DisplayNameScreenState extends ConsumerState<DisplayNameScreen> {
           .read(householdsRepositoryProvider)
           .ensureDefault(l.householdsDefaultName);
       // Backfill pre-cloud local rows so they show up inside the newly
-      // adopted household. No-op if the tables already carry an id from
-      // an earlier sign-in on this device.
-      await HouseholdStamper(ref.read(databaseProvider))
-          .stampNullRows(primaryId);
+      // adopted household AND enqueue them for their first push. No-op
+      // if the tables already carry an id from an earlier sign-in on
+      // this device.
+      await HouseholdStamper(ref.read(databaseProvider)).stampNullRows(
+        primaryId,
+        outbox: ref.read(syncOutboxProvider),
+      );
       if (!mounted) return;
       context.go('/home');
     } catch (e) {
