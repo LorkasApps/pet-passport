@@ -8,6 +8,11 @@ class SettingsKeys {
   static const currentPetUuid = 'current_pet_uuid';
   static const reminderLeadDays = 'reminder_lead_days';
   static const lastUsedHouseholdId = 'last_used_household_id';
+  /// Comma-joined, ascending-sorted household ids the pull engine was
+  /// scoped to on its last run. When the current membership set is a
+  /// superset, cursors get wiped so the newly-visible rows land on the
+  /// next pull.
+  static const lastPullScopeHouseholds = 'last_pull_scope_households';
 }
 
 class SettingsRepository {

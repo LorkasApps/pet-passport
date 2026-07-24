@@ -15,6 +15,7 @@ import '../features/pets/application/current_pet_provider.dart';
 import '../features/pets/application/pets_providers.dart';
 import '../features/security/presentation/app_lock_gate.dart';
 import '../features/settings/application/settings_providers.dart';
+import '../features/settings/data/settings_repository.dart';
 import '../features/sync/application/sync_providers.dart';
 import '../features/vaccinations/application/vaccinations_providers.dart';
 import 'router.dart';
@@ -145,15 +146,43 @@ class _PetPassportAppState extends ConsumerState<PetPassportApp>
   Future<void> _kickPull(List<Household> households) async {
     final engine = ref.read(pullEngineProvider);
     if (engine == null) return;
+    final ids = households.map((h) => h.id).toList(growable: false);
     try {
-      await engine.pullOnce(
-        householdIds: households.map((h) => h.id).toList(growable: false),
-      );
+      await _maybeResetCursorsForNewScope(ids);
+      await engine.pullOnce(householdIds: ids);
     } catch (_) {
       // Best-effort background pull — a transient network hiccup
       // shouldn't kill the app. The cursor is only advanced on
       // successful pages inside the engine, so the next kick picks
       // up where we left off.
+    }
+  }
+
+  /// When the household membership set grows (user joined a new one),
+  /// the pre-existing rows in that household have updated_at older
+  /// than any current cursor. A plain delta pull would skip them.
+  /// Wipe every cursor once so the next pullOnce sees them all.
+  ///
+  /// We only invalidate on strict growth. Shrinking (leave / kick)
+  /// isn't a data-visibility risk — those rows just stop being
+  /// returned by RLS, and the local copies stay put until the next
+  /// leave-side cleanup lands (M6).
+  Future<void> _maybeResetCursorsForNewScope(List<String> ids) async {
+    final settings = ref.read(settingsRepositoryProvider);
+    final current = ([...ids]..sort()).join(',');
+    final previous =
+        await settings.getRaw(SettingsKeys.lastPullScopeHouseholds);
+    if (previous != current) {
+      final prevSet = previous?.split(',').where((s) => s.isNotEmpty).toSet() ??
+          const <String>{};
+      final currSet = ids.toSet();
+      // Reset only on strict growth. Same set (order sanity) or
+      // shrinkage keeps existing cursors.
+      final grew = currSet.difference(prevSet).isNotEmpty;
+      if (grew) {
+        await ref.read(databaseProvider).syncCursorsDao.resetAll();
+      }
+      await settings.setRaw(SettingsKeys.lastPullScopeHouseholds, current);
     }
   }
 
