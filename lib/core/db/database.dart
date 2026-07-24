@@ -269,15 +269,20 @@ class AppDatabase extends _$AppDatabase {
             // M2 pattern: household_id, updated_by_user_id, deleted_at
             // for sync; updated_at and storage_key for media sync.
             //
-            // `updated_at` is added via raw ALTER TABLE with DEFAULT 0
-            // (constant) instead of `m.addColumn(...)`. Drift's table
-            // definition uses `withDefault(currentDateAndTime)` — which
-            // resolves to `strftime('%s','now')` — but SQLite rejects a
-            // non-constant expression as the default in ALTER TABLE ADD
-            // COLUMN. So we drop the column in with `DEFAULT 0`, then
-            // backfill from `created_at` immediately below. Fresh
-            // installs still get the withDefault semantics because
-            // createTable emits the column shape as defined.
+            // Idempotent by design: an earlier v21 attempt that
+            // aborted halfway (see the "non-constant default" issue
+            // fixed in the previous commit) left partial ALTERs
+            // sticking on the DB, and SQLite has no `ADD COLUMN IF NOT
+            // EXISTS`. Every add here consults PRAGMA table_info first
+            // and skips columns that already exist. Safe to re-run
+            // start after start.
+            //
+            // `updated_at` uses a constant DEFAULT 0 (SQLite refuses
+            // strftime-style non-constant defaults in ALTER TABLE ADD
+            // COLUMN) and gets backfilled from `created_at`
+            // immediately after. Fresh installs still get the
+            // withDefault(currentDateAndTime) semantics via
+            // createTable.
             for (final t in const [
               'event_photos',
               'food_photos',
@@ -285,34 +290,27 @@ class AppDatabase extends _$AppDatabase {
               'vaccination_documents',
               'pet_passport_documents',
             ]) {
-              await customStatement(
+              final added = await _addColumnIfMissing(
+                this,
+                t,
+                'updated_at',
                 'ALTER TABLE $t ADD COLUMN updated_at INTEGER NOT NULL '
                 'DEFAULT 0',
               );
-              await customStatement(
-                'UPDATE $t SET updated_at = created_at',
-              );
+              if (added) {
+                await customStatement(
+                  'UPDATE $t SET updated_at = created_at',
+                );
+              }
+              await _addColumnIfMissing(this, t, 'household_id',
+                  'ALTER TABLE $t ADD COLUMN household_id TEXT');
+              await _addColumnIfMissing(this, t, 'updated_by_user_id',
+                  'ALTER TABLE $t ADD COLUMN updated_by_user_id TEXT');
+              await _addColumnIfMissing(this, t, 'deleted_at',
+                  'ALTER TABLE $t ADD COLUMN deleted_at INTEGER');
+              await _addColumnIfMissing(this, t, 'storage_key',
+                  'ALTER TABLE $t ADD COLUMN storage_key TEXT');
             }
-            await m.addColumn(eventPhotos, eventPhotos.householdId);
-            await m.addColumn(eventPhotos, eventPhotos.updatedByUserId);
-            await m.addColumn(eventPhotos, eventPhotos.deletedAt);
-            await m.addColumn(eventPhotos, eventPhotos.storageKey);
-            await m.addColumn(foodPhotos, foodPhotos.householdId);
-            await m.addColumn(foodPhotos, foodPhotos.updatedByUserId);
-            await m.addColumn(foodPhotos, foodPhotos.deletedAt);
-            await m.addColumn(foodPhotos, foodPhotos.storageKey);
-            await m.addColumn(insuranceDocuments, insuranceDocuments.householdId);
-            await m.addColumn(insuranceDocuments, insuranceDocuments.updatedByUserId);
-            await m.addColumn(insuranceDocuments, insuranceDocuments.deletedAt);
-            await m.addColumn(insuranceDocuments, insuranceDocuments.storageKey);
-            await m.addColumn(vaccinationDocuments, vaccinationDocuments.householdId);
-            await m.addColumn(vaccinationDocuments, vaccinationDocuments.updatedByUserId);
-            await m.addColumn(vaccinationDocuments, vaccinationDocuments.deletedAt);
-            await m.addColumn(vaccinationDocuments, vaccinationDocuments.storageKey);
-            await m.addColumn(petPassportDocuments, petPassportDocuments.householdId);
-            await m.addColumn(petPassportDocuments, petPassportDocuments.updatedByUserId);
-            await m.addColumn(petPassportDocuments, petPassportDocuments.deletedAt);
-            await m.addColumn(petPassportDocuments, petPassportDocuments.storageKey);
           }
         },
         beforeOpen: (details) async {
@@ -323,4 +321,27 @@ class AppDatabase extends _$AppDatabase {
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'pet_passport');
   }
+}
+
+/// Idempotent ALTER TABLE ADD COLUMN. SQLite has no
+/// `ADD COLUMN IF NOT EXISTS`, so we sniff the current column set via
+/// `PRAGMA table_info` and skip if it's already there. Used from the
+/// v21 upgrade block where a previous failed attempt may have left
+/// some columns stuck.
+///
+/// Returns true when the column was actually added — callers use that
+/// to gate follow-up backfill statements (running a backfill twice is
+/// harmless here but a wasted round-trip).
+Future<bool> _addColumnIfMissing(
+  AppDatabase db,
+  String table,
+  String column,
+  String alterSql,
+) async {
+  final rows =
+      await db.customSelect('PRAGMA table_info($table)').get();
+  final present = rows.any((r) => r.data['name'] == column);
+  if (present) return false;
+  await db.customStatement(alterSql);
+  return true;
 }
