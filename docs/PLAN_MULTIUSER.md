@@ -1,5 +1,21 @@
 # Pet Passport — Multi-User Plan (Household Sharing)
 
+## Status auf einen Blick (2026-07-24)
+
+| M   | Titel                                      | Status                                      |
+| --- | ------------------------------------------ | ------------------------------------------- |
+| M1  | Auth + Household-Container                 | ✅ shipped                                   |
+| M2  | Schema-Erweiterung + Migration             | ✅ shipped                                   |
+| M3  | Push (Outbox) + Pull (Delta)               | ✅ shipped (inkl. server-monotoner Cursor)   |
+| M4  | Realtime + Live-Status                     | ✅ shipped                                   |
+| M5  | Media-Sync (Photos + Documents)            | ✅ shipped (alle 7 Attachment-Surfaces)      |
+| M6  | Owner-Kontrollen + Household-Verlassen     | ⏸️ bewusst zurückgestellt (1 HH + 2 User)   |
+| M7  | Härtung + Observability                    | ⏸️ zurückgestellt bis vor Store-Release     |
+
+Security-Checkliste: Day-0 komplett bis auf **Redirect-URL-Allowlist** (Dashboard-Config). M1-Quality-Gate (secure-storage session-token, Auth-Rate-Limits, Invite-Rate-Limit, RLS-Test-Suite) und M7-Härtung (hCaptcha, DSGVO-Endpoints, Sentry) offen — alle vor Store-Release.
+
+Legende: ✅ done, ⏸️ bewusst verschoben, [~] teilweise, [ ] offen.
+
 ## Context
 
 Bisheriger Zustand: rein lokale Single-User-App. Daten liegen ausschließlich in einer lokalen Drift-SQLite-DB pro Gerät. JSON-Export/Import existiert für Backup und Datenweitergabe.
@@ -281,18 +297,18 @@ Gestaffelt nach „muss ab Day 0" vs. „kann später inkrementell". Die Trennun
 
 ### Day-0 (M1 Schema-Setup) — nicht verhandelbar
 
-- [ ] **Row Level Security auf jeder Feature-Table aktivieren.** Default ist AUS; wer das vergisst, veröffentlicht die Rows via Anon Key an alle. Muster: `household_id IN (SELECT hid FROM household_members WHERE user_id = auth.uid())` pro SELECT/INSERT/UPDATE/DELETE.
-- [ ] **Anon Key vs. Service Role Key sauber trennen.** Nur der Anon Key kommt in die App. Service Role Key umgeht RLS und wird ausschließlich für einmalige Migrations-Skripte lokal genutzt, niemals im Client-Bundle.
-- [ ] **Redirect-URL-Allowlist konfigurieren.** In Supabase Auth → URL Configuration nur `petpassport://auth/callback` (und ggf. `http://localhost:*` für Dev) zulassen. Ohne das lässt sich das Magic-Link-Redirect für Phishing missbrauchen.
-- [ ] **Storage-Bucket auf privat + Path-basierte Policies.** Kein Public-Bucket. Downloads über signierte URLs mit TTL. Policy analog zu RLS: nur eigene Household-Pfade.
-- [ ] **Storage Mime-Whitelist**: `image/jpeg`, `image/png`, `image/webp`, `application/pdf`.
+- [x] **Row Level Security auf jeder Feature-Table aktivieren.** Migrationen 0001 (households + members + invites + profiles), 0004 (10 Top-Level-Feature-Tables), 0009 (5 nested Attachment-Tables) enablen RLS + Policies auf `my_household_ids()`-Helpers aus 0002.
+- [x] **Anon Key vs. Service Role Key sauber trennen.** App bindet nur `SUPABASE_PUBLISHABLE_KEY` via `--dart-define`. Service-Role-Key nirgends im Repo.
+- [ ] **Redirect-URL-Allowlist konfigurieren.** Supabase-Dashboard-Config (nicht Code) — bitte manuell setzen: `petpassport://auth/callback` + evtl. `http://localhost:*` für Dev.
+- [x] **Storage-Bucket auf privat + Path-basierte Policies.** Migration 0007: private Bucket `media`, Policies gaten auf `split_part(name,'/',2)::uuid IN my_household_ids()`.
+- [x] **Storage Mime-Whitelist**: `image/jpeg`, `image/png`, `image/webp`, `application/pdf` auf Bucket-Ebene (0007).
 
 ### M1 Quality-Gate (vor Ship des ersten Cloud-Users)
 
-- [ ] **Session-Token in `flutter_secure_storage`** (nicht `shared_preferences`). Supabase-Flutter-SDK via `pkceAsyncStorage`-Config.
-- [ ] **Auth Rate Limits senken**: OTP-Requests von 30/h auf 10/h/E-Mail, Sign-ups auf 5/h. Reicht für organische Nutzung, drosselt Massenmissbrauch.
-- [ ] **Invite-Einlöse-Endpoint hat serverseitiges Rate-Limit** (5 Falscheingaben/IP/Stunde), generische Fehlermeldung („Bitte kurz warten"), verrät nicht ob Code existiert.
-- [ ] **RLS-Test-Suite**: eine ausführbare Integration-Test-Datei, die als User A einlogged versucht, Rows von User B abzufragen — muss 0 Rows liefern. Für jede Feature-Table ein Test.
+- [ ] **Session-Token in `flutter_secure_storage`** (nicht `shared_preferences`). Aktuell: Supabase-Flutter-Default (Hive im sandboxed App-Data-Dir). Beim Threat-Model „Gerät-Diebstahl mit OS-Lock" reicht das; Store-Release erfordert das Upgrade.
+- [ ] **Auth Rate Limits senken**: OTP-Requests von 30/h auf 10/h/E-Mail, Sign-ups auf 5/h. Dashboard-Config, nicht Code.
+- [ ] **Invite-Einlöse-Endpoint hat serverseitiges Rate-Limit** (5 Falscheingaben/IP/Stunde). Aktuell: `redeem_invite` RPC ist SECURITY DEFINER mit generischen Fehlern, aber ohne explizites Rate-Limit.
+- [ ] **RLS-Test-Suite** (ausführbare Integration-Tests: User A darf 0 Rows von User B sehen, pro Feature-Table). Für lokale Unit-Tests haben wir FakeCloudApi-Assertions, aber kein RLS-Live-Test.
 
 ### M7 Härtung (bevor App in Store)
 
@@ -390,55 +406,72 @@ Jeder Milestone ist eigenständig shipbar. Zwischen Milestones bleibt die App vo
 **Deliverable:** Änderungen an Pet, Vet, Contact, Appointment, Medication, Food, Vaccination, Insurance, Event, Document propagieren zwischen Geräten. Ohne Realtime — noch pull-basiert bei App-Start.
 
 **Acceptance Criteria:**
-- [ ] Änderung auf Gerät A (Pet umbenennen) erscheint auf Gerät B nach nächstem App-Start
-- [ ] Offline-Änderung auf Gerät A queued → bei Netz automatischer Push, Gerät B kriegt beim nächsten Pull
-- [ ] Simultane Edits (Feld X auf A, Feld Y auf B, beide offline) → beide landen ohne Datenverlust, kein Duplicate
-- [ ] Simultane Edits am **gleichen Feld** → LWW auf Basis `updated_at`, keine Corruption
-- [ ] Soft-Delete auf A wird auf B respektiert; Rekord verschwindet aus UI
-- [ ] Sync-Fehler (Netz weg mid-flight) → Retry, keine verlorenen Ops
-- [ ] Property-based Test: 100 zufällige interleaved Edit-Sequenzen → Konvergenz auf beiden Geräten identisch
+- [x] Änderung auf Gerät A (Pet umbenennen) erscheint auf Gerät B nach nächstem App-Start
+- [x] Offline-Änderung auf Gerät A queued → bei Netz automatischer Push, Gerät B kriegt beim nächsten Pull
+- [x] Simultane Edits (Feld X auf A, Feld Y auf B, beide offline) → beide landen ohne Datenverlust, kein Duplicate
+- [x] Simultane Edits am **gleichen Feld** → LWW auf Basis `updated_at`, keine Corruption
+- [x] Soft-Delete auf A wird auf B respektiert; Rekord verschwindet aus UI
+- [x] Sync-Fehler (Netz weg mid-flight) → Retry, keine verlorenen Ops
+- [x] Property-based Test: 100 zufällige interleaved Edit-Sequenzen → Konvergenz auf beiden Geräten identisch
+
+**Post-M3 nachgezogen (folgt oben in der Reihenfolge der Auslieferung):**
+- Server-monotoner Pull-Cursor `pulled_seq` (Migration 0011) — schließt die Cursor-Race-Lücke, in der zwei Geräte mit Uhr-Drift Rows verlieren konnten. LWW bleibt auf `updated_at`.
+- `softDeleteByUuid` bumpt `updated_at` — sonst konnte eine Tombstone von einem älteren Update reverted werden.
+- Household-Set wächst → automatischer Cursor-Reset, damit die Pre-Existing-Rows des neuen Households sichtbar werden.
 
 ### M4 — Realtime-Updates + Live-Status
 
 **Deliverable:** Änderungen anderer erscheinen live, wenn App vorne ist. Sync-Status in UI sichtbar.
 
 **Acceptance Criteria:**
-- [ ] App im Vordergrund: Änderung von B erscheint bei A innerhalb ~2 Sekunden
-- [ ] Sync-Indicator in AppBar (offline / synchronisiert / syncing / Fehler)
-- [ ] Pending-Ops-Count im Settings/Debug-Screen einsehbar
-- [ ] Bei Realtime-Verbindungsabbruch fällt App transparent auf Poll-Pull zurück, kein User-Sichtbar
+- [x] App im Vordergrund: Änderung von B erscheint bei A innerhalb ~2 Sekunden
+- [x] Sync-Indicator in AppBar (offline / synchronisiert / syncing / Fehler)
+- [x] Pending-Ops-Count im Settings/Debug-Screen einsehbar
+- [x] Bei Realtime-Verbindungsabbruch fällt App transparent auf Poll-Pull zurück, kein User-Sichtbar
+
+**M4 Bau-Notiz:** Realtime-Publication in Migration 0006. RealtimeEngine + Sync-Status-Badge + Fallback-Pull-Hook alle über einen Riverpod-`myHouseholdsProvider`-Listener.
 
 ### M5 — Media-Sync (Photos + Documents)
 
 **Deliverable:** Fotos und PDFs werden hochgeladen, bei Bedarf runtergeladen und lokal gecacht.
 
 **Acceptance Criteria:**
-- [ ] Neu angehängtes Foto auf A landet in Storage; B sieht ein Thumbnail-Placeholder und lädt beim Öffnen die Datei
-- [ ] Offline gemachtes Foto queued zum Upload, wird bei Netz automatisch hochgeladen
-- [ ] Storage-Quota-Behandlung: Fehler abgefangen + verständliche Message
-- [ ] Beim Löschen eines Attachments wird auch die Storage-Datei entfernt (nach Grace-Period, wegen Sync-Race)
-- [ ] LRU-Cache limitiert lokalen Media-Speicher (default 200MB)
+- [x] Neu angehängtes Foto auf A landet in Storage; B sieht ein Thumbnail-Placeholder und lädt beim Öffnen die Datei
+- [x] Offline gemachtes Foto queued zum Upload, wird bei Netz automatisch hochgeladen
+- [x] Storage-Quota-Behandlung: Fehler abgefangen + verständliche Message (StorageResult ok/retryable/terminal, Terminal parkt mit Message in `last_error` sichtbar über die Sync-Tile)
+- [x] Beim Löschen eines Attachments wird auch die Storage-Datei entfernt (Media-Outbox `enqueueDelete` beim soft-delete)
+- [x] LRU-Cache limitiert lokalen Media-Speicher (default 200MB) — `MediaFetcher.sweep` bei Cold-Start
+
+**Post-M5 nachgezogen:**
+- Alle 5 nested Attachment-Surfaces (event_photos, food_photos, insurance/vaccination/passport_documents) im Sync-System (Phasen 1–5, Migrationen 0009).
+- MediaBackfiller für pre-M5 Rows — enqueued Bestandsdaten für Upload beim Cold-Start.
+- UploadWorker enqueued Row-Outbox nach Storage-Key-Writeback, damit peers den Key sofort sehen.
+- Viewer (PetAvatar + alle Doc-Opener) resolven über `MediaFetcher` — Downloads passieren lazy beim Öffnen.
 
 ### M6 — Owner-Kontrollen + Household-Verlassen
 
 **Deliverable:** Feinschliff für Multi-User-Verwaltung.
 
 **Acceptance Criteria:**
-- [ ] Owner kann Member entfernen; danach hat der ehemalige Member keinen Zugriff mehr (RLS erzwingt)
-- [ ] Member kann selbst das Household verlassen; lokale Daten werden entweder gelöscht oder zu neuem eigenen Household migriert (User-Wahl im Dialog)
+- [~] Owner kann Member entfernen; danach hat der ehemalige Member keinen Zugriff mehr (RLS erzwingt) — Remove-Button existiert in M1-09; RLS-Enforcement kommt aus 0001. Lokaler Cache-Cleanup auf der entfernten Seite ist noch nicht implementiert.
+- [~] Member kann selbst das Household verlassen — Leave-Button existiert (M1-09), Local-Data-Wahl-Dialog („löschen vs. eigener Haushalt") fehlt.
 - [ ] Household löschen (Owner-Recht) mit doppelter Bestätigung; kaskadiert alle Rows + Storage
 - [ ] Owner-Übergabe an anderen Member möglich
+
+**Status:** bewusst zurückgestellt — für 1 Haushalt + 2 Personen aktuell nicht dringend.
 
 ### M7 — Härtung + Observability
 
 **Deliverable:** Produktionsreife.
 
 **Acceptance Criteria:**
-- [ ] Retry-Backoff für alle Netzwerk-Ops (siehe Push-Strategie oben)
+- [x] Retry-Backoff für alle Netzwerk-Ops — PushWorker + UploadWorker: 500ms/2s/8s/30s/idle; Realtime-Channel handhabt eigenen Reconnect.
 - [ ] Sync-Konflikte werden im Debug-Log der App gesammelt (`sync_conflicts_log`)
 - [ ] Analytics/Sentry: Sync-Fehlerrate, Latenz, Konflikte, aktive Member pro Household
-- [ ] Backup-Strategie: DB-Snapshot per Supabase-Cronjob (eingebaut) + JSON-Export bleibt lokal möglich
+- [~] Backup-Strategie: Supabase-Cronjob-Snapshot (Free-Tier built-in, keine Code-Arbeit) + JSON-Export lokal möglich (existiert seit M6-Solo-Plan)
 - [ ] Chaos-Test: Netzwerk-Simulator (delay, loss, jitter) → Sync konvergiert unter allen Bedingungen
+
+**Status:** bewusst zurückgestellt bis vor Store-Release.
 
 ---
 
