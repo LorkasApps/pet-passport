@@ -32,13 +32,15 @@ void main() {
       expect(result.sent, 1);
       expect(result.inspected, 1);
       expect(await db.pendingOpsDao.count(), 0);
+      // Cloud store keeps rows in wire shape (snake_case, ISO,
+      // `id` PK) — same as what a real PostgREST projection returns.
       final row = cloud.find('pets', uuid);
       expect(row, isNotNull);
-      expect(row!['uuid'], uuid);
+      expect(row!['id'], uuid);
       expect(row['name'], 'Bello');
-      expect(row['householdId'], 'h-1');
-      expect(row.containsKey('id'), isFalse,
-          reason: 'local autoincrement id must be stripped before push');
+      expect(row['household_id'], 'h-1');
+      expect(row.containsKey('uuid'), isFalse,
+          reason: 'client `uuid` field must be renamed to cloud `id`');
     });
 
     test('drains ops in FIFO order', () async {
@@ -98,7 +100,7 @@ void main() {
 
       final row = cloud.find('pets', uuid);
       expect(row, isNotNull);
-      expect(row!['deletedAt'], isNotNull);
+      expect(row!['deleted_at'], isNotNull);
       expect(await db.pendingOpsDao.count(), 0);
     });
   });

@@ -1,4 +1,6 @@
 import 'package:pet_passport/features/sync/data/cloud_api.dart';
+import 'package:pet_passport/features/sync/data/supabase_cloud_api.dart'
+    show toCloudShape;
 
 /// In-memory [CloudApi] double for push-worker tests.
 ///
@@ -31,24 +33,25 @@ class FakeCloudApi implements CloudApi {
     if (_forced.isNotEmpty) {
       return _forced.removeAt(0);
     }
+    // Store rows in cloud wire shape so fetchChangesSince returns
+    // exactly what the real PostgREST would — snake_case columns,
+    // ISO-8601 datetimes, `id` PK. This mirrors what
+    // SupabaseCloudApi does on the wire.
+    final body = toCloudShape(payload);
     final store = rows.putIfAbsent(table, () => {});
     final existing = store[uuid];
     if (existing != null) {
-      // LWW: whichever payload has the larger `updatedAt` wins. Drift's
-      // default serializer emits DateTime as an int (millisSinceEpoch);
-      // if a caller ever hands us ISO-8601 strings that lexicographic
-      // order also matches chronological order, so a Comparable dyn
-      // works for both.
-      final incoming = existing['updatedAt'];
-      final current = payload['updatedAt'];
-      if (incoming is Comparable &&
+      // LWW on `updated_at` — ISO strings compare lexicographically
+      // in chronological order.
+      final incoming = body['updated_at'] as String?;
+      final current = existing['updated_at'] as String?;
+      if (incoming != null &&
           current != null &&
-          incoming.runtimeType == current.runtimeType &&
-          (current as Comparable).compareTo(incoming) < 0) {
+          incoming.compareTo(current) < 0) {
         return const CloudUpsertOk(); // silent loser, don't overwrite
       }
     }
-    store[uuid] = Map.of(payload);
+    store[uuid] = body;
     return const CloudUpsertOk();
   }
 

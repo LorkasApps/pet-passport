@@ -10,6 +10,22 @@ import '../../protocol/domain/event_enums.dart';
 import 'cloud_api.dart';
 import 'supabase_cloud_api.dart' show fromCloudShape;
 
+/// Known cursor-race limitation of this v1 pull:
+///
+/// Device A pulls and advances its cursor to max(updated_at seen) = T.
+/// Device B is offline; pushes a row later with a client-stamped
+/// updated_at = T' where T' < T (clock skew, or B's write happened
+/// BEFORE A's last write chronologically but B was late to push).
+/// Row lands in the cloud with updated_at = T' < T. On A's next
+/// pull, `updated_at > T` never matches it — A never sees B's row.
+///
+/// Real fix: server-side monotonic sequence column
+/// (`pulled_seq bigserial`, or `clock_timestamp()` on write via
+/// trigger) that clients cursor on instead of client-writable
+/// `updated_at`. Deferred until M4 Realtime lands — realtime push
+/// makes this race window shrink to essentially zero and covers the
+/// main "did I miss anything" concern without a schema change.
+///
 /// Delta-pull engine. For every top-level table it:
 ///
 ///   1. reads the persisted cursor (`sync_cursors`),
