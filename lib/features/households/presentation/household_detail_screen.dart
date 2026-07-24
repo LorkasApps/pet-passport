@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:pet_passport/l10n/generated/app_l10n.dart';
 
 import '../../auth/application/auth_providers.dart';
+import '../../pets/application/pets_providers.dart';
+import '../../pets/presentation/widgets/pet_avatar.dart';
 import '../application/households_providers.dart';
 import '../domain/household.dart';
 import '../domain/household_member.dart';
@@ -180,6 +182,11 @@ class _HouseholdDetailScreenState
                 householdId: h.id,
                 isOwner: isOwner,
               ),
+              const SizedBox(height: 24),
+              Text(l.householdPetsHeader,
+                  style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              _PetsList(householdId: h.id),
               if (isOwner) ...[
                 const SizedBox(height: 24),
                 FilledButton.tonalIcon(
@@ -318,6 +325,59 @@ class _MemberTile extends ConsumerWidget {
               onPressed: () => _confirmRemove(context, ref),
             )
           : null,
+    );
+  }
+}
+
+/// Pets bound to this household. Rendered as a compact list under the
+/// members section. This is where the *implicit* pet ↔ household
+/// binding becomes visible even for single-household users (the pet
+/// list still hides the label there to keep the tile clean).
+class _PetsList extends ConsumerWidget {
+  const _PetsList({required this.householdId});
+
+  final String householdId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppL10n.of(context);
+    final async = ref.watch(activePetsProvider);
+    return async.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text('$e'),
+      ),
+      data: (all) {
+        final scoped =
+            all.where((p) => p.householdId == householdId).toList();
+        if (scoped.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              l.householdPetsEmpty,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          );
+        }
+        return Column(
+          children: [
+            for (final p in scoped)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: PetAvatar(pet: p, radius: 20),
+                title: Text(p.name),
+                subtitle: (p.breed?.trim().isNotEmpty ?? false)
+                    ? Text(p.breed!.trim())
+                    : null,
+                onTap: () => context.push('/pets/${p.uuid}'),
+              ),
+          ],
+        );
+      },
     );
   }
 }

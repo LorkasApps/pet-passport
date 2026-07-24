@@ -307,6 +307,8 @@
   "householdInvitePerson": "Invite person",
   "householdMembersHeader": "Members",
   "householdMembersEmpty": "No members.",
+  "householdPetsHeader": "Pets",
+  "householdPetsEmpty": "No pets in this household.",
   "householdMemberSelfSuffix": "{name} (you)",
   "@householdMemberSelfSuffix": {
     "placeholders": { "name": { "type": "String" } }

@@ -260,6 +260,8 @@
   "householdInvitePerson": "Person einladen",
   "householdMembersHeader": "Mitglieder",
   "householdMembersEmpty": "Keine Mitglieder.",
+  "householdPetsHeader": "Tiere",
+  "householdPetsEmpty": "Keine Tiere in diesem Haushalt.",
   "householdMemberSelfSuffix": "{name} (du)",
   "householdMemberRemoveAction": "Entfernen",
   "householdMemberRemoveConfirmTitle": "Mitglied entfernen?",

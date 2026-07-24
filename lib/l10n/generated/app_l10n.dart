@@ -1465,6 +1465,18 @@ abstract class AppL10n {
   /// **'No members.'**
   String get householdMembersEmpty;
 
+  /// No description provided for @householdPetsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get householdPetsHeader;
+
+  /// No description provided for @householdPetsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pets in this household.'**
+  String get householdPetsEmpty;
+
   /// No description provided for @householdMemberSelfSuffix.
   ///
   /// In en, this message translates to:

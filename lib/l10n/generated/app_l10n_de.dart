@@ -780,6 +780,12 @@ class AppL10nDe extends AppL10n {
   String get householdMembersEmpty => 'Keine Mitglieder.';
 
   @override
+  String get householdPetsHeader => 'Tiere';
+
+  @override
+  String get householdPetsEmpty => 'Keine Tiere in diesem Haushalt.';
+
+  @override
   String householdMemberSelfSuffix(String name) {
     return '$name (du)';
   }
